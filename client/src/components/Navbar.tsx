@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Button from "@/components/Button";
 import Dropdown from "@/components/Dropdown";
+import Input from "@/components/Input";
 import seenitLogo from "@/assets/Seenit.svg";
 
 interface NavbarProps {
@@ -27,6 +29,18 @@ export default function Navbar({
   onSignOut = () => console.log("Sign out clicked"),
   onSearch = (query: string) => console.log(`Search: ${query}`)
 }: NavbarProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      onSearch(searchQuery.trim());
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   // Get user initials for avatar
   const getUserInitials = (name: string) => {
@@ -50,6 +64,26 @@ export default function Navbar({
               className="h-10 w-auto object-contain"
               data-testid="seenit-logo"
             />
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearchSubmit}>
+              <Input
+                type="text"
+                placeholder="Search movies, TV shows, anime..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                inputSize="sm"
+                leftIcon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                }
+                className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
+                data-testid="navbar-search"
+              />
+            </form>
           </div>
 
           {/* Navigation Menu */}

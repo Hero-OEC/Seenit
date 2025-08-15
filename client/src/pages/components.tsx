@@ -33,6 +33,7 @@ export default function ComponentsPage() {
         onSchedule={() => alert("Schedule clicked!")}
         onProfile={() => alert("Profile clicked!")}
         onSignOut={() => alert("Sign out clicked!")}
+        onSearch={(query) => alert(`Searching for: ${query}`)}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
