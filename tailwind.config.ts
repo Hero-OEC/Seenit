@@ -63,7 +63,7 @@ export default {
         },
         "retro": {
           50: "#FFFFFF",
-          100: "#D0E5FF", 
+          100: "#eef2ff", 
           200: "#C1CFFF",
           300: "#8ABEEF",
           400: "#39A1E4",
@@ -75,7 +75,7 @@ export default {
           950: "#0D0B28",
         },
         "retro-accent": "#C1CFFF",
-        "retro-accent-2": "#D0E5FF",
+        "retro-accent-2": "#eef2ff",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

@@ -51,7 +51,7 @@
   --font-headline: 'Mozilla Headline', 'Inter', sans-serif;
   --radius: 1.3rem;
   --retro-50: #FFFFFF;
-  --retro-100: #D0E5FF;
+  --retro-100: #eef2ff;
   --retro-200: #C1CFFF;
   --retro-300: #8ABEEF;
   --retro-400: #39A1E4;
@@ -62,7 +62,7 @@
   --retro-900: #00364D;
   --retro-950: #0D0B28;
   --retro-accent: #C1CFFF;
-  --retro-accent-2: #D0E5FF;
+  --retro-accent-2: #eef2ff;
 }
 
 .dark {
