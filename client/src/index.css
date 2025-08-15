@@ -13,11 +13,11 @@
 }
 
 :root {
-  --background: hsl(0, 0%, 100%);
+  --background: var(--retro-50);
   --foreground: hsl(207, 100%, 15%);
-  --card: hsl(0, 0%, 100%);
+  --card: var(--retro-50);
   --card-foreground: hsl(207, 100%, 15%);
-  --popover: hsl(0, 0%, 100%);
+  --popover: var(--retro-50);
   --popover-foreground: hsl(207, 100%, 15%);
   --primary: hsl(235, 44%, 5%);
   --primary-foreground: hsl(0, 0%, 100%);
@@ -37,7 +37,7 @@
   --chart-3: hsl(42, 93%, 56%);
   --chart-4: hsl(147, 79%, 42%);
   --chart-5: hsl(341, 75%, 51%);
-  --sidebar: hsl(0, 0%, 100%);
+  --sidebar: var(--retro-50);
   --sidebar-foreground: hsl(207, 100%, 15%);
   --sidebar-primary: hsl(235, 44%, 5%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
