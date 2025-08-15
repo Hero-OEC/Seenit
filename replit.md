@@ -2,7 +2,7 @@
 
 ## Overview
 
-Seenit is a modern web application for tracking movies, TV shows, and anime with a retro aesthetic. Built with React and TypeScript frontend communicating with an Express.js backend, it allows users to browse content, manage personal watchlists, and track viewing progress. The application features a clean, retro-styled interface with warm colors and rounded elements, providing an engaging user experience for entertainment enthusiasts.
+Seenit is a modern web application for tracking movies, TV shows, and anime with a retro aesthetic. Currently reset to a clean components-first architecture. The app features a components showcase page where reusable UI components are built and demonstrated before being used throughout the platform. Built with React and TypeScript, using a retro color palette with warm orange/coral tones.
 
 ## User Preferences
 
