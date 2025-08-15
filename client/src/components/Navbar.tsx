@@ -157,7 +157,7 @@ export default function Navbar({
           </div>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <div className="hidden md:flex flex-1 max-w-sm mx-6">
             <form onSubmit={handleSearchSubmit} className="w-full">
               <Input
                 type="text"
