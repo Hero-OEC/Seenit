@@ -13,6 +13,8 @@ export interface ContentDisplayProps {
   season?: number;
   /** Optional episode number for TV shows and anime */
   episode?: number;
+  /** Size variant - default or small */
+  size?: "default" | "small";
   /** Click handler for the content card */
   onClick?: () => void;
   /** Additional CSS classes */
@@ -26,6 +28,7 @@ export default function ContentDisplay({
   status,
   season,
   episode,
+  size = "default",
   onClick,
   className = ""
 }: ContentDisplayProps) {
@@ -86,6 +89,8 @@ export default function ContentDisplay({
     }
   };
 
+  const isSmall = size === "small";
+
   return (
     <div 
       className={`group cursor-pointer transition-all duration-200 hover:scale-105 ${className}`}
@@ -93,7 +98,7 @@ export default function ContentDisplay({
       data-testid="content-display"
     >
       {/* Poster Container - 2:3 Aspect Ratio */}
-      <div className="relative aspect-[2/3] mb-3 rounded-lg overflow-hidden bg-retro-100 shadow-md group-hover:shadow-lg transition-shadow">
+      <div className={`relative aspect-[2/3] ${isSmall ? 'mb-2' : 'mb-3'} rounded-lg overflow-hidden bg-retro-100 shadow-md group-hover:shadow-lg transition-shadow`}>
         <img
           src={posterUrl}
           alt={`${title} poster`}
@@ -106,20 +111,20 @@ export default function ContentDisplay({
       </div>
 
       {/* Content Info */}
-      <div className="space-y-2">
+      <div className={isSmall ? 'space-y-1' : 'space-y-2'}>
         {/* Title */}
         <h3 
-          className="font-headline text-sm font-semibold text-retro-900 line-clamp-2 leading-tight"
+          className={`font-headline ${isSmall ? 'text-xs' : 'text-sm'} font-semibold text-retro-900 line-clamp-2 leading-tight`}
           data-testid="content-title"
         >
           {title}
         </h3>
 
         {/* Badges Row */}
-        <div className="flex flex-wrap gap-1.5">
+        <div className={`flex flex-wrap ${isSmall ? 'gap-1' : 'gap-1.5'}`}>
           {/* Type Badge */}
           <span 
-            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getTypeBadgeColor(type)}`}
+            className={`inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getTypeBadgeColor(type)}`}
             data-testid="content-type-badge"
           >
             {getTypeLabel(type)}
@@ -127,7 +132,7 @@ export default function ContentDisplay({
 
           {/* Status Badge */}
           <span 
-            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadgeColor(status)}`}
+            className={`inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getStatusBadgeColor(status)}`}
             data-testid="content-status-badge"
           >
             {getStatusLabel(status)}
@@ -136,7 +141,7 @@ export default function ContentDisplay({
 
         {/* Season/Episode Info for TV Shows and Anime */}
         {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
-          <div className="text-xs text-retro-600 font-medium" data-testid="content-episode-info">
+          <div className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`} data-testid="content-episode-info">
             {season !== undefined && `Season ${season}`}
             {season !== undefined && episode !== undefined && " • "}
             {episode !== undefined && `Episode ${episode}`}

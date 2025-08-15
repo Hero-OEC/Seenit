@@ -900,6 +900,100 @@ import Input from "@/components/Input";
               </div>
             </div>
 
+            {/* Size Variations */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Size Variations</h3>
+              <div className="space-y-6">
+                {/* Default Size */}
+                <div>
+                  <h4 className="font-medium text-retro-900 mb-3">Default Size</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+                      title="Avatar: The Way of Water"
+                      type="movie"
+                      status="finished"
+                      size="default"
+                      onClick={() => alert("Default size movie!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/1qpUk27LVI9UoTS7S0EixUBj5aR.jpg"
+                      title="The Last of Us"
+                      type="tv"
+                      status="finished"
+                      season={1}
+                      episode={9}
+                      size="default"
+                      onClick={() => alert("Default size TV show!")}
+                    />
+                  </div>
+                </div>
+
+                {/* Small Size */}
+                <div>
+                  <h4 className="font-medium text-retro-900 mb-3">Small Size (50% smaller)</h4>
+                  <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+                      title="Avatar: The Way of Water"
+                      type="movie"
+                      status="finished"
+                      size="small"
+                      onClick={() => alert("Small size movie!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/1qpUk27LVI9UoTS7S0EixUBj5aR.jpg"
+                      title="The Last of Us"
+                      type="tv"
+                      status="finished"
+                      season={1}
+                      episode={9}
+                      size="small"
+                      onClick={() => alert("Small size TV show!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/tL4McUK15VMrQWiuxG9VkdTOpaR.jpg"
+                      title="Attack on Titan"
+                      type="anime"
+                      status="finished"
+                      season={4}
+                      episode={28}
+                      size="small"
+                      onClick={() => alert("Small size anime!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"
+                      title="Stranger Things"
+                      type="tv"
+                      status="ongoing"
+                      season={5}
+                      episode={3}
+                      size="small"
+                      onClick={() => alert("Small ongoing!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg"
+                      title="The Batman 2"
+                      type="movie"
+                      status="coming-soon"
+                      size="small"
+                      onClick={() => alert("Small coming soon!")}
+                    />
+                    <ContentDisplay
+                      posterUrl="https://image.tmdb.org/t/p/w300/fuVuDYrs8sxvEolnYr0wCSvtyTi.jpg"
+                      title="Cowboy Bebop Live Action"
+                      type="tv"
+                      status="canceled"
+                      season={1}
+                      episode={10}
+                      size="small"
+                      onClick={() => alert("Small canceled!")}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Usage Examples */}
             <div>
               <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
@@ -945,6 +1039,16 @@ import ContentDisplay from "@/components/ContentDisplay";
   title="Upcoming Movie"
   type="movie"
   status="coming-soon"
+  onClick={() => handleClick()}
+/>
+
+// Small size variant
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="Compact Movie"
+  type="movie"
+  status="finished"
+  size="small"
   onClick={() => handleClick()}
 />`}
                 </pre>
