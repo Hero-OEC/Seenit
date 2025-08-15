@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import Logo from "@/components/Logo";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState("");
@@ -14,15 +15,59 @@ export default function ComponentsPage() {
     <div className="min-h-screen bg-retro-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="font-retro text-4xl text-retro-main mb-4">
-            Seenit Components
-          </h1>
-          <p className="text-retro-dark text-lg">
-            A showcase of all reusable components for the Seenit platform
-          </p>
+          <div className="flex items-center gap-6 mb-6">
+            <Logo size="large" />
+            <div>
+              <h1 className="font-retro text-4xl text-retro-main mb-2">
+                Seenit Components
+              </h1>
+              <p className="text-retro-dark text-lg">
+                A showcase of all reusable components for the Seenit platform
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-8">
+          {/* Logo Component Showcase */}
+          <Card>
+            <h2 className="font-semibold text-xl text-retro-dark mb-4">
+              Logo Component
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The Seenit brand logo in different sizes, perfect for headers, footers, and navigation.
+            </p>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-medium text-retro-dark mb-3">Logo Sizes</h3>
+                <div className="flex flex-wrap items-center gap-8">
+                  <div className="flex flex-col items-center gap-2">
+                    <Logo size="small" />
+                    <span className="text-sm text-gray-600">Small (80px)</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Logo size="medium" />
+                    <span className="text-sm text-gray-600">Medium (128px)</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Logo size="large" />
+                    <span className="text-sm text-gray-600">Large (192px)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-medium text-retro-dark mb-3">Usage Example</h3>
+                <div className="bg-gray-100 p-4 rounded-lg">
+                  <code className="text-sm text-gray-800">
+                    &lt;Logo size="medium" className="my-custom-class" /&gt;
+                  </code>
+                </div>
+              </div>
+            </div>
+          </Card>
+
           {/* Button Component Showcase */}
           <Card>
             <h2 className="font-semibold text-xl text-retro-dark mb-4">
