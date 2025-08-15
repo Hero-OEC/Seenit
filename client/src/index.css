@@ -196,3 +196,52 @@
     border-radius: 10px;
   }
 }
+
+/* Custom styling for select dropdowns */
+@layer components {
+  .custom-select {
+    /* Remove default select arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  .custom-select:focus {
+    outline: none;
+    border-color: var(--retro-500);
+    box-shadow: 0 0 0 2px rgba(216, 94, 55, 0.1);
+  }
+
+  /* Style the dropdown options */
+  .custom-select option {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    padding: 8px 12px;
+    border: none;
+  }
+
+  .custom-select option:checked,
+  .custom-select option:hover {
+    background-color: var(--retro-500) !important;
+    color: hsl(var(--background)) !important;
+  }
+
+  .custom-select option:disabled {
+    color: hsl(var(--muted-foreground));
+    background-color: hsl(var(--muted));
+  }
+
+  /* Firefox specific styling */
+  @-moz-document url-prefix() {
+    .custom-select option:checked {
+      background: var(--retro-500) !important;
+      color: hsl(var(--background)) !important;
+    }
+  }
+
+  /* Webkit specific styling */
+  .custom-select option:checked {
+    background: var(--retro-500) linear-gradient(0deg, var(--retro-500) 0%, var(--retro-500) 100%);
+    color: hsl(var(--background));
+  }
+}
