@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "@/components/Button";
+import seenitLogo from "@/assets/Seenit.svg";
 
 interface NavbarProps {
   isSignedIn?: boolean;
@@ -47,8 +48,13 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-retro-500 rounded-lg flex items-center justify-center">
-              <span className="font-headline text-white text-lg">S</span>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img 
+                src={seenitLogo} 
+                alt="Seenit Logo" 
+                className="w-10 h-6 object-contain"
+                data-testid="seenit-logo"
+              />
             </div>
             <div>
               <h1 className="font-headline text-xl text-retro-900">Seenit</h1>
