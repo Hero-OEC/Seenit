@@ -1,5 +1,5 @@
-import { useState } from "react";
 import Button from "@/components/Button";
+import Dropdown from "@/components/Dropdown";
 import seenitLogo from "@/assets/Seenit.svg";
 
 interface NavbarProps {
@@ -21,16 +21,6 @@ export default function Navbar({
   onBrowse = (type: string) => console.log(`Browse ${type} clicked`),
   onSchedule = () => console.log("Schedule clicked")
 }: NavbarProps) {
-  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
-
-  const handleBrowseClick = () => {
-    setIsBrowseOpen(!isBrowseOpen);
-  };
-
-  const handleBrowseItem = (type: string) => {
-    setIsBrowseOpen(false);
-    onBrowse(type);
-  };
 
   // Get user initials for avatar
   const getUserInitials = (name: string) => {
@@ -95,63 +85,39 @@ export default function Navbar({
             )}
               
               {/* Browse Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={handleBrowseClick}
-                  className="flex items-center gap-1 font-headline text-retro-900 hover:text-retro-500 transition-colors"
-                  data-testid="nav-browse"
-                >
-                  Browse
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      isBrowseOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Browse Dropdown Menu */}
-                {isBrowseOpen && (
-                  <div className="absolute left-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="py-2">
-                      <button
-                        onClick={() => handleBrowseItem("Movies")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
-                        data-testid="browse-movies"
-                      >
-                        Movies
-                      </button>
-                      <button
-                        onClick={() => handleBrowseItem("TV Shows")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
-                        data-testid="browse-tv"
-                      >
-                        TV Shows
-                      </button>
-                      <button
-                        onClick={() => handleBrowseItem("Anime")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
-                        data-testid="browse-anime"
-                      >
-                        Anime
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Backdrop to close dropdown when clicking outside */}
-                {isBrowseOpen && (
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsBrowseOpen(false)}
-                    data-testid="browse-backdrop"
-                  />
-                )}
-              </div>
+              <Dropdown
+                trigger={
+                  <span className="flex items-center gap-1 font-headline text-retro-900 hover:text-retro-500 transition-colors">
+                    Browse
+                    <svg
+                      className="w-4 h-4 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                }
+                options={[
+                  {
+                    value: "movies",
+                    label: "Movies",
+                    onClick: () => onBrowse("Movies")
+                  },
+                  {
+                    value: "tv-shows", 
+                    label: "TV Shows",
+                    onClick: () => onBrowse("TV Shows")
+                  },
+                  {
+                    value: "anime",
+                    label: "Anime", 
+                    onClick: () => onBrowse("Anime")
+                  }
+                ]}
+                placement="left"
+              />
 
             <button
               onClick={isSignedIn ? onSchedule : () => onGetStarted && onGetStarted()}
