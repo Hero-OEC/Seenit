@@ -6,6 +6,7 @@ import RadioButton from "@/components/RadioButton";
 import Checkbox from "@/components/Checkbox";
 import Toggle from "@/components/Toggle";
 import ContentDisplay from "@/components/ContentDisplay";
+import Tags, { Tag, MOVIE_GENRES, TV_GENRES, ANIME_GENRES } from "@/components/Tags";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
@@ -1050,6 +1051,284 @@ import ContentDisplay from "@/components/ContentDisplay";
   status="finished"
   size="small"
   onClick={() => handleClick()}
+/>`}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tags Component Showcase */}
+        <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-6">
+            Tags Component
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Display genre tags, categories, and labels with various styles and interactive features for content organization.
+          </p>
+
+          <div className="space-y-8">
+            {/* Basic Tag Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Tags</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-retro-700">Single Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag>Action</Tag>
+                    <Tag>Comedy</Tag>
+                    <Tag>Drama</Tag>
+                    <Tag>Sci-Fi</Tag>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-retro-700">Clickable Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag clickable onTagClick={() => alert("Action clicked!")}>Action</Tag>
+                    <Tag clickable onTagClick={() => alert("Adventure clicked!")}>Adventure</Tag>
+                    <Tag clickable onTagClick={() => alert("Animation clicked!")}>Animation</Tag>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-retro-700">Removable Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag removable onRemove={() => alert("Fantasy removed!")}>Fantasy</Tag>
+                    <Tag removable onRemove={() => alert("Horror removed!")}>Horror</Tag>
+                    <Tag removable onRemove={() => alert("Mystery removed!")}>Mystery</Tag>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tag Variants */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Tag Variants</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Tag variant="default">Default</Tag>
+                    <Tag variant="primary">Primary</Tag>
+                    <Tag variant="secondary">Secondary</Tag>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag variant="success">Success</Tag>
+                    <Tag variant="warning">Warning</Tag>
+                    <Tag variant="error">Error</Tag>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Tag variant="outline">Outline</Tag>
+                    <Tag variant="ghost">Ghost</Tag>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tag Sizes */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Tag Sizes</h3>
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Tag size="sm">Small</Tag>
+                  <Tag size="default">Default</Tag>
+                  <Tag size="lg">Large</Tag>
+                </div>
+              </div>
+            </div>
+
+            {/* Genre Collections */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Genre Collections</h3>
+              <div className="space-y-6">
+                {/* Movie Genres */}
+                <div>
+                  <h4 className="font-medium text-retro-900 mb-3">Movie Genres</h4>
+                  <Tags
+                    tags={MOVIE_GENRES.slice(0, 8)}
+                    variant="default"
+                    clickable
+                    onTagClick={(id, tag) => alert(`Movie genre clicked: ${tag.label}`)}
+                  />
+                </div>
+
+                {/* TV Show Genres */}
+                <div>
+                  <h4 className="font-medium text-retro-900 mb-3">TV Show Genres</h4>
+                  <Tags
+                    tags={TV_GENRES.slice(0, 6)}
+                    variant="outline"
+                    clickable
+                    onTagClick={(id, tag) => alert(`TV genre clicked: ${tag.label}`)}
+                  />
+                </div>
+
+                {/* Anime Genres */}
+                <div>
+                  <h4 className="font-medium text-retro-900 mb-3">Anime Genres</h4>
+                  <Tags
+                    tags={ANIME_GENRES.slice(0, 7)}
+                    variant="primary"
+                    size="sm"
+                    clickable
+                    onTagClick={(id, tag) => alert(`Anime genre clicked: ${tag.label}`)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tags with Show More */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Expandable Tag Collections</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-retro-700 mb-2">All Movie Genres (Limited to 5, expandable)</h4>
+                  <Tags
+                    tags={MOVIE_GENRES}
+                    variant="default"
+                    maxVisible={5}
+                    clickable
+                    onTagClick={(id, tag) => alert(`Genre: ${tag.label}`)}
+                  />
+                </div>
+                <div>
+                  <h4 className="font-medium text-retro-700 mb-2">All Anime Genres (Limited to 8, expandable)</h4>
+                  <Tags
+                    tags={ANIME_GENRES}
+                    variant="outline"
+                    size="sm"
+                    maxVisible={8}
+                    clickable
+                    onTagClick={(id, tag) => alert(`Anime Genre: ${tag.label}`)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Example */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Interactive Example</h3>
+              <div className="p-6 bg-retro-50 rounded-lg border border-retro-200">
+                <h4 className="font-medium text-retro-900 mb-3">Selected Genres (Click to remove)</h4>
+                <Tags
+                  tags={[
+                    { id: "action", label: "Action", variant: "primary" },
+                    { id: "adventure", label: "Adventure", variant: "success" },
+                    { id: "comedy", label: "Comedy", variant: "warning" },
+                    { id: "drama", label: "Drama", variant: "default" },
+                  ]}
+                  removable
+                  onTagRemove={(id, tag) => alert(`Removed: ${tag.label}`)}
+                />
+              </div>
+            </div>
+
+            {/* Real-world Usage */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Real-world Examples</h3>
+              <div className="space-y-6">
+                {/* Content Filter Example */}
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-retro-900 mb-4">Content Filters</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-700 mb-2 block">Content Type:</span>
+                      <Tags
+                        tags={[
+                          { id: "movies", label: "Movies", variant: "primary" },
+                          { id: "tv", label: "TV Shows", variant: "outline" },
+                          { id: "anime", label: "Anime", variant: "outline" },
+                        ]}
+                        clickable
+                        onTagClick={(id, tag) => alert(`Filter: ${tag.label}`)}
+                      />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-700 mb-2 block">Selected Genres:</span>
+                      <Tags
+                        tags={[
+                          { id: "action", label: "Action" },
+                          { id: "sci-fi", label: "Sci-Fi" },
+                          { id: "thriller", label: "Thriller" },
+                        ]}
+                        variant="success"
+                        removable
+                        onTagRemove={(id, tag) => alert(`Remove filter: ${tag.label}`)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Profile Example */}
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-retro-900 mb-4">User Profile - Favorite Genres</h4>
+                  <Tags
+                    tags={[
+                      { id: "action", label: "Action", variant: "primary" },
+                      { id: "comedy", label: "Comedy", variant: "primary" },
+                      { id: "drama", label: "Drama", variant: "primary" },
+                      { id: "sci-fi", label: "Science Fiction", variant: "primary" },
+                      { id: "thriller", label: "Thriller", variant: "primary" },
+                    ]}
+                    size="sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Usage Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the Tags components
+import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
+
+// Single tag
+<Tag>Action</Tag>
+
+// Clickable tag
+<Tag clickable onTagClick={() => handleClick()}>
+  Comedy
+</Tag>
+
+// Removable tag
+<Tag removable onRemove={() => handleRemove()}>
+  Drama
+</Tag>
+
+// Tag with variant and size
+<Tag variant="primary" size="lg">
+  Featured Genre
+</Tag>
+
+// Collection of tags
+<Tags
+  tags={[
+    { id: "action", label: "Action" },
+    { id: "comedy", label: "Comedy" },
+    { id: "drama", label: "Drama" }
+  ]}
+  variant="default"
+  clickable
+  onTagClick={(id, tag) => handleTagClick(id, tag)}
+/>
+
+// Expandable tag collection
+<Tags
+  tags={MOVIE_GENRES}
+  maxVisible={5}
+  variant="outline"
+  clickable
+  onTagClick={(id, tag) => console.log(tag.label)}
+/>
+
+// Removable tag collection
+<Tags
+  tags={selectedGenres}
+  variant="primary"
+  removable
+  onTagRemove={(id, tag) => removeGenre(id)}
 />`}
                 </pre>
               </div>
