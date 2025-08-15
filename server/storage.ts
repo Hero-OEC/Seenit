@@ -91,7 +91,20 @@ export class MemStorage implements IStorage {
 
   async createContent(insertContent: InsertContent): Promise<Content> {
     const id = randomUUID();
-    const content: Content = { ...insertContent, id };
+    const content: Content = { 
+      ...insertContent, 
+      id,
+      // Ensure nullable fields are properly set
+      year: insertContent.year ?? null,
+      rating: insertContent.rating ?? null,
+      genre: insertContent.genre ?? null,
+      poster: insertContent.poster ?? null,
+      overview: insertContent.overview ?? null,
+      status: insertContent.status ?? null,
+      episodes: insertContent.episodes ?? null,
+      streamingPlatforms: insertContent.streamingPlatforms ?? null,
+      affiliateLinks: insertContent.affiliateLinks ?? null
+    };
     this.content.set(id, content);
     return content;
   }
@@ -115,6 +128,8 @@ export class MemStorage implements IStorage {
     const userContent: UserContent = {
       ...insertUserContent,
       id,
+      progress: insertUserContent.progress ?? null,
+      userRating: insertUserContent.userRating ?? null,
       addedAt: now,
       updatedAt: now
     };
