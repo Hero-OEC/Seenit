@@ -305,69 +305,17 @@ import Button from "@/components/Button";
             Input Component
           </h2>
           <p className="text-gray-600 mb-8">
-            Flexible input component with multiple variants, sizes, states, and support for icons, labels, and validation messages.
+            Clean input component with support for icons, labels, validation messages, and consistent styling.
           </p>
           
           <div className="space-y-8">
-            {/* Input Variants */}
+            {/* Basic Input */}
             <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Variants</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <Input 
-                    variant="default" 
-                    placeholder="Default input"
-                    data-testid="input-default"
-                  />
-                  <Input 
-                    variant="retro" 
-                    placeholder="Retro styled input"
-                    data-testid="input-retro"
-                  />
-                  <Input 
-                    variant="accent" 
-                    placeholder="Accent input"
-                    data-testid="input-accent"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <Input 
-                    variant="error" 
-                    placeholder="Error state input"
-                    data-testid="input-error"
-                  />
-                  <Input 
-                    variant="success" 
-                    placeholder="Success state input"
-                    data-testid="input-success"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Input Sizes */}
-            <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Sizes</h3>
-              <div className="space-y-4">
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Input</h3>
+              <div className="max-w-md">
                 <Input 
-                  size="sm" 
-                  placeholder="Small input"
-                  data-testid="input-small"
-                />
-                <Input 
-                  size="default" 
-                  placeholder="Default input"
-                  data-testid="input-default-size"
-                />
-                <Input 
-                  size="lg" 
-                  placeholder="Large input"
-                  data-testid="input-large"
-                />
-                <Input 
-                  size="xl" 
-                  placeholder="Extra large input"
-                  data-testid="input-extra-large"
+                  placeholder="Enter some text"
+                  data-testid="input-basic"
                 />
               </div>
             </div>
@@ -389,7 +337,6 @@ import Button from "@/components/Button";
                     placeholder="Enter password"
                     error="Password must be at least 8 characters"
                     type="password"
-                    variant="error"
                     data-testid="input-with-error"
                   />
                 </div>
@@ -398,7 +345,6 @@ import Button from "@/components/Button";
                     label="Username"
                     placeholder="Choose a username"
                     success="Username is available!"
-                    variant="success"
                     data-testid="input-with-success"
                   />
                   <Input 
@@ -525,7 +471,6 @@ import Button from "@/components/Button";
                       label="Email"
                       type="email"
                       placeholder="your@email.com"
-                      variant="retro"
                       leftIcon={
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -537,7 +482,6 @@ import Button from "@/components/Button";
                       label="Password"
                       type="password"
                       placeholder="Enter your password"
-                      variant="retro"
                       showPasswordToggle={true}
                       data-testid="login-password"
                     />
@@ -549,8 +493,6 @@ import Button from "@/components/Button";
                   <h4 className="font-medium text-retro-900 mb-4">Search Bar</h4>
                   <Input 
                     placeholder="Search for movies, TV shows, or anime..."
-                    variant="accent"
-                    size="lg"
                     leftIcon={
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -585,14 +527,12 @@ import Input from "@/components/Input";
   label="Password"
   type="password"
   error="Password must be at least 8 characters"
-  variant="error"
 />
 
 // With icons
 <Input 
   placeholder="Search..."
   leftIcon={<SearchIcon />}
-  variant="accent"
 />
 
 // Password with toggle

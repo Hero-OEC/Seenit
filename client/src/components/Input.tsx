@@ -3,51 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const inputVariants = cva(
-  "flex w-full rounded-5px border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "border-gray-300 focus-visible:ring-retro-500 focus-visible:border-retro-500",
-        retro: "border-retro-300 bg-retro-50 focus-visible:ring-retro-500 focus-visible:border-retro-500",
-        accent: "border-retro-accent border-2 bg-retro-accent-1 focus-visible:ring-retro-accent focus-visible:border-retro-accent",
-        error: "border-red-500 bg-red-50 focus-visible:ring-red-500 focus-visible:border-red-500",
-        success: "border-green-500 bg-green-50 focus-visible:ring-green-500 focus-visible:border-green-500"
-      },
-      size: {
-        sm: "h-8 px-2 text-xs",
-        default: "h-10 px-3",
-        lg: "h-12 px-4 text-base",
-        xl: "h-14 px-5 text-lg"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
+  "flex w-full h-10 px-3 py-2 rounded-5px border border-gray-300 bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-retro-500 focus-visible:border-retro-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
 );
 
 const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-  {
-    variants: {
-      variant: {
-        default: "text-gray-900",
-        retro: "text-retro-900 font-headline",
-        accent: "text-retro-accent font-headline",
-        error: "text-red-700",
-        success: "text-green-700"
-      }
-    },
-    defaultVariants: {
-      variant: "default"
-    }
-  }
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-900"
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
-    VariantProps<typeof inputVariants> {
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   helper?: string;
   error?: string;
@@ -60,8 +24,6 @@ export interface InputProps
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ 
     className, 
-    variant, 
-    size, 
     type = "text", 
     label, 
     helper, 
@@ -76,8 +38,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const [isFocused, setIsFocused] = useState(false);
     
     const inputType = showPasswordToggle ? (showPassword ? "text" : "password") : type;
-    const currentVariant = error ? "error" : success ? "success" : variant;
-    const hasIcon = leftIcon || rightIcon || (showPasswordToggle && type === "password");
 
     const PasswordToggleIcon = () => (
       <button
@@ -103,7 +63,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="space-y-2">
         {label && (
           <label 
-            className={cn(labelVariants({ variant: currentVariant }))}
+            className={cn(labelVariants())}
             data-testid="input-label"
           >
             {label}
@@ -120,21 +80,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             type={inputType}
             className={cn(
-              inputVariants({ variant: currentVariant, size }),
+              inputVariants(),
               leftIcon && "pl-10",
               (rightIcon || showPasswordToggle) && "pr-10",
-              isFocused && "ring-2",
+              error && "border-red-500 bg-red-50 focus-visible:ring-red-500 focus-visible:border-red-500",
+              success && "border-green-500 bg-green-50 focus-visible:ring-green-500 focus-visible:border-green-500",
               className
             )}
             ref={ref}
-            onFocus={(e) => {
-              setIsFocused(true);
-              props.onFocus?.(e);
-            }}
-            onBlur={(e) => {
-              setIsFocused(false);
-              props.onBlur?.(e);
-            }}
             data-testid="input-field"
             {...props}
           />
