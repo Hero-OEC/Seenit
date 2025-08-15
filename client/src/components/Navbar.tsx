@@ -66,7 +66,7 @@ export default function Navbar({
             <img 
               src={seenitLogo} 
               alt="Seenit Logo" 
-              className="h-10 w-auto object-contain"
+              className="h-12 w-auto max-w-[160px] object-contain"
               data-testid="seenit-logo"
             />
           </div>
