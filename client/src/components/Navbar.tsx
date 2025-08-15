@@ -72,14 +72,14 @@ export default function Navbar({
               <>
                 <button
                   onClick={onHome}
-                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
                   data-testid="nav-home"
                 >
                   Home
                 </button>
                 <button
                   onClick={onWatchlist}
-                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
                   data-testid="nav-watchlist"
                 >
                   Watchlist
@@ -89,14 +89,14 @@ export default function Navbar({
               <>
                 <button
                   onClick={() => onGetStarted && onGetStarted()}
-                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
                   data-testid="nav-home-guest"
                 >
                   Home
                 </button>
                 <button
                   onClick={() => onGetStarted && onGetStarted()}
-                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
                   data-testid="nav-discover-guest"
                 >
                   Discover
@@ -107,7 +107,7 @@ export default function Navbar({
               {/* Browse Dropdown */}
               <Dropdown
                 trigger={
-                  <span className="flex items-center gap-1 font-headline text-retro-900 hover:text-retro-500 transition-colors">
+                  <span className="flex items-center gap-1 font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors">
                     Browse
                     <svg
                       className="w-4 h-4 transition-transform"
@@ -141,7 +141,7 @@ export default function Navbar({
 
             <button
               onClick={isSignedIn ? onSchedule : () => onGetStarted && onGetStarted()}
-              className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+              className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
               data-testid="nav-schedule"
             >
               Schedule
