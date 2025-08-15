@@ -12,6 +12,7 @@ interface NavbarProps {
   onSchedule?: () => void;
   onProfile?: () => void;
   onSignOut?: () => void;
+  onSearch?: (query: string) => void;
 }
 
 export default function Navbar({ 
@@ -23,7 +24,8 @@ export default function Navbar({
   onBrowse = (type: string) => console.log(`Browse ${type} clicked`),
   onSchedule = () => console.log("Schedule clicked"),
   onProfile = () => console.log("Profile clicked"),
-  onSignOut = () => console.log("Sign out clicked")
+  onSignOut = () => console.log("Sign out clicked"),
+  onSearch = (query: string) => console.log(`Search: ${query}`)
 }: NavbarProps) {
 
   // Get user initials for avatar
