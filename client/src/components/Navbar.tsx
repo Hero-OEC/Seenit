@@ -4,34 +4,31 @@ import Button from "@/components/Button";
 interface NavbarProps {
   isSignedIn?: boolean;
   userName?: string;
-  userEmail?: string;
-  onSignOut?: () => void;
   onGetStarted?: () => void;
-  onProfile?: () => void;
+  onHome?: () => void;
+  onWatchlist?: () => void;
+  onBrowse?: (type: string) => void;
+  onSchedule?: () => void;
 }
 
 export default function Navbar({ 
   isSignedIn = false, 
   userName = "John Doe",
-  userEmail = "john@example.com",
-  onSignOut = () => console.log("Sign out clicked"),
   onGetStarted = () => console.log("Get started clicked"),
-  onProfile = () => console.log("Profile clicked")
+  onHome = () => console.log("Home clicked"),
+  onWatchlist = () => console.log("Watchlist clicked"),
+  onBrowse = (type: string) => console.log(`Browse ${type} clicked`),
+  onSchedule = () => console.log("Schedule clicked")
 }: NavbarProps) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
 
-  const handleUserIconClick = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+  const handleBrowseClick = () => {
+    setIsBrowseOpen(!isBrowseOpen);
   };
 
-  const handleSignOut = () => {
-    setIsDropdownOpen(false);
-    onSignOut();
-  };
-
-  const handleProfile = () => {
-    setIsDropdownOpen(false);
-    onProfile();
+  const handleBrowseItem = (type: string) => {
+    setIsBrowseOpen(false);
+    onBrowse(type);
   };
 
   // Get user initials for avatar
@@ -45,7 +42,7 @@ export default function Navbar({
   };
 
   return (
-    <nav className="bg-retro-cream shadow-sm border-b-2 border-retro-main">
+    <nav className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
@@ -55,32 +52,38 @@ export default function Navbar({
             </div>
             <div>
               <h1 className="font-headline text-xl text-retro-dark">Seenit</h1>
-              <p className="text-xs text-gray-600">Entertainment Tracker</p>
             </div>
           </div>
 
-          {/* Navigation Actions */}
-          <div className="flex items-center gap-4">
-            {isSignedIn ? (
-              /* Signed In State */
+          {/* Navigation Menu */}
+          {isSignedIn && (
+            <div className="hidden md:flex items-center gap-6">
+              <button
+                onClick={onHome}
+                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                data-testid="nav-home"
+              >
+                Home
+              </button>
+              <button
+                onClick={onWatchlist}
+                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                data-testid="nav-watchlist"
+              >
+                Watchlist
+              </button>
+              
+              {/* Browse Dropdown */}
               <div className="relative">
                 <button
-                  onClick={handleUserIconClick}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-retro-secondary transition-colors"
-                  data-testid="user-menu-button"
+                  onClick={handleBrowseClick}
+                  className="flex items-center gap-1 font-headline text-retro-dark hover:text-retro-main transition-colors"
+                  data-testid="nav-browse"
                 >
-                  <div className="w-8 h-8 bg-retro-main rounded-full flex items-center justify-center">
-                    <span className="font-headline text-white text-sm">
-                      {getUserInitials(userName)}
-                    </span>
-                  </div>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-sm font-headline text-retro-dark">{userName}</p>
-                    <p className="text-xs text-gray-600">{userEmail}</p>
-                  </div>
+                  Browse
                   <svg
-                    className={`w-4 h-4 text-gray-600 transition-transform ${
-                      isDropdownOpen ? 'rotate-180' : ''
+                    className={`w-4 h-4 transition-transform ${
+                      isBrowseOpen ? 'rotate-180' : ''
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -90,42 +93,66 @@ export default function Navbar({
                   </svg>
                 </button>
 
-                {/* Dropdown Menu */}
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                {/* Browse Dropdown Menu */}
+                {isBrowseOpen && (
+                  <div className="absolute left-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="py-2">
                       <button
-                        onClick={handleProfile}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-retro-secondary transition-colors flex items-center gap-3"
-                        data-testid="profile-menu-item"
+                        onClick={() => handleBrowseItem("Movies")}
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        data-testid="browse-movies"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Profile
+                        Movies
                       </button>
                       <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
-                        data-testid="signout-menu-item"
+                        onClick={() => handleBrowseItem("TV Shows")}
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        data-testid="browse-tv"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Sign Out
+                        TV Shows
+                      </button>
+                      <button
+                        onClick={() => handleBrowseItem("Anime")}
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        data-testid="browse-anime"
+                      >
+                        Anime
                       </button>
                     </div>
                   </div>
                 )}
 
                 {/* Backdrop to close dropdown when clicking outside */}
-                {isDropdownOpen && (
+                {isBrowseOpen && (
                   <div
                     className="fixed inset-0 z-40"
-                    onClick={() => setIsDropdownOpen(false)}
-                    data-testid="dropdown-backdrop"
+                    onClick={() => setIsBrowseOpen(false)}
+                    data-testid="browse-backdrop"
                   />
                 )}
+              </div>
+
+              <button
+                onClick={onSchedule}
+                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                data-testid="nav-schedule"
+              >
+                Schedule
+              </button>
+            </div>
+          )}
+
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-4">
+            {isSignedIn ? (
+              /* Signed In State */
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:block font-headline text-retro-dark">{userName}</span>
+                <div className="w-8 h-8 bg-retro-main rounded-full flex items-center justify-center">
+                  <span className="font-headline text-white text-sm">
+                    {getUserInitials(userName)}
+                  </span>
+                </div>
               </div>
             ) : (
               /* Not Signed In State */

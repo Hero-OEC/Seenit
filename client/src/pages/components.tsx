@@ -22,10 +22,11 @@ export default function ComponentsPage() {
       <Navbar 
         isSignedIn={isSignedIn}
         userName="Alex Morgan"
-        userEmail="alex@seenit.com"
-        onSignOut={() => alert("Sign out clicked!")}
         onGetStarted={() => alert("Get started clicked!")}
-        onProfile={() => alert("Profile clicked!")}
+        onHome={() => alert("Home clicked!")}
+        onWatchlist={() => alert("Watchlist clicked!")}
+        onBrowse={(type) => alert(`Browse ${type} clicked!`)}
+        onSchedule={() => alert("Schedule clicked!")}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -297,7 +298,7 @@ import Button from "@/components/Button";
             Navbar Component
           </h2>
           <p className="text-gray-600 mb-8">
-            Responsive navigation bar with two states: signed-in (with user dropdown) and not signed-in (with action buttons).
+            Clean navigation bar with navigation menu and browse dropdown for signed-in users, action buttons for not signed-in users.
           </p>
           
           <div className="space-y-8">
@@ -308,10 +309,10 @@ import Button from "@/components/Button";
                 <div className="space-y-3">
                   <h4 className="font-medium text-retro-dark">Signed In State:</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• User avatar with initials</li>
-                    <li>• Name and email display</li>
-                    <li>• Dropdown with Profile and Sign Out</li>
-                    <li>• Click outside to close dropdown</li>
+                    <li>• Navigation menu: Home, Watchlist, Browse, Schedule</li>
+                    <li>• Browse dropdown with Movies, TV Shows, Anime</li>
+                    <li>• User name and avatar display</li>
+                    <li>• Clean white background design</li>
                   </ul>
                 </div>
                 <div className="space-y-3">
@@ -319,8 +320,8 @@ import Button from "@/components/Button";
                   <ul className="space-y-1 text-sm text-gray-600">
                     <li>• Get Started button (outline style)</li>
                     <li>• Sign In button (primary style)</li>
-                    <li>• Call-to-action focused design</li>
-                    <li>• Mobile responsive layout</li>
+                    <li>• Clean minimal design</li>
+                    <li>• Focus on authentication actions</li>
                   </ul>
                 </div>
               </div>
@@ -340,23 +341,25 @@ import Navbar from "@/components/Navbar";
   onGetStarted={() => navigate('/signup')}
 />
 
-// Signed in state
+// Signed in state with navigation
 <Navbar 
   isSignedIn={true}
   userName="John Doe"
-  userEmail="john@example.com"
-  onSignOut={() => handleSignOut()}
-  onProfile={() => navigate('/profile')}
+  onHome={() => navigate('/home')}
+  onWatchlist={() => navigate('/watchlist')}
+  onBrowse={(type) => navigate(\`/browse/\${type.toLowerCase()}\`)}
+  onSchedule={() => navigate('/schedule')}
 />
 
 // Full customization
 <Navbar 
   isSignedIn={user?.isAuthenticated}
   userName={user?.name}
-  userEmail={user?.email}
-  onSignOut={logout}
   onGetStarted={() => router.push('/auth')}
-  onProfile={() => router.push('/profile')}
+  onHome={() => router.push('/home')}
+  onWatchlist={() => router.push('/watchlist')}
+  onBrowse={(type) => handleBrowse(type)}
+  onSchedule={() => router.push('/schedule')}
 />`}
                 </pre>
               </div>
