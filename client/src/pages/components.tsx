@@ -318,10 +318,10 @@ import Button from "@/components/Button";
                 <div className="space-y-3">
                   <h4 className="font-medium text-retro-900">Not Signed In State:</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• Get Started button (outline style)</li>
-                    <li>• Sign In button (primary style)</li>
+                    <li>• Single Get Started button (primary style)</li>
                     <li>• Clean minimal design</li>
-                    <li>• Focus on authentication actions</li>
+                    <li>• Focus on main call-to-action</li>
+                    <li>• Streamlined user experience</li>
                   </ul>
                 </div>
               </div>
@@ -335,7 +335,7 @@ import Button from "@/components/Button";
 {`// Import the Navbar component
 import Navbar from "@/components/Navbar";
 
-// Not signed in state
+// Not signed in state - single call-to-action
 <Navbar 
   isSignedIn={false}
   onGetStarted={() => navigate('/signup')}

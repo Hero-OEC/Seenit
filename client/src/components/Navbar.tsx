@@ -156,22 +156,14 @@ export default function Navbar({
               </div>
             ) : (
               /* Not Signed In State */
-              <div className="flex items-center gap-3">
+              <div className="flex items-center">
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={onGetStarted}
                   data-testid="get-started-button"
                 >
                   Get Started
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={onGetStarted}
-                  data-testid="sign-in-button"
-                >
-                  Sign In
                 </Button>
               </div>
             )}
