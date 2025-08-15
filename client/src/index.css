@@ -191,4 +191,8 @@
   .focus\:border-retro-accent:focus {
     border-color: var(--retro-accent);
   }
+  
+  .rounded-5px {
+    border-radius: 5px;
+  }
 }
