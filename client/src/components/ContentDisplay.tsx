@@ -109,24 +109,21 @@ export default function ContentDisplay({
         {/* Overlay with subtle gradient for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         
-        {/* Badges positioned at bottom corners */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between p-1.5">
-          {/* Type Badge - Bottom Left */}
-          <span 
-            className={`inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getTypeBadgeColor(type)} backdrop-blur-sm bg-opacity-90`}
-            data-testid="content-type-badge"
-          >
-            {getTypeLabel(type)}
-          </span>
+        {/* Type Badge - positioned based on size */}
+        <span 
+          className={`absolute ${isSmall ? 'top-1.5 left-1.5' : 'bottom-1.5 left-1.5'} inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getTypeBadgeColor(type)} backdrop-blur-sm bg-opacity-90`}
+          data-testid="content-type-badge"
+        >
+          {getTypeLabel(type)}
+        </span>
 
-          {/* Status Badge - Bottom Right */}
-          <span 
-            className={`inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90`}
-            data-testid="content-status-badge"
-          >
-            {getStatusLabel(status)}
-          </span>
-        </div>
+        {/* Status Badge - always at bottom right */}
+        <span 
+          className={`absolute bottom-1.5 right-1.5 inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90`}
+          data-testid="content-status-badge"
+        >
+          {getStatusLabel(status)}
+        </span>
       </div>
 
       {/* Content Info */}
