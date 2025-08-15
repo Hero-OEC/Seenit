@@ -66,26 +66,6 @@ export default function Navbar({
             />
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearchSubmit}>
-              <Input
-                type="text"
-                placeholder="Search movies, TV shows, anime..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                inputSize="sm"
-                leftIcon={
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                }
-                className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
-                data-testid="navbar-search"
-              />
-            </form>
-          </div>
-
           {/* Navigation Menu */}
           <div className="hidden md:flex items-center gap-6">
             {isSignedIn ? (
@@ -166,6 +146,26 @@ export default function Navbar({
             >
               Schedule
             </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearchSubmit}>
+              <Input
+                type="text"
+                placeholder="Search movies, TV shows, anime..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                inputSize="sm"
+                leftIcon={
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                }
+                className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
+                data-testid="navbar-search"
+              />
+            </form>
           </div>
 
           {/* Right Side Actions */}
