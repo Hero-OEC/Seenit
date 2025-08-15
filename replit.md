@@ -2,7 +2,7 @@
 
 ## Overview
 
-Seenit is a modern web application for tracking movies, TV shows, and anime with a retro aesthetic. Currently reset to a clean components-first architecture. The app features a components showcase page where reusable UI components are built and demonstrated before being used throughout the platform. Built with React and TypeScript, using a retro color palette with warm orange/coral tones.
+Seenit is a modern web application for tracking movies, TV shows, and anime with a modern aesthetic. Currently reset to a clean components-first architecture. The app features a components showcase page where reusable UI components are built and demonstrated before being used throughout the platform. Built with React and TypeScript, using a blue color palette with clean, modern tones.
 
 ## User Preferences
 
@@ -12,7 +12,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript using Vite as the build tool
-- **Styling**: Tailwind CSS with a custom retro theme featuring warm colors (oranges, creams, blues)
+- **Styling**: Tailwind CSS with a custom blue theme featuring modern, clean blues and whites
 - **UI Components**: Radix UI primitives with shadcn/ui component library for consistent design
 - **State Management**: TanStack Query (React Query) for server state management and caching
 - **Routing**: Wouter for lightweight client-side routing
@@ -41,14 +41,14 @@ Preferred communication style: Simple, everyday language.
 - **Content Browsing**: Search and filter movies, TV shows, and anime by type and genre
 - **User Lists**: Personal watchlists with status tracking (watching, watched, want to watch)
 - **Progress Tracking**: Episode progress and user ratings for tracked content
-- **Responsive Design**: Mobile-first approach with retro-inspired UI components
+- **Responsive Design**: Mobile-first approach with modern, clean UI components
 - **Category Tabs**: Quick navigation between different content types
 
 ## External Dependencies
 
 ### UI and Styling
 - **Radix UI**: Comprehensive set of accessible component primitives
-- **Tailwind CSS**: Utility-first CSS framework with custom retro color scheme
+- **Tailwind CSS**: Utility-first CSS framework with custom blue color scheme
 - **Lucide React**: Icon library for consistent iconography
 - **Class Variance Authority**: Utility for creating component variants
 
