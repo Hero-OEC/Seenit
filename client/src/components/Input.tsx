@@ -20,7 +20,7 @@ const inputVariants = cva(
       inputType: {
         text: "",
         textarea: "min-h-20 py-2 resize-y",
-        select: "cursor-pointer"
+        select: "cursor-pointer appearance-none"
       }
     },
     defaultVariants: {
