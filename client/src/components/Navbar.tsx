@@ -10,6 +10,8 @@ interface NavbarProps {
   onWatchlist?: () => void;
   onBrowse?: (type: string) => void;
   onSchedule?: () => void;
+  onProfile?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function Navbar({ 
@@ -19,7 +21,9 @@ export default function Navbar({
   onHome = () => console.log("Home clicked"),
   onWatchlist = () => console.log("Watchlist clicked"),
   onBrowse = (type: string) => console.log(`Browse ${type} clicked`),
-  onSchedule = () => console.log("Schedule clicked")
+  onSchedule = () => console.log("Schedule clicked"),
+  onProfile = () => console.log("Profile clicked"),
+  onSignOut = () => console.log("Sign out clicked")
 }: NavbarProps) {
 
   // Get user initials for avatar
@@ -132,14 +136,31 @@ export default function Navbar({
           <div className="flex items-center gap-4">
             {isSignedIn ? (
               /* Signed In State */
-              <div className="flex items-center gap-3">
-                <span className="hidden sm:block font-headline text-retro-900">{userName}</span>
-                <div className="w-8 h-8 bg-retro-500 rounded-full flex items-center justify-center">
-                  <span className="font-headline text-white text-sm">
-                    {getUserInitials(userName)}
-                  </span>
-                </div>
-              </div>
+              <Dropdown
+                trigger={
+                  <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="w-8 h-8 bg-retro-500 rounded-full flex items-center justify-center">
+                      <span className="font-headline text-white text-sm">
+                        {getUserInitials(userName)}
+                      </span>
+                    </div>
+                    <span className="hidden sm:block font-headline text-retro-900">{userName}</span>
+                  </div>
+                }
+                options={[
+                  {
+                    value: "profile",
+                    label: "Profile",
+                    onClick: onProfile
+                  },
+                  {
+                    value: "sign-out",
+                    label: "Sign Out",
+                    onClick: onSignOut
+                  }
+                ]}
+                placement="right"
+              />
             ) : (
               /* Not Signed In State */
               <div className="flex items-center">

@@ -31,6 +31,8 @@ export default function ComponentsPage() {
         onWatchlist={() => alert("Watchlist clicked!")}
         onBrowse={(type) => alert(`Browse ${type} clicked!`)}
         onSchedule={() => alert("Schedule clicked!")}
+        onProfile={() => alert("Profile clicked!")}
+        onSignOut={() => alert("Sign out clicked!")}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
