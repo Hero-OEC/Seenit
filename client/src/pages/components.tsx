@@ -47,8 +47,8 @@ export default function ComponentsPage() {
         </div>
 
         {/* Button Component Showcase */}
-        <div className="bg-retro-cream rounded-lg p-6 shadow-sm mb-8">
-          <h2 className="font-semibold text-2xl text-retro-dark mb-4">
+        <div className="bg-retro-100 rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-4">
             Button Component
           </h2>
           <p className="text-gray-600 mb-8">
@@ -58,7 +58,7 @@ export default function ComponentsPage() {
           <div className="space-y-8">
             {/* Button Variants */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Variants</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Variants</h3>
               <div className="flex flex-wrap gap-4 items-center">
                 <Button 
                   variant="default" 
@@ -121,7 +121,7 @@ export default function ComponentsPage() {
 
             {/* Button Sizes */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Sizes</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Sizes</h3>
               <div className="flex flex-wrap items-center gap-4">
                 <Button 
                   size="sm" 
@@ -164,7 +164,7 @@ export default function ComponentsPage() {
 
             {/* Button States */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">States</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">States</h3>
               <div className="flex flex-wrap gap-4 items-center">
                 <Button 
                   onClick={() => handleButtonClick("Normal")}
@@ -238,7 +238,7 @@ export default function ComponentsPage() {
 
             {/* Usage Examples */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Usage Examples</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <pre className="text-sm text-gray-800 overflow-x-auto">
 {`// Import the Button component
@@ -270,10 +270,10 @@ import Button from "@/components/Button";
 
             {/* Navbar Demo Controls */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Interactive Demo</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Interactive Demo</h3>
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <span className="text-sm text-gray-600">Current state:</span>
-                <span className="font-medium text-retro-dark">
+                <span className="font-medium text-retro-900">
                   {isSignedIn ? "Signed In (Alex Morgan)" : "Not Signed In"}
                 </span>
                 <Button
@@ -293,8 +293,8 @@ import Button from "@/components/Button";
         </div>
 
         {/* Navbar Component Showcase */}
-        <div className="bg-retro-cream rounded-lg p-6 shadow-sm mb-8">
-          <h2 className="font-semibold text-2xl text-retro-dark mb-4">
+        <div className="bg-retro-100 rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-4">
             Navbar Component
           </h2>
           <p className="text-gray-600 mb-8">
@@ -304,10 +304,10 @@ import Button from "@/components/Button";
           <div className="space-y-8">
             {/* Navbar Features */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Features</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Features</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <h4 className="font-medium text-retro-dark">Signed In State:</h4>
+                  <h4 className="font-medium text-retro-900">Signed In State:</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
                     <li>• Navigation menu: Home, Watchlist, Browse, Schedule</li>
                     <li>• Browse dropdown with Movies, TV Shows, Anime</li>
@@ -316,7 +316,7 @@ import Button from "@/components/Button";
                   </ul>
                 </div>
                 <div className="space-y-3">
-                  <h4 className="font-medium text-retro-dark">Not Signed In State:</h4>
+                  <h4 className="font-medium text-retro-900">Not Signed In State:</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
                     <li>• Get Started button (outline style)</li>
                     <li>• Sign In button (primary style)</li>
@@ -329,7 +329,7 @@ import Button from "@/components/Button";
 
             {/* Usage Examples */}
             <div>
-              <h3 className="font-medium text-lg text-retro-dark mb-4">Usage Examples</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <pre className="text-sm text-gray-800 overflow-x-auto">
 {`// Import the Navbar component
