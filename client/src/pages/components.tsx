@@ -1,4 +1,3 @@
-import { Link } from "wouter";
 import { useState } from "react";
 import Button from "@/components/Button";
 
@@ -14,7 +13,7 @@ export default function ComponentsPage() {
       {/* Header */}
       <header className="bg-retro-cream shadow-sm border-b-2 border-retro-main">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-retro-main rounded-lg flex items-center justify-center">
                 <span className="font-retro text-white text-lg">S</span>
@@ -24,14 +23,6 @@ export default function ComponentsPage() {
                 <p className="text-sm text-gray-600">Component Library</p>
               </div>
             </div>
-            <nav className="flex items-center gap-4">
-              <Link href="/" data-testid="link-home">
-                <Button variant="secondary" size="sm">Home</Button>
-              </Link>
-              <Link href="/components" data-testid="link-components">
-                <Button variant="accent" size="sm">Components</Button>
-              </Link>
-            </nav>
           </div>
         </div>
       </header>
