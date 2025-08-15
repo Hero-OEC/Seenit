@@ -357,7 +357,7 @@ export default function Navbar({
                 ) : (
                   <div className="pt-4 border-t border-retro-200">
                     <Button
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
                       className="w-full"

@@ -5,6 +5,7 @@ import Input from "@/components/Input";
 import RadioButton from "@/components/RadioButton";
 import Checkbox from "@/components/Checkbox";
 import Toggle from "@/components/Toggle";
+import ContentDisplay from "@/components/ContentDisplay";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
@@ -754,6 +755,203 @@ import Input from "@/components/Input";
           </div>
         </div>
 
+        {/* Content Display Component Showcase */}
+        <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-6">
+            Content Display Component
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Display movie, TV show, and anime content with poster images, titles, type badges, status indicators, and episode information.
+          </p>
+
+          <div className="space-y-8">
+            {/* Basic Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Content Types</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+                  title="Avatar: The Way of Water"
+                  type="movie"
+                  status="finished"
+                  onClick={() => alert("Clicked Avatar movie!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/1qpUk27LVI9UoTS7S0EixUBj5aR.jpg"
+                  title="The Last of Us"
+                  type="tv"
+                  status="finished"
+                  season={1}
+                  episode={9}
+                  onClick={() => alert("Clicked The Last of Us!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/tL4McUK15VMrQWiuxG9VkdTOpaR.jpg"
+                  title="Attack on Titan"
+                  type="anime"
+                  status="finished"
+                  season={4}
+                  episode={28}
+                  onClick={() => alert("Clicked Attack on Titan!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/9yBVqNruk6Ykrwc32qrK2TIE5xw.jpg"
+                  title="Dune: Part Two"
+                  type="movie"
+                  status="coming-soon"
+                  onClick={() => alert("Clicked Dune Part Two!")}
+                />
+              </div>
+            </div>
+
+            {/* Status Variations */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Status Variations</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg"
+                  title="Stranger Things"
+                  type="tv"
+                  status="ongoing"
+                  season={5}
+                  episode={3}
+                  onClick={() => alert("Ongoing series!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg"
+                  title="The Batman 2"
+                  type="movie"
+                  status="coming-soon"
+                  onClick={() => alert("Coming soon!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg"
+                  title="Game of Thrones"
+                  type="tv"
+                  status="finished"
+                  season={8}
+                  episode={6}
+                  onClick={() => alert("Finished series!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/fuVuDYrs8sxvEolnYr0wCSvtyTi.jpg"
+                  title="Cowboy Bebop Live Action"
+                  type="tv"
+                  status="canceled"
+                  season={1}
+                  episode={10}
+                  onClick={() => alert("Canceled series!")}
+                />
+              </div>
+            </div>
+
+            {/* Episode Information Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Episode Information Display</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/qZtAf4Z1lazGQoYVXiHlSLIThtw.jpg"
+                  title="One Piece"
+                  type="anime"
+                  status="ongoing"
+                  season={20}
+                  episode={1086}
+                  onClick={() => alert("Long running anime!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/4EYPN5mVIhKLfxGruy7Dy41dTVn.jpg"
+                  title="Breaking Bad"
+                  type="tv"
+                  status="finished"
+                  season={5}
+                  episode={16}
+                  onClick={() => alert("Classic finished series!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/z2yahl2uefxDCl0nogcRBstwruJ.jpg"
+                  title="Your Name"
+                  type="anime"
+                  status="finished"
+                  onClick={() => alert("Anime movie!")}
+                />
+              </div>
+            </div>
+
+            {/* Long Title Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Long Title Handling</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/rweIrveL43TaxUN0akQEaAXL6x0.jpg"
+                  title="Spider-Man: Across the Spider-Verse"
+                  type="movie"
+                  status="finished"
+                  onClick={() => alert("Long movie title!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg"
+                  title="That Time I Got Reincarnated as a Slime"
+                  type="anime"
+                  status="ongoing"
+                  season={3}
+                  episode={12}
+                  onClick={() => alert("Very long anime title!")}
+                />
+              </div>
+            </div>
+
+            {/* Usage Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the ContentDisplay component
+import ContentDisplay from "@/components/ContentDisplay";
+
+// Basic movie
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="Movie Title"
+  type="movie"
+  status="finished"
+  onClick={() => handleClick()}
+/>
+
+// TV show with episode info
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="TV Show Title"
+  type="tv"
+  status="ongoing"
+  season={2}
+  episode={5}
+  onClick={() => handleClick()}
+/>
+
+// Anime with all info
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="Anime Title"
+  type="anime"
+  status="finished"
+  season={1}
+  episode={24}
+  onClick={() => handleClick()}
+/>
+
+// Coming soon content
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="Upcoming Movie"
+  type="movie"
+  status="coming-soon"
+  onClick={() => handleClick()}
+/>`}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
         
       </div>
     </div>
