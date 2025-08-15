@@ -1,31 +1,32 @@
 import { useState } from "react";
 import Button from "@/components/Button";
+import Navbar from "@/components/Navbar";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+  const [navbarDemo, setNavbarDemo] = useState<string>("not-signed-in");
 
   const handleButtonClick = (buttonName: string) => {
     setClickedButton(buttonName);
     setTimeout(() => setClickedButton(""), 2000);
   };
+
+  const toggleSignInState = () => {
+    setIsSignedIn(!isSignedIn);
+    setNavbarDemo(isSignedIn ? "not-signed-in" : "signed-in");
+  };
   return (
     <div className="min-h-screen bg-retro-bg">
-      {/* Header */}
-      <header className="bg-retro-cream shadow-sm border-b-2 border-retro-main">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-retro-main rounded-lg flex items-center justify-center">
-                <span className="font-headline text-white text-lg">S</span>
-              </div>
-              <div>
-                <h1 className="font-headline text-2xl text-retro-dark">Seenit</h1>
-                <p className="text-sm text-gray-600">Component Library</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Demo Navbar */}
+      <Navbar 
+        isSignedIn={isSignedIn}
+        userName="Alex Morgan"
+        userEmail="alex@seenit.com"
+        onSignOut={() => alert("Sign out clicked!")}
+        onGetStarted={() => alert("Get started clicked!")}
+        onProfile={() => alert("Profile clicked!")}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
@@ -262,6 +263,101 @@ import Button from "@/components/Button";
 <Button disabled>
   Disabled Button
 </Button>`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Navbar Demo Controls */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-dark mb-4">Interactive Demo</h3>
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <span className="text-sm text-gray-600">Current state:</span>
+                <span className="font-medium text-retro-dark">
+                  {isSignedIn ? "Signed In (Alex Morgan)" : "Not Signed In"}
+                </span>
+                <Button
+                  variant="accent"
+                  size="sm"
+                  onClick={toggleSignInState}
+                  data-testid="toggle-signin-state"
+                >
+                  Toggle to {isSignedIn ? "Sign Out" : "Sign In"}
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                Try clicking the user avatar when signed in to see the dropdown menu, or the "Get Started" button when signed out.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navbar Component Showcase */}
+        <div className="bg-retro-cream rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="font-semibold text-2xl text-retro-dark mb-4">
+            Navbar Component
+          </h2>
+          <p className="text-gray-600 mb-8">
+            Responsive navigation bar with two states: signed-in (with user dropdown) and not signed-in (with action buttons).
+          </p>
+          
+          <div className="space-y-8">
+            {/* Navbar Features */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-dark mb-4">Features</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-retro-dark">Signed In State:</h4>
+                  <ul className="space-y-1 text-sm text-gray-600">
+                    <li>• User avatar with initials</li>
+                    <li>• Name and email display</li>
+                    <li>• Dropdown with Profile and Sign Out</li>
+                    <li>• Click outside to close dropdown</li>
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-retro-dark">Not Signed In State:</h4>
+                  <ul className="space-y-1 text-sm text-gray-600">
+                    <li>• Get Started button (outline style)</li>
+                    <li>• Sign In button (primary style)</li>
+                    <li>• Call-to-action focused design</li>
+                    <li>• Mobile responsive layout</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Usage Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-dark mb-4">Usage Examples</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the Navbar component
+import Navbar from "@/components/Navbar";
+
+// Not signed in state
+<Navbar 
+  isSignedIn={false}
+  onGetStarted={() => navigate('/signup')}
+/>
+
+// Signed in state
+<Navbar 
+  isSignedIn={true}
+  userName="John Doe"
+  userEmail="john@example.com"
+  onSignOut={() => handleSignOut()}
+  onProfile={() => navigate('/profile')}
+/>
+
+// Full customization
+<Navbar 
+  isSignedIn={user?.isAuthenticated}
+  userName={user?.name}
+  userEmail={user?.email}
+  onSignOut={logout}
+  onGetStarted={() => router.push('/auth')}
+  onProfile={() => router.push('/profile')}
+/>`}
                 </pre>
               </div>
             </div>
