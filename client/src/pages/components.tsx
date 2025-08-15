@@ -2,6 +2,9 @@ import { useState } from "react";
 import Button from "@/components/Button";
 import Navbar from "@/components/Navbar";
 import Input from "@/components/Input";
+import RadioButton from "@/components/RadioButton";
+import Checkbox from "@/components/Checkbox";
+import Toggle from "@/components/Toggle";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
@@ -397,18 +400,9 @@ import Button from "@/components/Button";
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-900">Radio Buttons</label>
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="rating" value="good" className="text-retro-500" />
-                        <span className="text-sm">Good</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="rating" value="great" className="text-retro-500" />
-                        <span className="text-sm">Great</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="rating" value="excellent" className="text-retro-500" />
-                        <span className="text-sm">Excellent</span>
-                      </label>
+                      <RadioButton name="rating" value="good" label="Good" />
+                      <RadioButton name="rating" value="great" label="Great" />
+                      <RadioButton name="rating" value="excellent" label="Excellent" />
                     </div>
                   </div>
                 </div>
@@ -416,29 +410,14 @@ import Button from "@/components/Button";
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-900">Checkboxes</label>
                     <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded text-retro-500" />
-                        <span className="text-sm">Movies</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded text-retro-500" />
-                        <span className="text-sm">TV Shows</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" className="rounded text-retro-500" />
-                        <span className="text-sm">Anime</span>
-                      </label>
+                      <Checkbox label="Movies" />
+                      <Checkbox label="TV Shows" />
+                      <Checkbox label="Anime" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-900">Toggle Switch</label>
-                    <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="sr-only" />
-                      <div className="relative w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-retro-500">
-                        <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
-                      </div>
-                      <span className="text-sm">Enable notifications</span>
-                    </label>
+                    <Toggle label="Enable notifications" />
                   </div>
                 </div>
               </div>
