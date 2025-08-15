@@ -29,16 +29,22 @@ export default function ComponentsPage() {
         onSchedule={() => alert("Schedule clicked!")}
       />
 
-      {/* Interactive Demo Controls */}
-      <div className="bg-retro-accent-2 border-b border-retro-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-center gap-4">
-            <span className="text-sm text-retro-900">Navbar Demo:</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Interactive Demo Controls */}
+        <div className="bg-retro-100 rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-4">
+            Interactive Demo
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Test the navbar functionality by toggling between signed-in and not signed-in states.
+          </p>
+          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+            <span className="text-sm text-gray-600">Current state:</span>
             <span className="font-medium text-retro-900">
               {isSignedIn ? "Signed In (Alex Morgan)" : "Not Signed In"}
             </span>
             <Button
-              variant="secondary"
+              variant="accent"
               size="sm"
               onClick={toggleSignInState}
               data-testid="toggle-signin-state"
@@ -46,10 +52,10 @@ export default function ComponentsPage() {
               Toggle to {isSignedIn ? "Sign Out" : "Sign In"}
             </Button>
           </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Try the navigation menu and Browse dropdown when signed in, or the "Get Started" button when signed out.
+          </p>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-6">
             <div className="w-24 h-24 bg-retro-500 rounded-2xl flex items-center justify-center">
