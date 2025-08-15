@@ -12,7 +12,7 @@ const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
         <div className="relative">
           <input
             type="radio"
-            className="sr-only"
+            className="sr-only peer"
             ref={ref}
             {...props}
           />
@@ -24,10 +24,10 @@ const RadioButton = forwardRef<HTMLInputElement, RadioButtonProps>(
             "peer-disabled:opacity-50 peer-disabled:cursor-not-allowed",
             className
           )} />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className={cn(
-              "w-2 h-2 rounded-full bg-white opacity-0 transition-opacity duration-200",
-              "peer-checked:opacity-100"
+              "w-2 h-2 rounded-full bg-white transition-all duration-200",
+              "scale-0 peer-checked:scale-100"
             )} />
           </div>
         </div>
