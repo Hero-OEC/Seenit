@@ -42,16 +42,16 @@ export default function Navbar({
   };
 
   return (
-    <nav className="bg-gray-200">
+    <nav className="bg-retro-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-retro-main rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-retro-500 rounded-lg flex items-center justify-center">
               <span className="font-headline text-white text-lg">S</span>
             </div>
             <div>
-              <h1 className="font-headline text-xl text-retro-dark">Seenit</h1>
+              <h1 className="font-headline text-xl text-retro-900">Seenit</h1>
             </div>
           </div>
 
@@ -60,14 +60,14 @@ export default function Navbar({
             <div className="hidden md:flex items-center gap-6">
               <button
                 onClick={onHome}
-                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
                 data-testid="nav-home"
               >
                 Home
               </button>
               <button
                 onClick={onWatchlist}
-                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
                 data-testid="nav-watchlist"
               >
                 Watchlist
@@ -77,7 +77,7 @@ export default function Navbar({
               <div className="relative">
                 <button
                   onClick={handleBrowseClick}
-                  className="flex items-center gap-1 font-headline text-retro-dark hover:text-retro-main transition-colors"
+                  className="flex items-center gap-1 font-headline text-retro-900 hover:text-retro-500 transition-colors"
                   data-testid="nav-browse"
                 >
                   Browse
@@ -99,21 +99,21 @@ export default function Navbar({
                     <div className="py-2">
                       <button
                         onClick={() => handleBrowseItem("Movies")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
                         data-testid="browse-movies"
                       >
                         Movies
                       </button>
                       <button
                         onClick={() => handleBrowseItem("TV Shows")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
                         data-testid="browse-tv"
                       >
                         TV Shows
                       </button>
                       <button
                         onClick={() => handleBrowseItem("Anime")}
-                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-dark hover:bg-retro-secondary transition-colors"
+                        className="w-full text-left px-4 py-2 text-sm font-headline text-retro-900 hover:bg-retro-200 transition-colors"
                         data-testid="browse-anime"
                       >
                         Anime
@@ -134,7 +134,7 @@ export default function Navbar({
 
               <button
                 onClick={onSchedule}
-                className="font-headline text-retro-dark hover:text-retro-main transition-colors"
+                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
                 data-testid="nav-schedule"
               >
                 Schedule
@@ -147,8 +147,8 @@ export default function Navbar({
             {isSignedIn ? (
               /* Signed In State */
               <div className="flex items-center gap-3">
-                <span className="hidden sm:block font-headline text-retro-dark">{userName}</span>
-                <div className="w-8 h-8 bg-retro-main rounded-full flex items-center justify-center">
+                <span className="hidden sm:block font-headline text-retro-900">{userName}</span>
+                <div className="w-8 h-8 bg-retro-500 rounded-full flex items-center justify-center">
                   <span className="font-headline text-white text-sm">
                     {getUserInitials(userName)}
                   </span>

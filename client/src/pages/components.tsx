@@ -17,7 +17,7 @@ export default function ComponentsPage() {
     setNavbarDemo(isSignedIn ? "not-signed-in" : "signed-in");
   };
   return (
-    <div className="min-h-screen bg-retro-bg">
+    <div className="min-h-screen bg-retro-50">
       {/* Demo Navbar */}
       <Navbar 
         isSignedIn={isSignedIn}
@@ -32,14 +32,14 @@ export default function ComponentsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-6">
-            <div className="w-24 h-24 bg-retro-main rounded-2xl flex items-center justify-center">
+            <div className="w-24 h-24 bg-retro-500 rounded-2xl flex items-center justify-center">
               <span className="font-headline text-white text-4xl">S</span>
             </div>
             <div>
-              <h1 className="font-headline text-4xl text-retro-main mb-2">
+              <h1 className="font-headline text-4xl text-retro-500 mb-2">
                 Seenit Components
               </h1>
-              <p className="text-retro-dark text-lg">
+              <p className="text-retro-900 text-lg">
                 A showcase of all reusable components for the Seenit platform
               </p>
             </div>

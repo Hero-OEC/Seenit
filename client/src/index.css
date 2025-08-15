@@ -50,11 +50,18 @@
   --font-mono: Menlo, monospace;
   --font-headline: 'Mozilla Headline', 'Inter', sans-serif;
   --radius: 1.3rem;
-  --retro-bg: hsl(39, 62%, 95%);
-  --retro-main: hsl(20, 65%, 55%);
-  --retro-secondary: hsl(22, 76%, 83%);
-  --retro-accent: hsl(193, 43%, 75%);
-  --retro-dark: hsl(27, 50%, 26%);
+  --retro-50: #FCF5F0;
+  --retro-100: #F9E7DB;
+  --retro-200: #F2CCB6;
+  --retro-300: #E9AA88;
+  --retro-400: #DC7248;
+  --retro-500: #D85E37;
+  --retro-600: #CA482C;
+  --retro-700: #A73727;
+  --retro-800: #862E26;
+  --retro-900: #6C2922;
+  --retro-950: #3A1210;
+  --retro-accent: #AED6D8;
 }
 
 .dark {
