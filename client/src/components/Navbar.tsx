@@ -62,13 +62,16 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             <img 
               src={seenitLogo} 
               alt="Seenit Logo" 
               className="h-12 w-auto max-w-[160px] object-contain"
               data-testid="seenit-logo"
             />
+            <h1 className="font-headline text-2xl font-bold text-retro-950">
+              Seenit
+            </h1>
           </div>
 
           {/* Navigation Menu */}
