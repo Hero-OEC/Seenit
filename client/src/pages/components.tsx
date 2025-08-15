@@ -305,55 +305,255 @@ import Button from "@/components/Button";
             Input Component
           </h2>
           <p className="text-gray-600 mb-8">
-            Clean input component with support for icons, labels, validation messages, and consistent styling.
+            Comprehensive input component supporting multiple interaction types, selection methods, and state feedback with consistent styling.
           </p>
           
           <div className="space-y-8">
-            {/* Basic Input */}
+            {/* 1. By Interaction Type */}
             <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Input</h3>
-              <div className="max-w-md">
-                <Input 
-                  placeholder="Enter some text"
-                  data-testid="input-basic"
-                />
-              </div>
-            </div>
-
-            {/* Input with Labels and Messages */}
-            <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Labels & Messages</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">1. By Interaction Type</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <Input 
-                    label="Email Address"
-                    placeholder="Enter your email"
-                    helper="We'll never share your email"
-                    type="email"
-                    data-testid="input-with-label"
+                    label="Text Field"
+                    placeholder="Enter your name"
+                    data-testid="input-text"
                   />
                   <Input 
-                    label="Password"
-                    placeholder="Enter password"
-                    error="Password must be at least 8 characters"
+                    label="Password Field"
                     type="password"
-                    data-testid="input-with-error"
+                    placeholder="Enter password"
+                    showPasswordToggle={true}
+                    data-testid="input-password"
+                  />
+                  <Input 
+                    label="Email Field"
+                    type="email"
+                    placeholder="your@email.com"
+                    data-testid="input-email"
+                  />
+                  <Input 
+                    label="Number Field"
+                    type="number"
+                    placeholder="123"
+                    min="0"
+                    max="999"
+                    data-testid="input-number"
                   />
                 </div>
                 <div className="space-y-4">
                   <Input 
-                    label="Username"
-                    placeholder="Choose a username"
-                    success="Username is available!"
-                    data-testid="input-with-success"
+                    label="Search Field"
+                    type="search"
+                    placeholder="Search movies..."
+                    leftIcon={
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    }
+                    data-testid="input-search"
                   />
                   <Input 
-                    label="Full Name"
-                    placeholder="Enter your full name"
-                    variant="retro"
-                    data-testid="input-retro-label"
+                    label="Phone Number"
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                    data-testid="input-phone"
+                  />
+                  <Input 
+                    label="Website URL"
+                    type="url"
+                    placeholder="https://example.com"
+                    data-testid="input-url"
+                  />
+                  <Input 
+                    label="Textarea"
+                    inputType="textarea"
+                    placeholder="Enter multiple lines of text..."
+                    rows={3}
+                    data-testid="input-textarea"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* 2. By Selection Type */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">2. By Selection Type</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="Dropdown / Select Menu"
+                    inputType="select"
+                    placeholder="Choose a genre"
+                    options={[
+                      { value: "action", label: "Action" },
+                      { value: "comedy", label: "Comedy" },
+                      { value: "drama", label: "Drama" },
+                      { value: "horror", label: "Horror" },
+                      { value: "sci-fi", label: "Science Fiction" }
+                    ]}
+                    data-testid="input-select"
+                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-900">Radio Buttons</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input type="radio" name="rating" value="good" className="text-retro-500" />
+                        <span className="text-sm">Good</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="radio" name="rating" value="great" className="text-retro-500" />
+                        <span className="text-sm">Great</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="radio" name="rating" value="excellent" className="text-retro-500" />
+                        <span className="text-sm">Excellent</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-900">Checkboxes</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" className="rounded text-retro-500" />
+                        <span className="text-sm">Movies</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" className="rounded text-retro-500" />
+                        <span className="text-sm">TV Shows</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" className="rounded text-retro-500" />
+                        <span className="text-sm">Anime</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-900">Toggle Switch</label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" className="sr-only" />
+                      <div className="relative w-10 h-6 bg-gray-200 rounded-full peer peer-checked:bg-retro-500">
+                        <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                      </div>
+                      <span className="text-sm">Enable notifications</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. By Data & Media Input */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">3. By Data & Media Input</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="File Upload"
+                    type="file"
+                    data-testid="input-file"
+                  />
+                  <Input 
+                    label="Image Upload"
+                    type="file"
+                    accept="image/*"
+                    data-testid="input-image"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    label="Date Picker"
+                    type="date"
+                    data-testid="input-date"
+                  />
+                  <Input 
+                    label="Time Picker"
+                    type="time"
+                    data-testid="input-time"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 4. By State Feedback */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">4. By State Feedback</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="Default State"
+                    placeholder="Normal input field"
+                    helper="This is a helper message"
+                    data-testid="input-default-state"
+                  />
+                  <Input 
+                    label="Hover State"
+                    placeholder="Hover over this input"
+                    helper="Hover effects show on desktop"
+                    data-testid="input-hover-state"
+                  />
+                  <Input 
+                    label="Focus State"
+                    placeholder="Click to focus this input"
+                    helper="Focus ring appears when active"
+                    data-testid="input-focus-state"
+                  />
+                  <Input 
+                    label="Disabled State"
+                    placeholder="Cannot interact with this"
+                    disabled
+                    data-testid="input-disabled-state"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    label="Error State"
+                    placeholder="This has an error"
+                    error="This field is required"
+                    variant="error"
+                    data-testid="input-error-state"
+                  />
+                  <Input 
+                    label="Warning State"
+                    placeholder="This has a warning"
+                    warning="Password strength is weak"
+                    variant="warning"
+                    data-testid="input-warning-state"
+                  />
+                  <Input 
+                    label="Success State"
+                    placeholder="This is validated"
+                    success="Email format is correct"
+                    variant="success"
+                    data-testid="input-success-state"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Sizes */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">5. Input Sizes</h3>
+              <div className="space-y-4">
+                <Input 
+                  label="Small Size"
+                  placeholder="Small input"
+                  inputSize="sm"
+                  data-testid="input-size-small"
+                />
+                <Input 
+                  label="Default Size"
+                  placeholder="Default input"
+                  inputSize="default"
+                  data-testid="input-size-default"
+                />
+                <Input 
+                  label="Large Size"
+                  placeholder="Large input"
+                  inputSize="lg"
+                  data-testid="input-size-large"
+                />
               </div>
             </div>
 
@@ -512,34 +712,59 @@ import Button from "@/components/Button";
 {`// Import the Input component
 import Input from "@/components/Input";
 
-// Basic usage
+// Basic text input
 <Input placeholder="Enter text" />
 
-// With label and helper text
+// With state feedback
 <Input 
   label="Email" 
+  type="email"
   placeholder="your@email.com"
-  helper="We'll never share your email"
-/>
-
-// With validation
-<Input 
-  label="Password"
-  type="password"
-  error="Password must be at least 8 characters"
-/>
-
-// With icons
-<Input 
-  placeholder="Search..."
-  leftIcon={<SearchIcon />}
+  variant="success"
+  success="Email format is valid"
 />
 
 // Password with toggle
 <Input 
+  label="Password"
   type="password"
   showPasswordToggle={true}
   placeholder="Enter password"
+/>
+
+// Textarea for long text
+<Input 
+  label="Description"
+  inputType="textarea"
+  placeholder="Enter description..."
+  rows={4}
+/>
+
+// Select dropdown
+<Input 
+  label="Category"
+  inputType="select"
+  placeholder="Choose category"
+  options={[
+    { value: "movies", label: "Movies" },
+    { value: "tv", label: "TV Shows" }
+  ]}
+/>
+
+// With icons and sizes
+<Input 
+  label="Search"
+  leftIcon={<SearchIcon />}
+  inputSize="lg"
+  placeholder="Search content..."
+/>
+
+// Error state with warning
+<Input 
+  label="Username"
+  variant="warning"
+  warning="Username may already exist"
+  placeholder="Enter username"
 />`}
                 </pre>
               </div>
