@@ -144,7 +144,7 @@ export default function Navbar({
                         {getUserInitials(userName)}
                       </span>
                     </div>
-                    <span className="hidden sm:block font-headline text-retro-900">{userName}</span>
+                    <span className="hidden sm:block font-headline text-retro-900 text-sm">{userName}</span>
                   </div>
                 }
                 options={[
