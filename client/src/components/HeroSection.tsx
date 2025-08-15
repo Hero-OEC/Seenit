@@ -18,16 +18,14 @@ interface HeroContent {
 
 interface HeroSectionProps {
   content: HeroContent;
-  onWatchTrailer?: () => void;
   onAddToList?: () => void;
-  onMoreInfo?: () => void;
+  onViewDetails?: () => void;
 }
 
 export function HeroSection({ 
   content, 
-  onWatchTrailer, 
   onAddToList, 
-  onMoreInfo 
+  onViewDetails 
 }: HeroSectionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
@@ -65,7 +63,7 @@ export function HeroSection({
 
   return (
     <div 
-      className="relative w-full h-screen overflow-hidden bg-black"
+      className="relative w-screen h-screen overflow-hidden bg-black -mx-4 sm:-mx-6 lg:-mx-8"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
@@ -96,92 +94,40 @@ export function HeroSection({
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 flex items-center">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="absolute inset-0 flex items-end">
+        <div className="w-full px-8 pb-16">
           <div className="max-w-2xl">
-            {/* Logo or Title */}
-            {content.logoUrl ? (
-              <img 
-                src={content.logoUrl} 
-                alt={`${content.title} Logo`}
-                className="h-20 md:h-28 w-auto object-contain mb-6"
-              />
-            ) : (
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 font-headline">
-                {content.title}
-              </h1>
-            )}
+            {/* Title */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 font-headline">
+              {content.title}
+            </h1>
 
-            {/* Movie Details */}
-            <div className="flex items-center gap-4 mb-4 text-white/90">
-              <span className="text-sm md:text-base font-medium">{content.year}</span>
-              <span className="w-1 h-1 bg-white/60 rounded-full"></span>
-              <span className="text-sm md:text-base font-medium">{content.rating}</span>
-              <span className="w-1 h-1 bg-white/60 rounded-full"></span>
-              <span className="text-sm md:text-base font-medium">{content.duration}</span>
-            </div>
-
-            {/* Genres */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {content.genres.map((genre) => (
-                <span 
-                  key={genre}
-                  className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white/90"
-                >
-                  {genre}
-                </span>
-              ))}
-            </div>
-
-            {/* Description */}
-            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
-              {content.description}
+            {/* Brief Description */}
+            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-lg line-clamp-3">
+              {content.description.length > 120 
+                ? content.description.substring(0, 120) + "..." 
+                : content.description}
             </p>
 
-            {/* Platforms */}
-            <div className="mb-8">
-              <p className="text-sm text-white/70 mb-3">Available on:</p>
-              <div className="flex flex-wrap gap-3">
-                {content.platforms.map((platform) => (
-                  <span 
-                    key={platform}
-                    className="px-4 py-2 bg-retro-950/80 backdrop-blur-sm rounded-lg text-sm text-white font-medium"
-                  >
-                    {platform}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex gap-4">
               <Button
                 size="lg"
-                onClick={onWatchTrailer}
+                onClick={onAddToList}
                 className="bg-white text-black hover:bg-white/90 font-semibold"
               >
-                <Play className="w-5 h-5 mr-2" />
-                Watch Trailer
+                <Plus className="w-5 h-5 mr-2" />
+                Add to Watchlist
               </Button>
               
               <Button
                 size="lg"
                 variant="outline"
-                onClick={onAddToList}
+                onClick={onViewDetails}
                 className="border-white/50 text-white hover:bg-white/10 hover:border-white"
               >
-                <Plus className="w-5 h-5 mr-2" />
-                Add to List
-              </Button>
-              
-              <Button
-                size="lg"
-                variant="ghost"
-                onClick={onMoreInfo}
-                className="text-white hover:bg-white/10"
-              >
                 <Info className="w-5 h-5 mr-2" />
-                More Info
+                View Details
               </Button>
             </div>
           </div>

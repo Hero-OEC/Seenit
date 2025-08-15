@@ -1348,7 +1348,7 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
           
           <div className="space-y-6">
             {/* Demo Hero */}
-            <div className="relative h-[600px] rounded-lg overflow-hidden">
+            <div className="relative h-[600px] overflow-hidden -mx-6">
               <HeroSection
                 content={{
                   id: "demo-movie",
@@ -1362,9 +1362,8 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
                   trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
                   posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
                 }}
-                onWatchTrailer={() => alert("Watch Trailer clicked!")}
-                onAddToList={() => alert("Add to List clicked!")}
-                onMoreInfo={() => alert("More Info clicked!")}
+                onAddToList={() => alert("Add to Watchlist clicked!")}
+                onViewDetails={() => alert("View Details clicked!")}
               />
             </div>
 
@@ -1374,13 +1373,13 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
                 <h3 className="font-medium text-lg text-retro-900 mb-3">Features</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li>• Full-screen video background with poster fallback</li>
+                  <li>• Minimal clean design with essential information only</li>
                   <li>• Dark gradient overlay for text readability</li>
                   <li>• Play/pause and mute/unmute controls</li>
                   <li>• Progress indicator for video timeline</li>
+                  <li>• Two primary actions: Add to Watchlist and View Details</li>
+                  <li>• Content positioned at bottom for better visibility</li>
                   <li>• Responsive design for all screen sizes</li>
-                  <li>• Logo or title display with brand styling</li>
-                  <li>• Genre tags and platform availability</li>
-                  <li>• Action buttons for user interaction</li>
                 </ul>
               </div>
               
@@ -1406,9 +1405,8 @@ import { HeroSection } from "@/components/HeroSection";
     posterUrl: "/path/to/poster.jpg",
     logoUrl: "/path/to/logo.png" // optional
   }}
-  onWatchTrailer={() => playTrailer()}
   onAddToList={() => addToWatchlist()}
-  onMoreInfo={() => showDetails()}
+  onViewDetails={() => showDetails()}
 />`}
                   </pre>
                 </div>
