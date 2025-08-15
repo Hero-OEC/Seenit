@@ -63,7 +63,12 @@ export function HeroSection({
 
   return (
     <div 
-      className="relative w-screen h-screen overflow-hidden bg-black -mx-4 sm:-mx-6 lg:-mx-8"
+      className="relative w-screen h-screen overflow-hidden bg-black"
+      style={{ 
+        marginLeft: 'calc(-50vw + 50%)',
+        marginRight: 'calc(-50vw + 50%)',
+        maxWidth: '100vw'
+      }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
@@ -98,16 +103,9 @@ export function HeroSection({
         <div className="w-full px-8 pb-16">
           <div className="max-w-2xl">
             {/* Title */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 font-headline">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-thin text-white mb-8 font-headline">
               {content.title}
             </h1>
-
-            {/* Brief Description */}
-            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-lg line-clamp-3">
-              {content.description.length > 120 
-                ? content.description.substring(0, 120) + "..." 
-                : content.description}
-            </p>
 
             {/* Action Buttons */}
             <div className="flex gap-4">

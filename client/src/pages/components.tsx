@@ -1348,7 +1348,11 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
           
           <div className="space-y-6">
             {/* Demo Hero */}
-            <div className="relative h-[600px] overflow-hidden -mx-6">
+            <div className="relative h-[600px] overflow-hidden" style={{
+              marginLeft: 'calc(-50vw + 50%)',
+              marginRight: 'calc(-50vw + 50%)',
+              maxWidth: '100vw'
+            }}>
               <HeroSection
                 content={{
                   id: "demo-movie",
