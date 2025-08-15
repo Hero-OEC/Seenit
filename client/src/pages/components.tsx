@@ -29,6 +29,26 @@ export default function ComponentsPage() {
         onSchedule={() => alert("Schedule clicked!")}
       />
 
+      {/* Interactive Demo Controls */}
+      <div className="bg-retro-accent-2 border-b border-retro-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-sm text-retro-900">Navbar Demo:</span>
+            <span className="font-medium text-retro-900">
+              {isSignedIn ? "Signed In (Alex Morgan)" : "Not Signed In"}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={toggleSignInState}
+              data-testid="toggle-signin-state"
+            >
+              Toggle to {isSignedIn ? "Sign Out" : "Sign In"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-6">
@@ -268,27 +288,7 @@ import Button from "@/components/Button";
               </div>
             </div>
 
-            {/* Navbar Demo Controls */}
-            <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Interactive Demo</h3>
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-600">Current state:</span>
-                <span className="font-medium text-retro-900">
-                  {isSignedIn ? "Signed In (Alex Morgan)" : "Not Signed In"}
-                </span>
-                <Button
-                  variant="accent"
-                  size="sm"
-                  onClick={toggleSignInState}
-                  data-testid="toggle-signin-state"
-                >
-                  Toggle to {isSignedIn ? "Sign Out" : "Sign In"}
-                </Button>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                Try clicking the user avatar when signed in to see the dropdown menu, or the "Get Started" button when signed out.
-              </p>
-            </div>
+
           </div>
         </div>
 
