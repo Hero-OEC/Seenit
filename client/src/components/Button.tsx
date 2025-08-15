@@ -7,14 +7,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-retro-500 text-white hover:bg-retro-600",
+        default: "bg-retro-950 text-white hover:bg-retro-900",
         destructive: "bg-red-500 text-white hover:bg-red-600",
-        outline: "border border-retro-500 text-retro-500 hover:bg-retro-500 hover:text-white",
-        secondary: "bg-retro-200 text-retro-900 hover:bg-retro-300",
-        ghost: "text-retro-500 hover:bg-retro-100",
-        link: "text-retro-500 underline-offset-4 hover:underline",
-        accent: "bg-retro-accent text-retro-900 hover:bg-retro-accent/80",
-        cream: "bg-retro-accent-2 text-retro-900 hover:bg-retro-200 border border-retro-400"
+        outline: "border border-retro-950 text-retro-950 hover:bg-retro-950 hover:text-white",
+        secondary: "bg-retro-800 text-white hover:bg-retro-700",
+        ghost: "text-retro-950 hover:bg-retro-100",
+        link: "text-retro-950 underline-offset-4 hover:underline",
+        accent: "bg-retro-600 text-white hover:bg-retro-700",
+        cream: "bg-retro-100 text-retro-950 hover:bg-retro-200 border border-retro-300"
       },
       size: {
         default: "h-10 px-4 py-2",
