@@ -75,6 +75,7 @@ export default {
           950: "#3A1210",
         },
         "retro-accent": "#AED6D8",
+        "retro-accent-2": "#F2E3C2",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
