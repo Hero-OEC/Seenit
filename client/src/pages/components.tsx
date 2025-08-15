@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Button from "@/components/Button";
 import Navbar from "@/components/Navbar";
+import Input from "@/components/Input";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
@@ -295,6 +296,314 @@ import Button from "@/components/Button";
             </div>
 
 
+          </div>
+        </div>
+
+        {/* Input Component Showcase */}
+        <div className="bg-retro-100 rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-4">
+            Input Component
+          </h2>
+          <p className="text-gray-600 mb-8">
+            Flexible input component with multiple variants, sizes, states, and support for icons, labels, and validation messages.
+          </p>
+          
+          <div className="space-y-8">
+            {/* Input Variants */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Variants</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    variant="default" 
+                    placeholder="Default input"
+                    data-testid="input-default"
+                  />
+                  <Input 
+                    variant="retro" 
+                    placeholder="Retro styled input"
+                    data-testid="input-retro"
+                  />
+                  <Input 
+                    variant="accent" 
+                    placeholder="Accent input"
+                    data-testid="input-accent"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    variant="error" 
+                    placeholder="Error state input"
+                    data-testid="input-error"
+                  />
+                  <Input 
+                    variant="success" 
+                    placeholder="Success state input"
+                    data-testid="input-success"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Input Sizes */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Sizes</h3>
+              <div className="space-y-4">
+                <Input 
+                  size="sm" 
+                  placeholder="Small input"
+                  data-testid="input-small"
+                />
+                <Input 
+                  size="default" 
+                  placeholder="Default input"
+                  data-testid="input-default-size"
+                />
+                <Input 
+                  size="lg" 
+                  placeholder="Large input"
+                  data-testid="input-large"
+                />
+                <Input 
+                  size="xl" 
+                  placeholder="Extra large input"
+                  data-testid="input-extra-large"
+                />
+              </div>
+            </div>
+
+            {/* Input with Labels and Messages */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Labels & Messages</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="Email Address"
+                    placeholder="Enter your email"
+                    helper="We'll never share your email"
+                    type="email"
+                    data-testid="input-with-label"
+                  />
+                  <Input 
+                    label="Password"
+                    placeholder="Enter password"
+                    error="Password must be at least 8 characters"
+                    type="password"
+                    variant="error"
+                    data-testid="input-with-error"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    label="Username"
+                    placeholder="Choose a username"
+                    success="Username is available!"
+                    variant="success"
+                    data-testid="input-with-success"
+                  />
+                  <Input 
+                    label="Full Name"
+                    placeholder="Enter your full name"
+                    variant="retro"
+                    data-testid="input-retro-label"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Input with Icons */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">With Icons</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="Search"
+                    placeholder="Search movies, shows..."
+                    leftIcon={
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    }
+                    data-testid="input-search-icon"
+                  />
+                  <Input 
+                    label="Email"
+                    placeholder="your@email.com"
+                    type="email"
+                    leftIcon={
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                      </svg>
+                    }
+                    data-testid="input-email-icon"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    label="Amount"
+                    placeholder="0.00"
+                    type="number"
+                    leftIcon={
+                      <span className="text-gray-500 font-medium">$</span>
+                    }
+                    rightIcon={
+                      <span className="text-gray-400 text-sm">USD</span>
+                    }
+                    data-testid="input-currency"
+                  />
+                  <Input 
+                    label="Website"
+                    placeholder="example.com"
+                    leftIcon={
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                    }
+                    data-testid="input-website-icon"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Input Types & Special Features */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Input Types & Special Features</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Input 
+                    label="Password with Toggle"
+                    placeholder="Enter password"
+                    type="password"
+                    showPasswordToggle={true}
+                    data-testid="input-password-toggle"
+                  />
+                  <Input 
+                    label="Date"
+                    type="date"
+                    data-testid="input-date"
+                  />
+                  <Input 
+                    label="Time"
+                    type="time"
+                    data-testid="input-time"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <Input 
+                    label="Phone Number"
+                    placeholder="+1 (555) 123-4567"
+                    type="tel"
+                    data-testid="input-phone"
+                  />
+                  <Input 
+                    label="Age"
+                    placeholder="25"
+                    type="number"
+                    min="0"
+                    max="120"
+                    data-testid="input-number"
+                  />
+                  <Input 
+                    label="Disabled Input"
+                    placeholder="Cannot edit this"
+                    disabled
+                    data-testid="input-disabled"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Real-world Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Real-world Examples</h3>
+              <div className="space-y-6">
+                {/* Login Form Example */}
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-retro-900 mb-4">Login Form</h4>
+                  <div className="space-y-4 max-w-md">
+                    <Input 
+                      label="Email"
+                      type="email"
+                      placeholder="your@email.com"
+                      variant="retro"
+                      leftIcon={
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                        </svg>
+                      }
+                      data-testid="login-email"
+                    />
+                    <Input 
+                      label="Password"
+                      type="password"
+                      placeholder="Enter your password"
+                      variant="retro"
+                      showPasswordToggle={true}
+                      data-testid="login-password"
+                    />
+                  </div>
+                </div>
+
+                {/* Search Example */}
+                <div className="p-6 bg-white rounded-lg border border-gray-200">
+                  <h4 className="font-medium text-retro-900 mb-4">Search Bar</h4>
+                  <Input 
+                    placeholder="Search for movies, TV shows, or anime..."
+                    variant="accent"
+                    size="lg"
+                    leftIcon={
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    }
+                    data-testid="search-bar"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Usage Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the Input component
+import Input from "@/components/Input";
+
+// Basic usage
+<Input placeholder="Enter text" />
+
+// With label and helper text
+<Input 
+  label="Email" 
+  placeholder="your@email.com"
+  helper="We'll never share your email"
+/>
+
+// With validation
+<Input 
+  label="Password"
+  type="password"
+  error="Password must be at least 8 characters"
+  variant="error"
+/>
+
+// With icons
+<Input 
+  placeholder="Search..."
+  leftIcon={<SearchIcon />}
+  variant="accent"
+/>
+
+// Password with toggle
+<Input 
+  type="password"
+  showPasswordToggle={true}
+  placeholder="Enter password"
+/>`}
+                </pre>
+              </div>
+            </div>
           </div>
         </div>
 
