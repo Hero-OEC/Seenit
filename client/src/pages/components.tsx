@@ -1359,7 +1359,7 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
                   duration: "2h 46m",
                   genres: ["Sci-Fi", "Adventure", "Drama"],
                   platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
-                  trailerUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                  trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
                   posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
                 }}
                 onWatchTrailer={() => alert("Watch Trailer clicked!")}

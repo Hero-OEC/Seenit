@@ -32,6 +32,7 @@ export function HeroSection({
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [showControls, setShowControls] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -57,24 +58,38 @@ export function HeroSection({
     setIsPlaying(false);
   };
 
+  const handleVideoError = () => {
+    setVideoError(true);
+    setIsPlaying(false);
+  };
+
   return (
     <div 
       className="relative w-full h-screen overflow-hidden bg-black"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* Video Background */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        src={content.trailerUrl}
-        autoPlay
-        muted={isMuted}
-        loop={false}
-        playsInline
-        onEnded={handleVideoEnd}
-        poster={content.posterUrl}
-      />
+      {/* Video Background or Poster Fallback */}
+      {!videoError ? (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          src={content.trailerUrl}
+          autoPlay={false}
+          muted={isMuted}
+          loop={false}
+          playsInline
+          onEnded={handleVideoEnd}
+          onError={handleVideoError}
+          poster={content.posterUrl}
+        />
+      ) : (
+        <img
+          src={content.posterUrl}
+          alt={content.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      )}
 
       {/* Dark Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
