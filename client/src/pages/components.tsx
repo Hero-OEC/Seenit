@@ -7,6 +7,7 @@ import Checkbox from "@/components/Checkbox";
 import Toggle from "@/components/Toggle";
 import ContentDisplay from "@/components/ContentDisplay";
 import Tags, { Tag, MOVIE_GENRES, TV_GENRES, ANIME_GENRES } from "@/components/Tags";
+import { HeroSection } from "@/components/HeroSection";
 
 export default function ComponentsPage() {
   const [clickedButton, setClickedButton] = useState<string>("");
@@ -1331,6 +1332,86 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
   onTagRemove={(id, tag) => removeGenre(id)}
 />`}
                 </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Section Component */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-4">
+            Hero Section Component
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Full-screen video background hero section with content overlay, similar to A24 Films and other streaming platforms.
+          </p>
+          
+          <div className="space-y-6">
+            {/* Demo Hero */}
+            <div className="relative h-[600px] rounded-lg overflow-hidden">
+              <HeroSection
+                content={{
+                  id: "demo-movie",
+                  title: "Dune: Part Two",
+                  description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
+                  year: 2024,
+                  rating: "PG-13",
+                  duration: "2h 46m",
+                  genres: ["Sci-Fi", "Adventure", "Drama"],
+                  platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
+                  trailerUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                  posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+                }}
+                onWatchTrailer={() => alert("Watch Trailer clicked!")}
+                onAddToList={() => alert("Add to List clicked!")}
+                onMoreInfo={() => alert("More Info clicked!")}
+              />
+            </div>
+
+            {/* Features List */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium text-lg text-retro-900 mb-3">Features</h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li>• Full-screen video background with poster fallback</li>
+                  <li>• Dark gradient overlay for text readability</li>
+                  <li>• Play/pause and mute/unmute controls</li>
+                  <li>• Progress indicator for video timeline</li>
+                  <li>• Responsive design for all screen sizes</li>
+                  <li>• Logo or title display with brand styling</li>
+                  <li>• Genre tags and platform availability</li>
+                  <li>• Action buttons for user interaction</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-lg text-retro-900 mb-3">Usage Example</h3>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the HeroSection component
+import { HeroSection } from "@/components/HeroSection";
+
+// Use with content data
+<HeroSection
+  content={{
+    id: "movie-id",
+    title: "Movie Title",
+    description: "Movie description...",
+    year: 2024,
+    rating: "PG-13",
+    duration: "2h 30m",
+    genres: ["Action", "Sci-Fi"],
+    platforms: ["Netflix", "Prime Video"],
+    trailerUrl: "/path/to/trailer.mp4",
+    posterUrl: "/path/to/poster.jpg",
+    logoUrl: "/path/to/logo.png" // optional
+  }}
+  onWatchTrailer={() => playTrailer()}
+  onAddToList={() => addToWatchlist()}
+  onMoreInfo={() => showDetails()}
+/>`}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
