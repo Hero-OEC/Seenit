@@ -1,4 +1,4 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useRef, useEffect } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +65,104 @@ export interface InputProps
   rows?: number; // For textarea
 }
 
+// Custom Select Component
+interface CustomSelectProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  options: Array<{ value: string; label: string }>;
+  className?: string;
+  disabled?: boolean;
+  name?: string;
+}
+
+const CustomSelect = ({ value, onChange, placeholder, options, className, disabled, name }: CustomSelectProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(value || "");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedValue(value);
+    }
+  }, [value]);
+
+  const handleSelect = (optionValue: string) => {
+    setSelectedValue(optionValue);
+    setIsOpen(false);
+    onChange?.(optionValue);
+  };
+
+  const selectedOption = options.find(option => option.value === selectedValue);
+  const displayText = selectedOption?.label || placeholder || "Select an option";
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        className={cn(
+          className,
+          "text-left justify-between items-center flex"
+        )}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        data-testid="select-trigger"
+      >
+        <span className={cn("truncate", !selectedValue && "text-muted-foreground")}>
+          {displayText}
+        </span>
+        <svg 
+          className={cn(
+            "w-4 h-4 text-muted-foreground transition-transform duration-200 ml-2",
+            isOpen && "rotate-180"
+          )} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div className={cn(
+          "absolute z-50 w-full mt-1 bg-background border border-border rounded-5px shadow-lg",
+          "max-h-60 overflow-auto"
+        )}>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={cn(
+                "w-full px-3 py-2 text-left text-sm hover:bg-primary hover:text-primary-foreground transition-colors",
+                "first:rounded-t-5px last:rounded-b-5px",
+                selectedValue === option.value && "bg-primary text-primary-foreground"
+              )}
+              onClick={() => handleSelect(option.value)}
+              data-testid={`select-option-${option.value}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Hidden input for form submission */}
+      <input type="hidden" name={name} value={selectedValue} />
+    </div>
+  );
+};
+
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ 
     className, 
@@ -114,30 +212,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
       if (inputType === "select") {
         return (
-          <div className="relative">
-            <select
-              className={cn(baseClasses, "custom-select")}
-              ref={ref as any}
-              data-testid="select-field"
-              {...(props as any)}
-            >
-              {props.placeholder && (
-                <option value="" disabled>
-                  {props.placeholder}
-                </option>
-              )}
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
+          <CustomSelect 
+            value={props.value as string}
+            onChange={(value) => {
+              if (props.onChange) {
+                const event = {
+                  target: { value, name: props.name }
+                } as React.ChangeEvent<HTMLInputElement>;
+                props.onChange(event);
+              }
+            }}
+            placeholder={props.placeholder}
+            options={options} 
+            className={baseClasses}
+            disabled={props.disabled}
+            name={props.name}
+          />
         );
       }
 
