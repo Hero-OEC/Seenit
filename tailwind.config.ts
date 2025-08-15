@@ -71,7 +71,7 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
-        retro: ["var(--font-retro)"],
+        headline: ["var(--font-headline)"],
       },
       keyframes: {
         "accordion-down": {

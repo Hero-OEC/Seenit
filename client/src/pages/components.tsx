@@ -16,10 +16,10 @@ export default function ComponentsPage() {
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-retro-main rounded-lg flex items-center justify-center">
-                <span className="font-retro text-white text-lg">S</span>
+                <span className="font-headline text-white text-lg">S</span>
               </div>
               <div>
-                <h1 className="font-retro text-2xl text-retro-dark">Seenit</h1>
+                <h1 className="font-headline text-2xl text-retro-dark">Seenit</h1>
                 <p className="text-sm text-gray-600">Component Library</p>
               </div>
             </div>
@@ -31,10 +31,10 @@ export default function ComponentsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-6 mb-6">
             <div className="w-24 h-24 bg-retro-main rounded-2xl flex items-center justify-center">
-              <span className="font-retro text-white text-4xl">S</span>
+              <span className="font-headline text-white text-4xl">S</span>
             </div>
             <div>
-              <h1 className="font-retro text-4xl text-retro-main mb-2">
+              <h1 className="font-headline text-4xl text-retro-main mb-2">
                 Seenit Components
               </h1>
               <p className="text-retro-dark text-lg">
