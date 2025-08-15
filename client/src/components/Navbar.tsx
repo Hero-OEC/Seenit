@@ -30,6 +30,7 @@ export default function Navbar({
   onSearch = (query: string) => console.log(`Search: ${query}`)
 }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +41,10 @@ export default function Navbar({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   // Get user initials for avatar
@@ -148,9 +153,9 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearchSubmit}>
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearchSubmit} className="w-full">
               <Input
                 type="text"
                 placeholder="Search movies, TV shows, anime..."
@@ -168,10 +173,31 @@ export default function Navbar({
             </form>
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-lg hover:bg-retro-100 transition-colors"
+              data-testid="mobile-menu-button"
+            >
+              <svg
+                className="w-6 h-6 text-retro-900"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Right Side Actions - Desktop */}
+          <div className="hidden md:flex items-center gap-4">
             {isSignedIn ? (
-              /* Signed In State */
               <Dropdown
                 trigger={
                   <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
@@ -198,7 +224,6 @@ export default function Navbar({
                 placement="right"
               />
             ) : (
-              /* Not Signed In State */
               <div className="flex items-center">
                 <Button
                   variant="default"
@@ -212,6 +237,142 @@ export default function Navbar({
             )}
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-retro-200">
+            <div className="px-4 py-4 space-y-4">
+              {/* Mobile Search */}
+              <form onSubmit={handleSearchSubmit}>
+                <Input
+                  type="text"
+                  placeholder="Search movies, TV shows, anime..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  inputSize="sm"
+                  leftIcon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  }
+                  className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
+                  data-testid="mobile-navbar-search"
+                />
+              </form>
+
+              {/* Mobile Navigation */}
+              <div className="space-y-3">
+                {isSignedIn ? (
+                  <>
+                    <button
+                      onClick={() => { onHome(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-nav-home"
+                    >
+                      Home
+                    </button>
+                    <button
+                      onClick={() => { onWatchlist(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-nav-watchlist"
+                    >
+                      Watchlist
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-nav-home-guest"
+                    >
+                      Home
+                    </button>
+                    <button
+                      onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-nav-discover-guest"
+                    >
+                      Discover
+                    </button>
+                  </>
+                )}
+
+                {/* Mobile Browse Options */}
+                <div className="space-y-2">
+                  <p className="py-2 px-3 font-headline text-sm text-retro-700 font-semibold">Browse</p>
+                  <button
+                    onClick={() => { onBrowse('movies'); setIsMobileMenuOpen(false); }}
+                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                    data-testid="mobile-browse-movies"
+                  >
+                    Movies
+                  </button>
+                  <button
+                    onClick={() => { onBrowse('tv'); setIsMobileMenuOpen(false); }}
+                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                    data-testid="mobile-browse-tv"
+                  >
+                    TV Shows
+                  </button>
+                  <button
+                    onClick={() => { onBrowse('anime'); setIsMobileMenuOpen(false); }}
+                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                    data-testid="mobile-browse-anime"
+                  >
+                    Anime
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => { isSignedIn ? onSchedule() : onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                  className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                  data-testid="mobile-nav-schedule"
+                >
+                  Schedule
+                </button>
+
+                {/* Mobile User Actions */}
+                {isSignedIn ? (
+                  <div className="pt-4 border-t border-retro-200 space-y-2">
+                    <div className="flex items-center gap-2 py-2 px-3">
+                      <div className="w-8 h-8 bg-retro-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {getUserInitials(userName)}
+                      </div>
+                      <span className="font-headline text-sm text-retro-900">{userName}</span>
+                    </div>
+                    <button
+                      onClick={() => { onProfile && onProfile(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-profile"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => { onSignOut && onSignOut(); setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-sign-out"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pt-4 border-t border-retro-200">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                      className="w-full"
+                      data-testid="mobile-get-started-button"
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
