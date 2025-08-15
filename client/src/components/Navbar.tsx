@@ -56,22 +56,42 @@ export default function Navbar({
           </div>
 
           {/* Navigation Menu */}
-          {isSignedIn && (
-            <div className="hidden md:flex items-center gap-6">
-              <button
-                onClick={onHome}
-                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
-                data-testid="nav-home"
-              >
-                Home
-              </button>
-              <button
-                onClick={onWatchlist}
-                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
-                data-testid="nav-watchlist"
-              >
-                Watchlist
-              </button>
+          <div className="hidden md:flex items-center gap-6">
+            {isSignedIn ? (
+              <>
+                <button
+                  onClick={onHome}
+                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  data-testid="nav-home"
+                >
+                  Home
+                </button>
+                <button
+                  onClick={onWatchlist}
+                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  data-testid="nav-watchlist"
+                >
+                  Watchlist
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => onGetStarted && onGetStarted()}
+                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  data-testid="nav-home-guest"
+                >
+                  Home
+                </button>
+                <button
+                  onClick={() => onGetStarted && onGetStarted()}
+                  className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+                  data-testid="nav-discover-guest"
+                >
+                  Discover
+                </button>
+              </>
+            )}
               
               {/* Browse Dropdown */}
               <div className="relative">
@@ -132,15 +152,14 @@ export default function Navbar({
                 )}
               </div>
 
-              <button
-                onClick={onSchedule}
-                className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
-                data-testid="nav-schedule"
-              >
-                Schedule
-              </button>
-            </div>
-          )}
+            <button
+              onClick={isSignedIn ? onSchedule : () => onGetStarted && onGetStarted()}
+              className="font-headline text-retro-900 hover:text-retro-500 transition-colors"
+              data-testid="nav-schedule"
+            >
+              Schedule
+            </button>
+          </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">

@@ -304,7 +304,7 @@ import Button from "@/components/Button";
             Navbar Component
           </h2>
           <p className="text-gray-600 mb-8">
-            Clean navigation bar with navigation menu and browse dropdown for signed-in users, action buttons for not signed-in users.
+            Clean navigation bar with full navigation menu and browse dropdown available to all users, with personalized features for signed-in users.
           </p>
           
           <div className="space-y-8">
@@ -318,16 +318,16 @@ import Button from "@/components/Button";
                     <li>• Navigation menu: Home, Watchlist, Browse, Schedule</li>
                     <li>• Browse dropdown with Movies, TV Shows, Anime</li>
                     <li>• User name and avatar display</li>
-                    <li>• Clean white background design</li>
+                    <li>• Personalized navigation experience</li>
                   </ul>
                 </div>
                 <div className="space-y-3">
                   <h4 className="font-medium text-retro-900">Not Signed In State:</h4>
                   <ul className="space-y-1 text-sm text-gray-600">
-                    <li>• Single Get Started button (primary style)</li>
-                    <li>• Clean minimal design</li>
-                    <li>• Focus on main call-to-action</li>
-                    <li>• Streamlined user experience</li>
+                    <li>• Navigation menu: Home, Discover, Browse, Schedule</li>
+                    <li>• Browse dropdown with Movies, TV Shows, Anime</li>
+                    <li>• Get Started button (primary call-to-action)</li>
+                    <li>• Full site navigation without sign-up requirement</li>
                   </ul>
                 </div>
               </div>
