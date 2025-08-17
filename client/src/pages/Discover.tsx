@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
+import ContentDisplay from "@/components/ContentDisplay";
 import { Film, Tv, Star, Calendar, TrendingUp } from "lucide-react";
 import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
@@ -138,42 +139,28 @@ export default function Discover() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {filteredAndSortedContent.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className="group cursor-pointer transition-transform hover:scale-105"
-                      data-testid={`card-content-${item.id}`}
-                    >
-                      <div className="relative rounded-lg overflow-hidden shadow-lg mb-3 aspect-[2/3]">
-                        <img
-                          src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                          data-testid={`img-poster-${item.id}`}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {item.rating && (
-                            <div className="flex items-center gap-1 text-white text-sm">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span data-testid={`text-rating-${item.id}`}>{item.rating}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-retro-900 mb-1 line-clamp-2" data-testid={`text-title-${item.id}`}>
-                        {item.title}
-                      </h3>
-                      <div className="flex items-center justify-between text-sm text-retro-600">
-                        <span data-testid={`text-year-${item.id}`}>{item.year}</span>
-                        {item.genre && item.genre.length > 0 && (
-                          <Tag variant="secondary" size="sm" data-testid={`badge-genre-${item.id}`}>
-                            {item.genre[0]}
-                          </Tag>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  {filteredAndSortedContent.map((item) => {
+                    // Determine status based on item data
+                    const getContentStatus = () => {
+                      if (item.status === "airing") return "ongoing";
+                      if (item.status === "upcoming") return "coming-soon";
+                      if (item.status === "completed") return "finished";
+                      return "finished"; // default fallback
+                    };
+
+                    return (
+                      <ContentDisplay
+                        key={item.id}
+                        posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                        title={item.title}
+                        type={activeContentType}
+                        status={getContentStatus()}
+                        size="small"
+                        onClick={() => console.log(`Clicked on ${item.title}`)}
+                        data-testid={`content-display-${item.id}`}
+                      />
+                    );
+                  })}
                 </div>
               )}
 
