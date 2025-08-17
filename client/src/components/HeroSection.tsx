@@ -65,7 +65,7 @@ export function HeroSection({
     <div 
       className="relative w-screen overflow-hidden bg-black"
       style={{ 
-        height: '100vh',
+        height: '120vh',
         marginLeft: 'calc(-50vw + 50%)',
         marginRight: 'calc(-50vw + 50%)',
         maxWidth: '100vw'
