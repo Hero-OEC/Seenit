@@ -153,14 +153,6 @@ export default function Navbar({
                 ]}
                 placement="left"
               />
-
-            <button
-              onClick={isSignedIn ? onSchedule : () => onGetStarted && onGetStarted()}
-              className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
-              data-testid="nav-schedule"
-            >
-              Schedule
-            </button>
           </div>
 
           {/* Search Bar - Desktop */}
@@ -273,7 +265,7 @@ export default function Navbar({
                 {isSignedIn ? (
                   <>
                     <button
-                      onClick={() => { onHome(); setIsMobileMenuOpen(false); }}
+                      onClick={() => { window.location.href = "/"; setIsMobileMenuOpen(false); }}
                       className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                       data-testid="mobile-nav-home"
                     >
@@ -290,14 +282,14 @@ export default function Navbar({
                 ) : (
                   <>
                     <button
-                      onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                      onClick={() => { window.location.href = "/"; setIsMobileMenuOpen(false); }}
                       className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                       data-testid="mobile-nav-home-guest"
                     >
                       Home
                     </button>
                     <button
-                      onClick={() => { onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                      onClick={() => { window.location.href = "/discover"; setIsMobileMenuOpen(false); }}
                       className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                       data-testid="mobile-nav-discover-guest"
                     >
@@ -310,21 +302,21 @@ export default function Navbar({
                 <div className="space-y-2">
                   <p className="py-2 px-3 font-headline text-sm text-retro-700 font-semibold">Browse</p>
                   <button
-                    onClick={() => { onBrowse('movies'); setIsMobileMenuOpen(false); }}
+                    onClick={() => { window.location.href = "/discover?type=movie"; setIsMobileMenuOpen(false); }}
                     className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                     data-testid="mobile-browse-movies"
                   >
                     Movies
                   </button>
                   <button
-                    onClick={() => { onBrowse('tv'); setIsMobileMenuOpen(false); }}
+                    onClick={() => { window.location.href = "/discover?type=tv"; setIsMobileMenuOpen(false); }}
                     className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                     data-testid="mobile-browse-tv"
                   >
                     TV Shows
                   </button>
                   <button
-                    onClick={() => { onBrowse('anime'); setIsMobileMenuOpen(false); }}
+                    onClick={() => { window.location.href = "/discover?type=anime"; setIsMobileMenuOpen(false); }}
                     className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                     data-testid="mobile-browse-anime"
                   >
@@ -333,7 +325,7 @@ export default function Navbar({
                 </div>
 
                 <button
-                  onClick={() => { isSignedIn ? onSchedule() : onGetStarted && onGetStarted(); setIsMobileMenuOpen(false); }}
+                  onClick={() => { window.location.href = "/schedule"; setIsMobileMenuOpen(false); }}
                   className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                   data-testid="mobile-nav-schedule"
                 >

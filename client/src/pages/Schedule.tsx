@@ -66,13 +66,13 @@ export default function Schedule() {
     .sort((a, b) => {
       switch (sortBy) {
         case "air_date":
-          return (b.year || 0) - (a.year || 0);
+          return (Number(b.year) || 0) - (Number(a.year) || 0);
         case "popular":
-          return (b.rating || 0) - (a.rating || 0);
+          return (Number(b.rating) || 0) - (Number(a.rating) || 0);
         case "new":
           return b.id.localeCompare(a.id);
         case "reviews":
-          return (b.rating || 0) - (a.rating || 0);
+          return (Number(b.rating) || 0) - (Number(a.rating) || 0);
         default:
           return 0;
       }
@@ -286,8 +286,8 @@ export default function Schedule() {
                   value={selectedGenre}
                   onChange={(e) => setSelectedGenre(e.target.value)}
                   options={genres.map(genre => ({ 
-                    value: String(genre), 
-                    label: genre === "all" ? "All Genres" : String(genre).charAt(0).toUpperCase() + String(genre).slice(1) 
+                    value: genre, 
+                    label: genre === "all" ? "All Genres" : genre.charAt(0).toUpperCase() + genre.slice(1) 
                   }))}
                   data-testid="select-genre"
                 />
@@ -298,7 +298,7 @@ export default function Schedule() {
                 <div className="text-sm text-retro-600">
                   <div className="flex justify-between mb-2">
                     <span>Total {contentTypeConfig[activeContentType].label.toLowerCase()}:</span>
-                    <span className="font-medium" data-testid="text-total-count">{content.length}</span>
+                    <span className="font-medium" data-testid="text-total-count">{content?.length || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Showing:</span>
