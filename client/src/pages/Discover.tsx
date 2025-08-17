@@ -155,6 +155,7 @@ export default function Discover() {
                         title={item.title}
                         type={activeContentType}
                         status={getContentStatus()}
+                        year={item.year}
                         size="small"
                         onClick={() => console.log(`Clicked on ${item.title}`)}
                         data-testid={`content-display-${item.id}`}

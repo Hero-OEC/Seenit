@@ -14,6 +14,8 @@ export interface ContentDisplayProps {
   season?: number;
   /** Optional episode number for TV shows and anime */
   episode?: number;
+  /** Optional year of release */
+  year?: number;
   /** Size variant - default or small */
   size?: "default" | "small";
   /** Click handler for the content card */
@@ -29,6 +31,7 @@ export default function ContentDisplay({
   status,
   season,
   episode,
+  year,
   size = "default",
   onClick,
   className = ""
@@ -137,7 +140,15 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-
+        {/* Year for Movies */}
+        {type === "movie" && year && (
+          <p 
+            className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
+            data-testid="content-year"
+          >
+            {year}
+          </p>
+        )}
 
         {/* Season/Episode Info for TV Shows and Anime */}
         {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
