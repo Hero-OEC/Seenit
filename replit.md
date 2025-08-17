@@ -43,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Progress Tracking**: Episode progress and user ratings for tracked content
 - **Responsive Design**: Mobile-first approach with modern, clean UI components
 - **Category Tabs**: Quick navigation between different content types
+- **Welcome Experience**: Dedicated homepage for new users with popular content sections
 
 ## External Dependencies
 
