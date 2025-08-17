@@ -19,7 +19,7 @@ export default function Home() {
   };
 
   const handleSchedule = () => {
-    console.log("Schedule clicked");
+    window.location.href = "/schedule";
   };
 
   const handleSearch = (query: string) => {

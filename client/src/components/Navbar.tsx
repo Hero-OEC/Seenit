@@ -109,6 +109,13 @@ export default function Navbar({
                     Discover
                   </span>
                 </Link>
+                <Link href="/schedule">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/schedule" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-schedule-guest">
+                    Schedule
+                  </span>
+                </Link>
               </>
             )}
               
