@@ -156,6 +156,7 @@ export default function Discover() {
                         type={activeContentType}
                         status={getContentStatus()}
                         year={item.year || undefined}
+                        season={activeContentType === "tv" || activeContentType === "anime" ? item.season : undefined}
                         size="small"
                         onClick={() => console.log(`Clicked on ${item.title}`)}
                         data-testid={`content-display-${item.id}`}
