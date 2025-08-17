@@ -94,16 +94,16 @@ export default function ContentDisplay({
 
   return (
     <div 
-      className={`group cursor-pointer transition-all duration-200 hover:scale-105 ${className}`}
+      className={`group cursor-pointer ${className}`}
       onClick={onClick}
       data-testid="content-display"
     >
       {/* Poster Container - 2:3 Aspect Ratio */}
-      <div className={`relative aspect-[2/3] ${isSmall ? 'mb-2' : 'mb-3'} rounded-lg overflow-hidden bg-retro-100 shadow-md group-hover:shadow-lg transition-shadow`}>
+      <div className={`relative aspect-[2/3] ${isSmall ? 'mb-2' : 'mb-3'} rounded-lg overflow-hidden bg-retro-100 shadow-md group-hover:shadow-lg transition-all duration-200 hover:scale-105`}>
         <img
           src={posterUrl}
           alt={`${title} poster`}
-          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+          className="w-full h-full object-cover"
           data-testid="content-poster"
         />
         
