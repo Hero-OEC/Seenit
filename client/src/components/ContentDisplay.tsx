@@ -142,10 +142,10 @@ export default function ContentDisplay({
         {/* Season/Episode Info for TV Shows and Anime */}
         {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
           <div 
-            className={`inline-flex items-center gap-1.5 ${isSmall ? 'px-2.5 py-1 text-xs' : 'px-3 py-1 text-sm'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
+            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
             data-testid="content-episode-info"
           >
-            <Play className={`${isSmall ? 'w-3 h-3' : 'w-4 h-4'} fill-white`} />
+            <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
             {season !== undefined && `S${season}`}
             {season !== undefined && episode !== undefined && " • "}
             {episode !== undefined && `E${episode}`}
