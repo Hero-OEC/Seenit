@@ -96,7 +96,7 @@ export default function Discover() {
                       className={`flex items-center gap-2 ${
                         isActive 
                           ? "bg-retro-600 hover:bg-retro-700 text-white" 
-                          : "border-retro-300 text-retro-700 hover:bg-retro-100"
+                          : "border-retro-300 text-retro-700 hover:bg-retro-100 hover:text-retro-900"
                       }`}
                       data-testid={`button-content-type-${type}`}
                     >
