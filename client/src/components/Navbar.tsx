@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import Button from "@/components/Button";
 import Dropdown from "@/components/Dropdown";
 import Input from "@/components/Input";
@@ -8,9 +9,7 @@ interface NavbarProps {
   isSignedIn?: boolean;
   userName?: string;
   onGetStarted?: () => void;
-  onHome?: () => void;
   onWatchlist?: () => void;
-  onBrowse?: (type: string) => void;
   onSchedule?: () => void;
   onProfile?: () => void;
   onSignOut?: () => void;
@@ -21,9 +20,7 @@ export default function Navbar({
   isSignedIn = false, 
   userName = "John Doe",
   onGetStarted = () => console.log("Get started clicked"),
-  onHome = () => console.log("Home clicked"),
   onWatchlist = () => console.log("Watchlist clicked"),
-  onBrowse = (type: string) => console.log(`Browse ${type} clicked`),
   onSchedule = () => console.log("Schedule clicked"),
   onProfile = () => console.log("Profile clicked"),
   onSignOut = () => console.log("Sign out clicked"),
@@ -31,6 +28,7 @@ export default function Navbar({
 }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [location] = useLocation();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,29 +60,31 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center gap-3">
-            <img 
-              src={seenitLogo} 
-              alt="Seenit Logo" 
-              className="h-12 w-auto max-w-[160px] object-contain"
-              data-testid="seenit-logo"
-            />
-            <h1 className="font-headline text-2xl font-bold text-retro-950">
-              Seenit
-            </h1>
-          </div>
+          <Link href="/">
+            <div className="flex items-center gap-3 cursor-pointer">
+              <img 
+                src={seenitLogo} 
+                alt="Seenit Logo" 
+                className="h-12 w-auto max-w-[160px] object-contain"
+                data-testid="seenit-logo"
+              />
+              <h1 className="font-headline text-2xl font-bold text-retro-950">
+                Seenit
+              </h1>
+            </div>
+          </Link>
 
           {/* Navigation Menu */}
           <div className="hidden md:flex items-center gap-6">
             {isSignedIn ? (
               <>
-                <button
-                  onClick={onHome}
-                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
-                  data-testid="nav-home"
-                >
-                  Home
-                </button>
+                <Link href="/">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-home">
+                    Home
+                  </span>
+                </Link>
                 <button
                   onClick={onWatchlist}
                   className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
@@ -95,20 +95,20 @@ export default function Navbar({
               </>
             ) : (
               <>
-                <button
-                  onClick={() => onGetStarted && onGetStarted()}
-                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
-                  data-testid="nav-home-guest"
-                >
-                  Home
-                </button>
-                <button
-                  onClick={() => onGetStarted && onGetStarted()}
-                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
-                  data-testid="nav-discover-guest"
-                >
-                  Discover
-                </button>
+                <Link href="/">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-home-guest">
+                    Home
+                  </span>
+                </Link>
+                <Link href="/discover">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/discover" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-discover-guest">
+                    Discover
+                  </span>
+                </Link>
               </>
             )}
               
@@ -131,17 +131,17 @@ export default function Navbar({
                   {
                     value: "movies",
                     label: "Movies",
-                    onClick: () => onBrowse("Movies")
+                    onClick: () => { window.location.href = "/discover?type=movie"; }
                   },
                   {
                     value: "tv-shows", 
                     label: "TV Shows",
-                    onClick: () => onBrowse("TV Shows")
+                    onClick: () => { window.location.href = "/discover?type=tv"; }
                   },
                   {
                     value: "anime",
                     label: "Anime", 
-                    onClick: () => onBrowse("Anime")
+                    onClick: () => { window.location.href = "/discover?type=anime"; }
                   }
                 ]}
                 placement="left"

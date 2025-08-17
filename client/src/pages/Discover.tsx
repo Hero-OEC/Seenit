@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
@@ -14,6 +15,16 @@ export default function Discover() {
   const [activeContentType, setActiveContentType] = useState<ContentType>("movie");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortBy>("popular");
+  const [location] = useLocation();
+
+  // Parse URL parameters to set initial content type
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.split('?')[1]);
+    const typeParam = urlParams.get('type');
+    if (typeParam && ['movie', 'tv', 'anime'].includes(typeParam)) {
+      setActiveContentType(typeParam as ContentType);
+    }
+  }, [location]);
 
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);

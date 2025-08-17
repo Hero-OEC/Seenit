@@ -9,7 +9,13 @@ export default function Home() {
   };
 
   const handleBrowse = (type: string) => {
-    console.log(`Browse ${type} clicked`);
+    const typeMap: Record<string, string> = {
+      "Movies": "movie",
+      "TV Shows": "tv", 
+      "Anime": "anime"
+    };
+    const typeParam = typeMap[type] || type.toLowerCase();
+    window.location.href = `/discover?type=${typeParam}`;
   };
 
   const handleSchedule = () => {
