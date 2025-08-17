@@ -33,42 +33,48 @@ export default function Home() {
       posterUrl: "https://picsum.photos/300/450?random=1",
       title: "Dune: Part Two",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2024
     },
     {
       id: "2", 
       posterUrl: "https://picsum.photos/300/450?random=2",
       title: "Oppenheimer",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2023
     },
     {
       id: "3",
       posterUrl: "https://picsum.photos/300/450?random=3",
       title: "Spider-Man: Across the Spider-Verse",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2023
     },
     {
       id: "4",
       posterUrl: "https://picsum.photos/300/450?random=4",
       title: "The Menu",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2022
     },
     {
       id: "5",
       posterUrl: "https://picsum.photos/300/450?random=5",
       title: "Black Panther: Wakanda Forever",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2022
     },
     {
       id: "6",
       posterUrl: "https://picsum.photos/300/450?random=6",
       title: "Top Gun: Maverick",
       type: "movie" as const,
-      status: "finished" as const
+      status: "finished" as const,
+      year: 2022
     }
   ];
 
@@ -274,6 +280,7 @@ export default function Home() {
                   title={movie.title}
                   type={movie.type}
                   status={movie.status}
+                  year={movie.year}
                   onClick={() => console.log(`Clicked movie: ${movie.title}`)}
                 />
               ))}
