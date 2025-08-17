@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/HeroSection";
 import Navbar from "@/components/Navbar";
 import ContentDisplay from "@/components/ContentDisplay";
+import EpisodeDisplay from "@/components/EpisodeDisplay";
 
 export default function Home() {
   const handleGetStarted = () => {
@@ -171,6 +172,58 @@ export default function Home() {
     }
   ];
 
+  // Sample episode data
+  const newEpisodes = [
+    {
+      id: "ep1",
+      thumbnailUrl: "https://picsum.photos/120/180?random=19",
+      showTitle: "House of the Dragon",
+      episodeTitle: "The Red Dragon and the Gold",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 2,
+      episode: 4,
+      duration: 68,
+      releaseDate: "2 days ago"
+    },
+    {
+      id: "ep2", 
+      thumbnailUrl: "https://picsum.photos/120/180?random=20",
+      showTitle: "Demon Slayer",
+      episodeTitle: "The Hashira Training Arc Begins",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 4,
+      episode: 8,
+      duration: 24,
+      releaseDate: "3 days ago"
+    },
+    {
+      id: "ep3",
+      thumbnailUrl: "https://picsum.photos/120/180?random=21",
+      showTitle: "The Bear",
+      episodeTitle: "Tomorrow",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 3,
+      episode: 9,
+      duration: 42,
+      releaseDate: "5 days ago"
+    },
+    {
+      id: "ep4",
+      thumbnailUrl: "https://picsum.photos/120/180?random=22",
+      showTitle: "Jujutsu Kaisen",
+      episodeTitle: "The Shibuya Incident - Gate Close",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 2,
+      episode: 23,
+      duration: 24,
+      releaseDate: "1 week ago"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-retro-50 relative">
       <Navbar
@@ -291,21 +344,20 @@ export default function Home() {
               </button>
             </div>
             <div className="space-y-4" data-testid="new-episodes-list">
-              {/* Episode cards will be populated here */}
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="flex gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="w-16 h-24 bg-retro-300 rounded flex-shrink-0 flex items-center justify-center">
-                    <span className="text-retro-50 text-xs font-medium">EP</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-retro-900 truncate">Show Name - Episode {i + 1}</h3>
-                    <p className="text-retro-600 text-sm mt-1">Season 2, Episode {i + 5}</p>
-                    <p className="text-retro-500 text-xs mt-2">Released 2 days ago</p>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-retro-400 text-sm">42min</span>
-                  </div>
-                </div>
+              {newEpisodes.map((episode) => (
+                <EpisodeDisplay
+                  key={episode.id}
+                  thumbnailUrl={episode.thumbnailUrl}
+                  showTitle={episode.showTitle}
+                  episodeTitle={episode.episodeTitle}
+                  type={episode.type}
+                  status={episode.status}
+                  season={episode.season}
+                  episode={episode.episode}
+                  duration={episode.duration}
+                  releaseDate={episode.releaseDate}
+                  onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                />
               ))}
             </div>
           </section>
