@@ -118,41 +118,6 @@ export default function Navbar({
                 </Link>
               </>
             )}
-              
-              {/* Browse Dropdown */}
-              <Dropdown
-                trigger={
-                  <span className="flex items-center gap-1 font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors">
-                    Browse
-                    <svg
-                      className="w-4 h-4 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </span>
-                }
-                options={[
-                  {
-                    value: "movies",
-                    label: "Movies",
-                    onClick: () => { window.location.href = "/discover?type=movie"; }
-                  },
-                  {
-                    value: "tv-shows", 
-                    label: "TV Shows",
-                    onClick: () => { window.location.href = "/discover?type=tv"; }
-                  },
-                  {
-                    value: "anime",
-                    label: "Anime", 
-                    onClick: () => { window.location.href = "/discover?type=anime"; }
-                  }
-                ]}
-                placement="left"
-              />
           </div>
 
           {/* Search Bar - Desktop */}
@@ -297,32 +262,6 @@ export default function Navbar({
                     </button>
                   </>
                 )}
-
-                {/* Mobile Browse Options */}
-                <div className="space-y-2">
-                  <p className="py-2 px-3 font-headline text-sm text-retro-700 font-semibold">Browse</p>
-                  <button
-                    onClick={() => { window.location.href = "/discover?type=movie"; setIsMobileMenuOpen(false); }}
-                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
-                    data-testid="mobile-browse-movies"
-                  >
-                    Movies
-                  </button>
-                  <button
-                    onClick={() => { window.location.href = "/discover?type=tv"; setIsMobileMenuOpen(false); }}
-                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
-                    data-testid="mobile-browse-tv"
-                  >
-                    TV Shows
-                  </button>
-                  <button
-                    onClick={() => { window.location.href = "/discover?type=anime"; setIsMobileMenuOpen(false); }}
-                    className="block w-full text-left py-2 px-6 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
-                    data-testid="mobile-browse-anime"
-                  >
-                    Anime
-                  </button>
-                </div>
 
                 <button
                   onClick={() => { window.location.href = "/schedule"; setIsMobileMenuOpen(false); }}
