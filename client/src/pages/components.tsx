@@ -1351,7 +1351,8 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
             <div className="relative h-[600px] overflow-hidden" style={{
               marginLeft: 'calc(-50vw + 50%)',
               marginRight: 'calc(-50vw + 50%)',
-              maxWidth: '100vw'
+              maxWidth: '100vw',
+              height: '100vh'
             }}>
               <HeroSection
                 content={{
