@@ -36,28 +36,28 @@ export default function ContentDisplay({
   const getTypeBadgeColor = (contentType: string) => {
     switch (contentType) {
       case "movie":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-indigo-500 text-white border-indigo-600";
       case "tv":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-emerald-500 text-white border-emerald-600";
       case "anime":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-violet-500 text-white border-violet-600";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-slate-500 text-white border-slate-600";
     }
   };
 
   const getStatusBadgeColor = (contentStatus: string) => {
     switch (contentStatus) {
       case "coming-soon":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-amber-500 text-white border-amber-600";
       case "ongoing":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-lime-500 text-white border-lime-600";
       case "finished":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-neutral-500 text-white border-neutral-600";
       case "canceled":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-rose-500 text-white border-rose-600";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-neutral-500 text-white border-neutral-600";
     }
   };
 
@@ -141,7 +141,7 @@ export default function ContentDisplay({
         {/* Season/Episode Info for TV Shows and Anime */}
         {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
           <div 
-            className={`inline-flex items-center ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-100 text-retro-800 font-medium border border-retro-200`} 
+            className={`inline-flex items-center ${isSmall ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-sm'} rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-bold shadow-lg border border-cyan-600`} 
             data-testid="content-episode-info"
           >
             {season !== undefined && `S${season}`}
