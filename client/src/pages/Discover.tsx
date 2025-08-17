@@ -220,24 +220,6 @@ export default function Discover() {
                 />
               </div>
 
-              {/* Quick Genre Tags */}
-              <div>
-                <label className="block text-sm font-medium text-retro-700 mb-2">Quick Filters</label>
-                <div className="flex flex-wrap gap-2">
-                  {genres.slice(1, 7).map((genre) => (
-                    <Tag
-                      key={genre}
-                      variant={selectedGenre === genre ? "primary" : "outline"}
-                      clickable
-                      onTagClick={() => setSelectedGenre(genre)}
-                      data-testid={`badge-quick-filter-${genre}`}
-                    >
-                      {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                    </Tag>
-                  ))}
-                </div>
-              </div>
-
               {/* Statistics */}
               <div className="mt-6 pt-6 border-t border-retro-200">
                 <div className="text-sm text-retro-600">

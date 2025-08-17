@@ -231,7 +231,6 @@ export default function Home() {
       <Navbar
         isSignedIn={false}
         onGetStarted={handleGetStarted}
-        onBrowse={handleBrowse}
         onSchedule={handleSchedule}
         onSearch={handleSearch}
       />
