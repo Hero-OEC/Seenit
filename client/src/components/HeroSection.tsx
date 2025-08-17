@@ -63,12 +63,11 @@ export function HeroSection({
 
   return (
     <div 
-      className="relative w-screen overflow-hidden bg-black"
+      className="relative w-full overflow-hidden bg-black"
       style={{ 
         height: '90vh',
-        marginLeft: 'calc(-50vw + 50%)',
-        marginRight: 'calc(-50vw + 50%)',
-        maxWidth: '100vw'
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)'
       }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
