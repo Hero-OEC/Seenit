@@ -5,7 +5,8 @@ import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
-import { Calendar, Clock, Tv, Star, Play } from "lucide-react";
+import ContentDisplay from "@/components/ContentDisplay";
+import { Calendar, Tv, Play } from "lucide-react";
 import type { Content } from "@shared/schema";
 
 type ContentType = "tv" | "anime";
@@ -167,83 +168,22 @@ export default function Schedule() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {filteredAndSortedContent.map((item) => {
                     const episodeInfo = getEpisodeInfo(item);
                     
                     return (
-                      <div 
-                        key={item.id} 
-                        className="group cursor-pointer transition-transform hover:scale-105"
-                        data-testid={`card-content-${item.id}`}
-                      >
-                        <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-retro-200">
-                          {/* Show Poster/Banner */}
-                          <div className="relative aspect-[16/9] overflow-hidden">
-                            <img
-                              src={item.poster || `https://picsum.photos/400/225?random=${item.id}`}
-                              alt={item.title}
-                              className="w-full h-full object-cover"
-                              data-testid={`img-poster-${item.id}`}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute top-3 right-3">
-                              <Tag 
-                                variant={episodeInfo.status === "Airing" ? "primary" : "secondary"}
-                                size="sm"
-                                data-testid={`badge-status-${item.id}`}
-                              >
-                                {episodeInfo.status}
-                              </Tag>
-                            </div>
-                            {item.rating && (
-                              <div className="absolute bottom-3 left-3 flex items-center gap-1 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span data-testid={`text-rating-${item.id}`}>{item.rating}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Show Details */}
-                          <div className="p-4">
-                            <h3 className="font-semibold text-retro-900 mb-2 line-clamp-2" data-testid={`text-title-${item.id}`}>
-                              {item.title}
-                            </h3>
-                            
-                            {/* Episode Information */}
-                            <div className="space-y-2 mb-3">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-retro-600">Season:</span>
-                                <span className="font-medium text-retro-900" data-testid={`text-season-${item.id}`}>
-                                  {episodeInfo.currentSeason} of {episodeInfo.totalSeasons}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-retro-600">Episode:</span>
-                                <span className="font-medium text-retro-900" data-testid={`text-episode-${item.id}`}>
-                                  {episodeInfo.currentEpisode} of {episodeInfo.totalEpisodes}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-retro-600">Next Air:</span>
-                                <span className="font-medium text-retro-900" data-testid={`text-air-date-${item.id}`}>
-                                  {episodeInfo.nextAirDate}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {/* Genre and Year */}
-                            <div className="flex items-center justify-between text-sm text-retro-600">
-                              <span data-testid={`text-year-${item.id}`}>{item.year}</span>
-                              {item.genre && item.genre.length > 0 && (
-                                <Tag variant="outline" size="sm" data-testid={`badge-genre-${item.id}`}>
-                                  {item.genre[0]}
-                                </Tag>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <ContentDisplay
+                        key={item.id}
+                        posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                        title={item.title}
+                        type={activeContentType as "tv" | "anime"}
+                        status={episodeInfo.status === "Airing" ? "ongoing" : "coming-soon"}
+                        season={episodeInfo.currentSeason}
+                        episode={episodeInfo.currentEpisode}
+                        onClick={() => console.log(`Clicked ${item.title}`)}
+                        className="w-full"
+                      />
                     );
                   })}
                 </div>
