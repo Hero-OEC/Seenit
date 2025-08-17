@@ -183,8 +183,7 @@ export default function Home() {
       status: "ongoing" as const,
       season: 2,
       episode: 4,
-      duration: 68,
-      releaseDate: "2 days ago"
+      duration: 68
     },
     {
       id: "ep2", 
@@ -195,8 +194,7 @@ export default function Home() {
       status: "ongoing" as const,
       season: 4,
       episode: 8,
-      duration: 24,
-      releaseDate: "3 days ago"
+      duration: 24
     },
     {
       id: "ep3",
@@ -207,8 +205,7 @@ export default function Home() {
       status: "ongoing" as const,
       season: 3,
       episode: 9,
-      duration: 42,
-      releaseDate: "5 days ago"
+      duration: 42
     },
     {
       id: "ep4",
@@ -219,8 +216,7 @@ export default function Home() {
       status: "ongoing" as const,
       season: 2,
       episode: 23,
-      duration: 24,
-      releaseDate: "1 week ago"
+      duration: 24
     }
   ];
 
@@ -355,7 +351,6 @@ export default function Home() {
                   season={episode.season}
                   episode={episode.episode}
                   duration={episode.duration}
-                  releaseDate={episode.releaseDate}
                   onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
                 />
               ))}

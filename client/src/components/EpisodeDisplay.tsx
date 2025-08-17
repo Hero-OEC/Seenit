@@ -17,8 +17,6 @@ export interface EpisodeDisplayProps {
   episode?: number;
   /** Episode duration in minutes */
   duration?: number;
-  /** Release date or relative time */
-  releaseDate?: string;
   /** Size variant - default or compact */
   size?: "default" | "compact";
   /** Click handler for the episode card */
@@ -36,7 +34,6 @@ export default function EpisodeDisplay({
   season,
   episode,
   duration,
-  releaseDate,
   size = "default",
   onClick,
   className = ""
@@ -167,16 +164,6 @@ export default function EpisodeDisplay({
                 {season !== undefined && episode !== undefined && " • "}
                 {episode !== undefined && `E${episode}`}
               </div>
-            )}
-
-            {/* Release Date */}
-            {releaseDate && (
-              <p 
-                className={`${isCompact ? 'text-[10px]' : 'text-xs'} text-retro-500`}
-                data-testid="release-date"
-              >
-                {releaseDate}
-              </p>
             )}
           </div>
         </div>
