@@ -1,11 +1,13 @@
 import { Route, Switch } from "wouter";
 import Home from "@/pages/Home";
 import ComponentsPage from "@/pages/components";
+import Discover from "@/pages/Discover";
 
 function App() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/discover" component={Discover} />
       <Route path="/components" component={ComponentsPage} />
       <Route>
         <div className="min-h-screen flex items-center justify-center bg-retro-50">
