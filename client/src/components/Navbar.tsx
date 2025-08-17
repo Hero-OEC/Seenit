@@ -58,7 +58,7 @@ export default function Navbar({
   };
 
   return (
-    <nav className="bg-retro-100">
+    <nav className="sticky top-0 z-50 bg-retro-100 shadow-sm border-b border-retro-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
