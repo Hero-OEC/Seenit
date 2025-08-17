@@ -82,7 +82,7 @@ export default function Discover() {
     <div className="min-h-screen bg-retro-50">
       <Navbar onSearch={handleSearch} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-retro-900 mb-2">Discover</h1>
