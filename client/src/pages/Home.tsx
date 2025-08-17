@@ -333,7 +333,6 @@ export default function Home() {
                   type={anime.type}
                   status={anime.status}
                   season={anime.season}
-                  episode={anime.episode}
                   onClick={() => console.log(`Clicked anime: ${anime.title}`)}
                 />
               ))}
