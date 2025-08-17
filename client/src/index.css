@@ -116,6 +116,10 @@
     max-width: 100vw;
   }
 
+  body {
+    position: relative;
+  }
+
   .font-retro {
     font-family: var(--font-retro);
   }
