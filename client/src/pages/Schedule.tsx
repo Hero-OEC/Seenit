@@ -6,7 +6,8 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
 import ContentDisplay from "@/components/ContentDisplay";
-import { Calendar, Tv, Play } from "lucide-react";
+import { Calendar, Tv } from "lucide-react";
+import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
 
 type ContentType = "tv" | "anime";
@@ -35,7 +36,7 @@ export default function Schedule() {
     },
     anime: {
       label: "Anime",
-      icon: Play,
+      icon: SharinganIcon,
       description: "Current and upcoming anime series"
     }
   };

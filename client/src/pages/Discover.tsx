@@ -5,7 +5,8 @@ import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
-import { Film, Tv, Zap, Star, Calendar, TrendingUp } from "lucide-react";
+import { Film, Tv, Star, Calendar, TrendingUp } from "lucide-react";
+import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
 
 type ContentType = "movie" | "tv" | "anime";
@@ -66,7 +67,7 @@ export default function Discover() {
   const contentTypeConfig = {
     movie: { icon: Film, label: "Movies", color: "bg-blue-500" },
     tv: { icon: Tv, label: "TV Shows", color: "bg-green-500" },
-    anime: { icon: Zap, label: "Anime", color: "bg-purple-500" }
+    anime: { icon: SharinganIcon, label: "Anime", color: "bg-purple-500" }
   };
 
   const sortOptions = [
