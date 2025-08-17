@@ -181,6 +181,7 @@ export default function Schedule() {
                         status={episodeInfo.status === "Airing" ? "ongoing" : "coming-soon"}
                         season={episodeInfo.currentSeason}
                         episode={episodeInfo.currentEpisode}
+                        size="small"
                         onClick={() => console.log(`Clicked ${item.title}`)}
                         className="w-full"
                       />
