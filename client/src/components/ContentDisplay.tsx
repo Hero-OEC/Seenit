@@ -110,8 +110,7 @@ export default function ContentDisplay({
           data-testid="content-poster"
         />
         
-        {/* Overlay with subtle gradient for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
         
         {/* Type Badge - positioned based on size */}
         <span 
