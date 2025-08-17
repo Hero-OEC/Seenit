@@ -111,7 +111,7 @@ export default function EpisodeDisplay({
     >
       <div className={`flex gap-4 ${isCompact ? 'p-3' : 'p-4'} bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow`}>
         {/* Episode Thumbnail */}
-        <div className={`${isCompact ? 'w-14 h-20' : 'w-16 h-24'} rounded overflow-hidden flex-shrink-0 bg-retro-200 relative`}>
+        <div className={`${isCompact ? 'w-14 h-20' : 'w-16 h-24'} rounded overflow-hidden flex-shrink-0 bg-retro-200`}>
           {thumbnailUrl ? (
             <img
               src={thumbnailUrl}
@@ -124,14 +124,6 @@ export default function EpisodeDisplay({
               <Play className={`${isCompact ? 'w-4 h-4' : 'w-5 h-5'} text-retro-50 fill-current`} />
             </div>
           )}
-          
-          {/* Type Badge - positioned at top left */}
-          <span 
-            className={`absolute top-1 left-1 inline-flex items-center ${isCompact ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-xs'} rounded-full font-medium border ${getTypeBadgeColor(type)} backdrop-blur-sm bg-opacity-90`}
-            data-testid="episode-type-badge"
-          >
-            {getTypeLabel(type)}
-          </span>
         </div>
 
         {/* Episode Info */}
@@ -170,13 +162,23 @@ export default function EpisodeDisplay({
 
         {/* Right Side Info */}
         <div className="flex flex-col items-end justify-between">
-          {/* Status Badge */}
-          <span 
-            className={`inline-flex items-center ${isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90 mb-2`}
-            data-testid="episode-status-badge"
-          >
-            {getStatusLabel(status)}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            {/* Type Badge */}
+            <span 
+              className={`inline-flex items-center ${isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full font-medium border ${getTypeBadgeColor(type)} backdrop-blur-sm bg-opacity-90`}
+              data-testid="episode-type-badge"
+            >
+              {getTypeLabel(type)}
+            </span>
+            
+            {/* Status Badge */}
+            <span 
+              className={`inline-flex items-center ${isCompact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90`}
+              data-testid="episode-status-badge"
+            >
+              {getStatusLabel(status)}
+            </span>
+          </div>
 
           {/* Duration */}
           {duration && (
