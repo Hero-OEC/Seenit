@@ -102,6 +102,7 @@ export class MemStorage implements IStorage {
       overview: insertContent.overview ?? null,
       status: insertContent.status ?? null,
       episodes: insertContent.episodes ?? null,
+      season: insertContent.season ?? null,
       streamingPlatforms: insertContent.streamingPlatforms ?? null,
       affiliateLinks: insertContent.affiliateLinks ?? null
     };
@@ -175,6 +176,7 @@ export class MemStorage implements IStorage {
         overview: "An epic action adventure that keeps you on the edge of your seat.",
         status: "completed",
         episodes: null,
+        season: null,
         streamingPlatforms: ["Netflix", "Prime Video"],
         affiliateLinks: ["https://netflix.com/affiliate/action-hero", "https://primevideo.com/affiliate/action-hero"]
       },
@@ -189,6 +191,7 @@ export class MemStorage implements IStorage {
         overview: "A gripping mystery that unfolds across multiple seasons.",
         status: "airing",
         episodes: 10,
+        season: 3,
         streamingPlatforms: ["HBO Max", "Hulu"],
         affiliateLinks: ["https://hbomax.com/affiliate/mystery-series", "https://hulu.com/affiliate/mystery-series"]
       },
@@ -203,6 +206,7 @@ export class MemStorage implements IStorage {
         overview: "An exciting anime adventure with stunning visuals.",
         status: "airing",
         episodes: 24,
+        season: 2,
         streamingPlatforms: ["Crunchyroll", "Funimation"],
         affiliateLinks: ["https://crunchyroll.com/affiliate/adventure-quest"]
       },
@@ -217,6 +221,7 @@ export class MemStorage implements IStorage {
         overview: "A heartwarming romantic drama that touches the soul.",
         status: "completed",
         episodes: null,
+        season: null,
         streamingPlatforms: ["Netflix", "Disney+"],
         affiliateLinks: ["https://netflix.com/affiliate/love-story", "https://disneyplus.com/affiliate/love-story"]
       },
@@ -231,6 +236,7 @@ export class MemStorage implements IStorage {
         overview: "A thrilling space adventure with stunning visual effects.",
         status: "completed",
         episodes: null,
+        season: null,
         streamingPlatforms: ["Prime Video", "HBO Max"],
         affiliateLinks: ["https://primevideo.com/affiliate/space-odyssey"]
       },
@@ -245,6 +251,7 @@ export class MemStorage implements IStorage {
         overview: "A spine-chilling horror that will keep you awake at night.",
         status: "completed",
         episodes: null,
+        season: null,
         streamingPlatforms: ["Netflix", "Hulu"],
         affiliateLinks: ["https://netflix.com/affiliate/night-terror"]
       }

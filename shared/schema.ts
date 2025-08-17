@@ -22,6 +22,7 @@ export const content = pgTable("content", {
   overview: text("overview"),
   status: text("status"), // 'airing', 'completed', 'upcoming'
   episodes: integer("episodes"),
+  season: integer("season"), // current season for tv/anime
   streamingPlatforms: text("streaming_platforms").array(),
   affiliateLinks: text("affiliate_links").array(),
 });
