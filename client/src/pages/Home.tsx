@@ -19,46 +19,46 @@ export default function Home() {
     console.log(`Search: ${query}`);
   };
 
-  // Sample content data
+  // Sample content data with placeholder images
   const popularMovies = [
     {
       id: "1",
-      posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=1",
       title: "Dune: Part Two",
       type: "movie" as const,
       status: "finished" as const
     },
     {
       id: "2", 
-      posterUrl: "https://image.tmdb.org/t/p/w500/6KErczPBROQty7QoIsaa6wJYXZi.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=2",
       title: "Oppenheimer",
       type: "movie" as const,
       status: "finished" as const
     },
     {
       id: "3",
-      posterUrl: "https://image.tmdb.org/t/p/w500/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=3",
       title: "Spider-Man: Across the Spider-Verse",
       type: "movie" as const,
       status: "finished" as const
     },
     {
       id: "4",
-      posterUrl: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=4",
       title: "The Menu",
       type: "movie" as const,
       status: "finished" as const
     },
     {
       id: "5",
-      posterUrl: "https://image.tmdb.org/t/p/w500/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=5",
       title: "Black Panther: Wakanda Forever",
       type: "movie" as const,
       status: "finished" as const
     },
     {
       id: "6",
-      posterUrl: "https://image.tmdb.org/t/p/w500/1HnJYFj4OnzfIkRZKhAhLmhn4Pj.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=6",
       title: "Top Gun: Maverick",
       type: "movie" as const,
       status: "finished" as const
@@ -68,7 +68,7 @@ export default function Home() {
   const popularTVShows = [
     {
       id: "tv1",
-      posterUrl: "https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=7",
       title: "House of the Dragon",
       type: "tv" as const,
       status: "ongoing" as const,
@@ -76,7 +76,7 @@ export default function Home() {
     },
     {
       id: "tv2",
-      posterUrl: "https://image.tmdb.org/t/p/w500/9WzJMrGjr8FLrEAjbvC3DUh0a1K.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=8",
       title: "The Bear",
       type: "tv" as const,
       status: "ongoing" as const,
@@ -84,7 +84,7 @@ export default function Home() {
     },
     {
       id: "tv3",
-      posterUrl: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=9",
       title: "Avatar: The Last Airbender",
       type: "tv" as const,
       status: "finished" as const,
@@ -92,7 +92,7 @@ export default function Home() {
     },
     {
       id: "tv4",
-      posterUrl: "https://image.tmdb.org/t/p/w500/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=10",
       title: "Stranger Things",
       type: "tv" as const,
       status: "finished" as const,
@@ -100,7 +100,7 @@ export default function Home() {
     },
     {
       id: "tv5",
-      posterUrl: "https://image.tmdb.org/t/p/w500/clnyhPqj1SNgpAdeSS6a6fwE6Bo.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=11",
       title: "Wednesday",
       type: "tv" as const,
       status: "ongoing" as const,
@@ -108,7 +108,7 @@ export default function Home() {
     },
     {
       id: "tv6",
-      posterUrl: "https://image.tmdb.org/t/p/w500/mY7SeH4HFFxW1hiI6cWuwCRKptN.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=12",
       title: "The Last of Us",
       type: "tv" as const,
       status: "ongoing" as const,
@@ -119,7 +119,7 @@ export default function Home() {
   const popularAnime = [
     {
       id: "anime1",
-      posterUrl: "https://image.tmdb.org/t/p/w500/8I0AENdMhRKBsRlUULWSmngIfpI.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=13",
       title: "Attack on Titan",
       type: "anime" as const,
       status: "finished" as const,
@@ -128,7 +128,7 @@ export default function Home() {
     },
     {
       id: "anime2",
-      posterUrl: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=14",
       title: "Demon Slayer",
       type: "anime" as const,
       status: "ongoing" as const,
@@ -137,7 +137,7 @@ export default function Home() {
     },
     {
       id: "anime3",
-      posterUrl: "https://image.tmdb.org/t/p/w500/yufLCZRgF8AqWC3F8FhEHm4KHdO.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=15",
       title: "Jujutsu Kaisen",
       type: "anime" as const,
       status: "ongoing" as const,
@@ -146,7 +146,7 @@ export default function Home() {
     },
     {
       id: "anime4",
-      posterUrl: "https://image.tmdb.org/t/p/w500/7KqZyHLnCe57TwJJQxVNiKBu0rF.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=16",
       title: "My Hero Academia",
       type: "anime" as const,
       status: "ongoing" as const,
@@ -155,7 +155,7 @@ export default function Home() {
     },
     {
       id: "anime5",
-      posterUrl: "https://image.tmdb.org/t/p/w500/yYp73qPhGHxVomIjDjD2NWVBxDu.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=17",
       title: "One Piece",
       type: "anime" as const,
       status: "ongoing" as const,
@@ -164,7 +164,7 @@ export default function Home() {
     },
     {
       id: "anime6",
-      posterUrl: "https://image.tmdb.org/t/p/w500/4KFhvQTB3U8jFvYWBz8rVzwHaLZ.jpg",
+      posterUrl: "https://picsum.photos/300/450?random=18",
       title: "Spirited Away",
       type: "anime" as const,
       status: "finished" as const
