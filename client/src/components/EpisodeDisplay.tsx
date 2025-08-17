@@ -105,7 +105,7 @@ export default function EpisodeDisplay({
 
   return (
     <div 
-      className={`group cursor-pointer transition-all duration-200 hover:shadow-lg ${className}`}
+      className={`group cursor-pointer ${className}`}
       onClick={onClick}
       data-testid="episode-display"
     >

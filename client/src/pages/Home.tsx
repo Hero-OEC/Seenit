@@ -339,7 +339,7 @@ export default function Home() {
                 View All →
               </button>
             </div>
-            <div className="space-y-4" data-testid="new-episodes-list">
+            <div className="space-y-4 p-1" data-testid="new-episodes-list">
               {newEpisodes.map((episode) => (
                 <EpisodeDisplay
                   key={episode.id}
