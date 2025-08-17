@@ -19,7 +19,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-retro-50">
+    <div className="min-h-screen bg-retro-50 overflow-x-hidden">
       <Navbar
         isSignedIn={false}
         onGetStarted={handleGetStarted}
