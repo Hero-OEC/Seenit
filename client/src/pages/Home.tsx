@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/HeroSection";
 import Navbar from "@/components/Navbar";
+import ContentDisplay from "@/components/ContentDisplay";
 
 export default function Home() {
   const handleGetStarted = () => {
@@ -17,6 +18,158 @@ export default function Home() {
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);
   };
+
+  // Sample content data
+  const popularMovies = [
+    {
+      id: "1",
+      posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      title: "Dune: Part Two",
+      type: "movie" as const,
+      status: "finished" as const
+    },
+    {
+      id: "2", 
+      posterUrl: "https://image.tmdb.org/t/p/w500/6KErczPBROQty7QoIsaa6wJYXZi.jpg",
+      title: "Oppenheimer",
+      type: "movie" as const,
+      status: "finished" as const
+    },
+    {
+      id: "3",
+      posterUrl: "https://image.tmdb.org/t/p/w500/4m1Au3YkjqsxF8iwQy0fPYSxE0h.jpg",
+      title: "Spider-Man: Across the Spider-Verse",
+      type: "movie" as const,
+      status: "finished" as const
+    },
+    {
+      id: "4",
+      posterUrl: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+      title: "The Menu",
+      type: "movie" as const,
+      status: "finished" as const
+    },
+    {
+      id: "5",
+      posterUrl: "https://image.tmdb.org/t/p/w500/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg",
+      title: "Black Panther: Wakanda Forever",
+      type: "movie" as const,
+      status: "finished" as const
+    },
+    {
+      id: "6",
+      posterUrl: "https://image.tmdb.org/t/p/w500/1HnJYFj4OnzfIkRZKhAhLmhn4Pj.jpg",
+      title: "Top Gun: Maverick",
+      type: "movie" as const,
+      status: "finished" as const
+    }
+  ];
+
+  const popularTVShows = [
+    {
+      id: "tv1",
+      posterUrl: "https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+      title: "House of the Dragon",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 2
+    },
+    {
+      id: "tv2",
+      posterUrl: "https://image.tmdb.org/t/p/w500/9WzJMrGjr8FLrEAjbvC3DUh0a1K.jpg",
+      title: "The Bear",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 3
+    },
+    {
+      id: "tv3",
+      posterUrl: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      title: "Avatar: The Last Airbender",
+      type: "tv" as const,
+      status: "finished" as const,
+      season: 1
+    },
+    {
+      id: "tv4",
+      posterUrl: "https://image.tmdb.org/t/p/w500/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+      title: "Stranger Things",
+      type: "tv" as const,
+      status: "finished" as const,
+      season: 4
+    },
+    {
+      id: "tv5",
+      posterUrl: "https://image.tmdb.org/t/p/w500/clnyhPqj1SNgpAdeSS6a6fwE6Bo.jpg",
+      title: "Wednesday",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 1
+    },
+    {
+      id: "tv6",
+      posterUrl: "https://image.tmdb.org/t/p/w500/mY7SeH4HFFxW1hiI6cWuwCRKptN.jpg",
+      title: "The Last of Us",
+      type: "tv" as const,
+      status: "ongoing" as const,
+      season: 1
+    }
+  ];
+
+  const popularAnime = [
+    {
+      id: "anime1",
+      posterUrl: "https://image.tmdb.org/t/p/w500/8I0AENdMhRKBsRlUULWSmngIfpI.jpg",
+      title: "Attack on Titan",
+      type: "anime" as const,
+      status: "finished" as const,
+      season: 4,
+      episode: 28
+    },
+    {
+      id: "anime2",
+      posterUrl: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+      title: "Demon Slayer",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 4,
+      episode: 8
+    },
+    {
+      id: "anime3",
+      posterUrl: "https://image.tmdb.org/t/p/w500/yufLCZRgF8AqWC3F8FhEHm4KHdO.jpg",
+      title: "Jujutsu Kaisen",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 2,
+      episode: 23
+    },
+    {
+      id: "anime4",
+      posterUrl: "https://image.tmdb.org/t/p/w500/7KqZyHLnCe57TwJJQxVNiKBu0rF.jpg",
+      title: "My Hero Academia",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 7,
+      episode: 18
+    },
+    {
+      id: "anime5",
+      posterUrl: "https://image.tmdb.org/t/p/w500/yYp73qPhGHxVomIjDjD2NWVBxDu.jpg",
+      title: "One Piece",
+      type: "anime" as const,
+      status: "ongoing" as const,
+      season: 21,
+      episode: 1090
+    },
+    {
+      id: "anime6",
+      posterUrl: "https://image.tmdb.org/t/p/w500/4KFhvQTB3U8jFvYWBz8rVzwHaLZ.jpg",
+      title: "Spirited Away",
+      type: "anime" as const,
+      status: "finished" as const
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-retro-50 overflow-x-hidden">
@@ -60,17 +213,15 @@ export default function Home() {
               </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-movies-grid">
-              {/* Movie cards will be populated here */}
-              {Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className="group cursor-pointer">
-                  <div className="aspect-[2/3] bg-retro-200 rounded-lg mb-3 overflow-hidden group-hover:shadow-lg transition-shadow">
-                    <div className="w-full h-full bg-gradient-to-br from-retro-300 to-retro-500 flex items-center justify-center">
-                      <span className="text-retro-50 font-medium">Movie {i + 1}</span>
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-retro-900 text-sm truncate">Popular Movie Title</h3>
-                  <p className="text-retro-600 text-xs">2024</p>
-                </div>
+              {popularMovies.map((movie) => (
+                <ContentDisplay
+                  key={movie.id}
+                  posterUrl={movie.posterUrl}
+                  title={movie.title}
+                  type={movie.type}
+                  status={movie.status}
+                  onClick={() => console.log(`Clicked movie: ${movie.title}`)}
+                />
               ))}
             </div>
           </section>
@@ -87,17 +238,16 @@ export default function Home() {
               </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-tv-grid">
-              {/* TV show cards will be populated here */}
-              {Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className="group cursor-pointer">
-                  <div className="aspect-[2/3] bg-retro-200 rounded-lg mb-3 overflow-hidden group-hover:shadow-lg transition-shadow">
-                    <div className="w-full h-full bg-gradient-to-br from-retro-400 to-retro-600 flex items-center justify-center">
-                      <span className="text-retro-50 font-medium">TV {i + 1}</span>
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-retro-900 text-sm truncate">Popular TV Show</h3>
-                  <p className="text-retro-600 text-xs">Season 3</p>
-                </div>
+              {popularTVShows.map((show) => (
+                <ContentDisplay
+                  key={show.id}
+                  posterUrl={show.posterUrl}
+                  title={show.title}
+                  type={show.type}
+                  status={show.status}
+                  season={show.season}
+                  onClick={() => console.log(`Clicked TV show: ${show.title}`)}
+                />
               ))}
             </div>
           </section>
@@ -114,17 +264,17 @@ export default function Home() {
               </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-anime-grid">
-              {/* Anime cards will be populated here */}
-              {Array.from({ length: 6 }, (_, i) => (
-                <div key={i} className="group cursor-pointer">
-                  <div className="aspect-[2/3] bg-retro-200 rounded-lg mb-3 overflow-hidden group-hover:shadow-lg transition-shadow">
-                    <div className="w-full h-full bg-gradient-to-br from-retro-500 to-retro-700 flex items-center justify-center">
-                      <span className="text-retro-50 font-medium">Anime {i + 1}</span>
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-retro-900 text-sm truncate">Popular Anime Title</h3>
-                  <p className="text-retro-600 text-xs">Episode 24</p>
-                </div>
+              {popularAnime.map((anime) => (
+                <ContentDisplay
+                  key={anime.id}
+                  posterUrl={anime.posterUrl}
+                  title={anime.title}
+                  type={anime.type}
+                  status={anime.status}
+                  season={anime.season}
+                  episode={anime.episode}
+                  onClick={() => console.log(`Clicked anime: ${anime.title}`)}
+                />
               ))}
             </div>
           </section>
