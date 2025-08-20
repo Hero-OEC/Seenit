@@ -276,6 +276,7 @@ export default function Home() {
               {popularMovies.map((movie) => (
                 <ContentDisplay
                   key={movie.id}
+                  id={movie.id}
                   posterUrl={movie.posterUrl}
                   title={movie.title}
                   type={movie.type}
@@ -302,6 +303,7 @@ export default function Home() {
               {popularTVShows.map((show) => (
                 <ContentDisplay
                   key={show.id}
+                  id={show.id}
                   posterUrl={show.posterUrl}
                   title={show.title}
                   type={show.type}
@@ -328,6 +330,7 @@ export default function Home() {
               {popularAnime.map((anime) => (
                 <ContentDisplay
                   key={anime.id}
+                  id={anime.id}
                   posterUrl={anime.posterUrl}
                   title={anime.title}
                   type={anime.type}

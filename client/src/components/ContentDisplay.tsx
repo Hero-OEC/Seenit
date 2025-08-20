@@ -1,7 +1,10 @@
 
 import { Play } from "lucide-react";
+import { Link } from "wouter";
 
 export interface ContentDisplayProps {
+  /** Content ID for linking */
+  id?: string;
   /** URL for the poster image */
   posterUrl: string;
   /** Title of the content */
@@ -25,6 +28,7 @@ export interface ContentDisplayProps {
 }
 
 export default function ContentDisplay({
+  id,
   posterUrl,
   title,
   type,
@@ -95,12 +99,33 @@ export default function ContentDisplay({
 
   const isSmall = size === "small";
 
+  const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (id) {
+      return (
+        <Link href={`/content/${id}`}>
+          <div 
+            className={`group cursor-pointer ${className}`}
+            data-testid="content-display"
+          >
+            {children}
+          </div>
+        </Link>
+      );
+    }
+    
+    return (
+      <div 
+        className={`group cursor-pointer ${className}`}
+        onClick={onClick}
+        data-testid="content-display"
+      >
+        {children}
+      </div>
+    );
+  };
+
   return (
-    <div 
-      className={`group cursor-pointer ${className}`}
-      onClick={onClick}
-      data-testid="content-display"
-    >
+    <ContentWrapper>
       {/* Poster Container - 2:3 Aspect Ratio */}
       <div className={`relative aspect-[2/3] ${isSmall ? 'mb-2' : 'mb-3'} rounded-lg overflow-hidden bg-retro-100 shadow-md group-hover:shadow-lg transition-all duration-200 hover:scale-105`}>
         <img
@@ -162,6 +187,6 @@ export default function ContentDisplay({
           </div>
         )}
       </div>
-    </div>
+    </ContentWrapper>
   );
 }

@@ -151,6 +151,7 @@ export default function Discover() {
                     return (
                       <ContentDisplay
                         key={item.id}
+                        id={item.id}
                         posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
                         title={item.title}
                         type={activeContentType}

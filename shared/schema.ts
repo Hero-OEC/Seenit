@@ -16,13 +16,17 @@ export const content = pgTable("content", {
   title: text("title").notNull(),
   type: text("type").notNull(), // 'movie', 'tv', 'anime'
   year: integer("year"),
+  endYear: integer("end_year"), // for TV shows that have ended
   rating: text("rating"), // e.g. "8.5"
+  imdbRating: text("imdb_rating"), // IMDb rating
+  rottenTomatoesRating: text("rotten_tomatoes_rating"), // Rotten Tomatoes rating
   genre: text("genre").array(),
   poster: text("poster"),
   overview: text("overview"),
   status: text("status"), // 'airing', 'completed', 'upcoming'
   episodes: integer("episodes"),
   season: integer("season"), // current season for tv/anime
+  totalSeasons: integer("total_seasons"), // total number of seasons
   streamingPlatforms: text("streaming_platforms").array(),
   affiliateLinks: text("affiliate_links").array(),
 });
