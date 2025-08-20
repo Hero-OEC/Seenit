@@ -466,7 +466,7 @@ export default function ContentDetails() {
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                           selectedSeason === i + 1
                             ? 'bg-retro-500 text-white shadow-md'
-                            : 'bg-retro-100 text-retro-700 hover:bg-retro-200'
+                            : 'border border-retro-300 text-retro-700 hover:bg-retro-50'
                         }`}
                         data-testid={`season-tab-${i + 1}`}
                       >
