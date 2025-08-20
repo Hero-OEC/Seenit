@@ -454,47 +454,9 @@ export default function ContentDetails() {
             {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
               <div className="bg-white rounded-lg p-6 shadow-md mb-8">
                 <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  {content.totalSeasons && (
-                    <div className="text-center p-4 bg-retro-50 rounded-lg">
-                      <div className="text-2xl font-bold text-retro-900" data-testid="total-seasons">
-                        {content.totalSeasons}
-                      </div>
-                      <div className="text-sm text-retro-600 font-medium">
-                        {content.totalSeasons === 1 ? "Season" : "Seasons"}
-                      </div>
-                    </div>
-                  )}
-                  {content.episodes && (
-                    <div className="text-center p-4 bg-retro-50 rounded-lg">
-                      <div className="text-2xl font-bold text-retro-900" data-testid="total-episodes">
-                        {content.episodes}
-                      </div>
-                      <div className="text-sm text-retro-600 font-medium">
-                        {content.episodes === 1 ? "Episode" : "Episodes"}
-                      </div>
-                    </div>
-                  )}
-                  {content.season && (
-                    <div className="text-center p-4 bg-retro-50 rounded-lg">
-                      <div className="text-2xl font-bold text-retro-900" data-testid="current-season">
-                        {content.season}
-                      </div>
-                      <div className="text-sm text-retro-600 font-medium">Current Season</div>
-                    </div>
-                  )}
-                  {content.status === "airing" && (
-                    <div className="text-center p-4 bg-lime-50 rounded-lg border border-lime-200">
-                      <div className="text-2xl font-bold text-lime-700">
-                        <Play className="w-6 h-6 mx-auto" />
-                      </div>
-                      <div className="text-sm text-lime-600 font-medium">Now Airing</div>
-                    </div>
-                  )}
-                </div>
 
                 {/* Episode List */}
-                <div className="border-t border-retro-200 pt-6">
+                <div>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-retro-900">Season {content.season || 1} Episodes</h3>
                     <select className="px-3 py-1 border border-retro-300 rounded-md text-sm text-retro-700 bg-white">
