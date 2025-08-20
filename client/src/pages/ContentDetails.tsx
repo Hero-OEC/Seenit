@@ -148,7 +148,7 @@ export default function ContentDetails() {
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               {/* Poster */}
-              <div className="aspect-[2/3] rounded-lg overflow-hidden bg-retro-100 shadow-lg mb-6">
+              <div className="aspect-[2/3] w-64 mx-auto rounded-lg overflow-hidden bg-retro-100 shadow-lg mb-6">
                 <img
                   src={content.poster || "/api/placeholder/400/600"}
                   alt={`${content.title} poster`}
