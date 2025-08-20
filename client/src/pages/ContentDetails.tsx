@@ -383,12 +383,23 @@ export default function ContentDetails() {
                 {content.rottenTomatoesRating && (
                   <div className="flex items-center gap-3" data-testid="rotten-tomatoes-rating">
                     {/* Rotten Tomatoes Logo */}
-                    <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
-                      <circle cx="16" cy="16" r="16" fill="#FA320A"/>
-                      <path d="M16 6c-1.5 0-3 .5-4 1.5l-2-2c-.5-.5-1.5-.5-2 0s-.5 1.5 0 2l2 2C9.5 11 9 12.5 9 14c0 3.9 3.1 7 7 7s7-3.1 7-7c0-1.5-.5-3-1.5-4l2-2c.5-.5.5-1.5 0-2s-1.5-.5-2 0l-2 2C18 6.5 16.5 6 16 6z" fill="#FFFFFF"/>
-                      <circle cx="13" cy="13" r="1" fill="#FA320A"/>
-                      <circle cx="19" cy="13" r="1" fill="#FA320A"/>
-                      <path d="M13 17c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke="#FA320A" strokeWidth="1" fill="none"/>
+                    <svg className="w-8 h-8" viewBox="0 0 100 100" fill="none">
+                      {/* Main tomato body */}
+                      <ellipse cx="50" cy="60" rx="35" ry="30" fill="#FA320A"/>
+                      
+                      {/* Tomato highlights */}
+                      <ellipse cx="42" cy="55" rx="8" ry="6" fill="#FF6B47" opacity="0.7"/>
+                      <ellipse cx="35" cy="65" rx="4" ry="3" fill="#FF6B47" opacity="0.5"/>
+                      
+                      {/* Tomato stem/calyx */}
+                      <path d="M35 35 Q40 30 45 35 Q50 25 55 35 Q60 30 65 35 Q50 40 50 45 Q50 40 35 35" fill="#228B22"/>
+                      
+                      {/* Small leaves */}
+                      <path d="M30 35 Q25 30 30 25 Q35 30 30 35" fill="#32CD32"/>
+                      <path d="M70 35 Q75 30 70 25 Q65 30 70 35" fill="#32CD32"/>
+                      
+                      {/* Tomato shine */}
+                      <ellipse cx="45" cy="50" rx="6" ry="8" fill="#FF8C69" opacity="0.6"/>
                     </svg>
                     <span className="font-medium text-lg">{content.rottenTomatoesRating}%</span>
                   </div>
