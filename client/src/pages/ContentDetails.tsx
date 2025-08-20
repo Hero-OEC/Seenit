@@ -353,15 +353,6 @@ export default function ContentDetails() {
                   {getStatusLabel(content.status)}
                 </span>
               )}
-              {content.genre && content.genre.map((g, index) => (
-                <span 
-                  key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-retro-100 text-retro-800 border border-retro-200"
-                  data-testid={`genre-badge-${g.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {g}
-                </span>
-              ))}
             </div>
 
             {/* Ratings */}
