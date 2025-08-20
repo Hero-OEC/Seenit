@@ -137,6 +137,28 @@ export default function ContentDetails() {
     setIsDropdownOpen(false);
   };
 
+  // Function to generate sample episodes for demonstration
+  const generateSampleEpisodes = (content: Content) => {
+    const episodeCount = Math.min(content.episodes || 10, 10); // Show max 10 episodes
+    const currentSeason = content.season || 1;
+    
+    const episodeTitles = [
+      "The Beginning", "Shadows of the Past", "Revelations", "The Hunt Begins", 
+      "Unexpected Allies", "Betrayal", "The Truth Unveiled", "Final Confrontation", 
+      "New Horizons", "The End of an Era"
+    ];
+
+    return Array.from({ length: episodeCount }, (_, i) => ({
+      number: i + 1,
+      title: episodeTitles[i] || `Episode ${i + 1}`,
+      description: `An intense episode that continues the storyline with unexpected twists and character development. The stakes are higher than ever as our protagonists face new challenges.`,
+      duration: content.type === "anime" ? Math.floor(Math.random() * 5) + 22 : Math.floor(Math.random() * 10) + 42,
+      airDate: new Date(2024, 0, 15 + (i * 7)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      rating: (8.0 + Math.random() * 1.5).toFixed(1),
+      watched: i < 3 // Mark first 3 episodes as watched for demo
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-retro-50">
       <Navbar onSearch={handleSearch} />
@@ -288,9 +310,9 @@ export default function ContentDetails() {
 
             {/* Seasons and Episodes Section */}
             {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
-              <div className="bg-white rounded-lg p-6 shadow-md">
+              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
                 <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   {content.totalSeasons && (
                     <div className="text-center p-4 bg-retro-50 rounded-lg">
                       <div className="text-2xl font-bold text-retro-900" data-testid="total-seasons">
@@ -327,6 +349,61 @@ export default function ContentDetails() {
                       <div className="text-sm text-lime-600 font-medium">Now Airing</div>
                     </div>
                   )}
+                </div>
+
+                {/* Episode List */}
+                <div className="border-t border-retro-200 pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-retro-900">Season {content.season || 1} Episodes</h3>
+                    <select className="px-3 py-1 border border-retro-300 rounded-md text-sm text-retro-700 bg-white">
+                      {Array.from({ length: content.totalSeasons || 1 }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>Season {i + 1}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {/* Sample episodes - in a real app this would come from API */}
+                    {generateSampleEpisodes(content).map((episode, index) => (
+                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors cursor-pointer" data-testid={`episode-${episode.number}`}>
+                        <div className="flex-shrink-0 w-20 h-12 bg-retro-200 rounded overflow-hidden">
+                          <img 
+                            src={`https://picsum.photos/160/90?random=${content.id}-ep${episode.number}`}
+                            alt={`Episode ${episode.number} thumbnail`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-medium text-retro-900 mb-1">
+                                {episode.number}. {episode.title}
+                              </h4>
+                              <p className="text-sm text-retro-600 line-clamp-2 mb-2">
+                                {episode.description}
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-retro-500">
+                                <span>{episode.duration}m</span>
+                                <span>{episode.airDate}</span>
+                                {episode.rating && <span>★ {episode.rating}</span>}
+                              </div>
+                            </div>
+                            {episode.watched ? (
+                              <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            ) : (
+                              <button className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors">
+                                <Play className="w-4 h-4 text-white fill-white" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
