@@ -9,6 +9,7 @@ export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
   const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watchlist");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState<number>(1);
 
   const { data: content, isLoading } = useQuery<Content>({
     queryKey: [`/api/content/${params?.id}`],
@@ -455,15 +456,30 @@ export default function ContentDetails() {
               <div className="bg-white rounded-lg p-6 shadow-md mb-8">
                 <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
 
+                {/* Season Tabs */}
+                {content.totalSeasons && content.totalSeasons > 1 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {Array.from({ length: content.totalSeasons }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setSelectedSeason(i + 1)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          selectedSeason === i + 1
+                            ? 'bg-retro-500 text-white shadow-md'
+                            : 'bg-retro-100 text-retro-700 hover:bg-retro-200'
+                        }`}
+                        data-testid={`season-tab-${i + 1}`}
+                      >
+                        Season {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* Episode List */}
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-retro-900">Season {content.season || 1} Episodes</h3>
-                    <select className="px-3 py-1 border border-retro-300 rounded-md text-sm text-retro-700 bg-white">
-                      {Array.from({ length: content.totalSeasons || 1 }, (_, i) => (
-                        <option key={i + 1} value={i + 1}>Season {i + 1}</option>
-                      ))}
-                    </select>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-retro-900">Season {selectedSeason} Episodes</h3>
                   </div>
                   
                   <div className="space-y-3">
