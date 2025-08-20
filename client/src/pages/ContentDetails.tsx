@@ -4,6 +4,7 @@ import { Star, Play, ExternalLink, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { Content } from "@shared/schema";
 import Navbar from "@/components/Navbar";
+import ContentDisplay from "@/components/ContentDisplay";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
@@ -549,37 +550,18 @@ export default function ContentDetails() {
               {/* Recommended Content Grid */}
               <div className="flex gap-4">
                 {getRecommendedContent(content).slice(0, 4).map((item, index) => (
-                  <div 
+                  <ContentDisplay
                     key={index}
-                    className="group cursor-pointer flex-shrink-0 w-40"
+                    id={item.id}
+                    posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                    title={item.title}
+                    type={item.type as "movie" | "tv" | "anime"}
+                    status={item.status === "airing" ? "ongoing" : "finished"}
+                    year={item.year}
+                    size="small"
+                    className="flex-shrink-0 w-40"
                     data-testid={`recommended-${index}`}
-                    onClick={() => navigate(`/content/${item.id}`)}
-                  >
-                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-retro-100 mb-3 group-hover:shadow-lg transition-shadow">
-                      <img
-                        src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                        alt={`${item.title} poster`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <h3 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-xs text-retro-600">
-                      <span>{item.year}</span>
-                      <span className="capitalize bg-retro-50 px-2 py-1 rounded">
-                        {item.type}
-                      </span>
-                    </div>
-                    {item.rating && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <svg className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                        <span className="text-xs text-retro-600">{item.rating}</span>
-                      </div>
-                    )}
-                  </div>
+                  />
                 ))}
               </div>
             </div>
