@@ -1,4 +1,4 @@
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Star, Play, ExternalLink, ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
+  const [, navigate] = useLocation();
   const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watchlist");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
@@ -546,8 +547,8 @@ export default function ContentDetails() {
               </div>
 
               {/* Recommended Content Grid */}
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {getRecommendedContent(content).map((item, index) => (
+              <div className="flex gap-4">
+                {getRecommendedContent(content).slice(0, 4).map((item, index) => (
                   <div 
                     key={index}
                     className="group cursor-pointer flex-shrink-0 w-40"
