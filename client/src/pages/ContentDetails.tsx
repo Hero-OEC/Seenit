@@ -431,7 +431,7 @@ export default function ContentDetails() {
             )}
 
             {/* Recommended Content */}
-            <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+            <div className="bg-white rounded-lg p-6 mb-8">
               <h2 className="text-2xl font-bold text-retro-900 mb-4">Recommended for You</h2>
               
               {/* Genre Tags */}
