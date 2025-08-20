@@ -12,6 +12,8 @@ export default function ContentDetails() {
   const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watchlist");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [hoveredRating, setHoveredRating] = useState<number>(0);
 
   const { data: content, isLoading } = useQuery<Content>({
     queryKey: [`/api/content/${params?.id}`],
@@ -138,6 +140,36 @@ export default function ContentDetails() {
       console.log(`Added to watchlist with status: ${status}`);
     }
     setIsDropdownOpen(false);
+  };
+
+  const handleRatingClick = (rating: number) => {
+    setUserRating(rating);
+    console.log(`User rated content: ${rating} stars`);
+  };
+
+  const renderStarRating = () => {
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onClick={() => handleRatingClick(star)}
+            onMouseEnter={() => setHoveredRating(star)}
+            onMouseLeave={() => setHoveredRating(0)}
+            className="transition-colors hover:scale-110 transform duration-150"
+            data-testid={`star-${star}`}
+          >
+            <Star 
+              className={`w-6 h-6 ${
+                star <= (hoveredRating || userRating)
+                  ? 'fill-yellow-400 text-yellow-400'
+                  : 'fill-gray-200 text-gray-300'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    );
   };
 
   // Function to generate sample episodes for demonstration
@@ -423,6 +455,112 @@ export default function ContentDetails() {
                 )}
               </div>
             )}
+
+            {/* User Reviews Section */}
+            <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+              <h2 className="text-2xl font-bold text-retro-900 mb-6">User Reviews</h2>
+              
+              {/* Your Rating */}
+              <div className="border-b border-retro-200 pb-6 mb-6">
+                <h3 className="text-lg font-semibold text-retro-900 mb-3">Rate This {content.type === 'movie' ? 'Movie' : content.type === 'tv' ? 'TV Show' : 'Anime'}</h3>
+                <div className="flex items-center gap-4">
+                  {renderStarRating()}
+                  {userRating > 0 && (
+                    <span className="text-sm text-retro-600 font-medium">
+                      {userRating} out of 5 stars
+                    </span>
+                  )}
+                </div>
+                {userRating > 0 && (
+                  <p className="text-sm text-retro-600 mt-2">Thanks for rating!</p>
+                )}
+              </div>
+
+              {/* Sample Reviews */}
+              <div className="space-y-6">
+                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">AK</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-retro-900">Alex K.</h4>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= 4 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-retro-500">2 days ago</span>
+                      </div>
+                      <p className="text-retro-700 leading-relaxed">
+                        Great storyline and excellent character development. The plot keeps you engaged throughout, though some episodes feel a bit slow. Overall, definitely worth watching!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">MR</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-retro-900">Maria R.</h4>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= 5 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-retro-500">1 week ago</span>
+                      </div>
+                      <p className="text-retro-700 leading-relaxed">
+                        Absolutely loved it! The cinematography is stunning and the acting is top-notch. This is exactly what I was looking for. Highly recommend to anyone who enjoys this genre.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-semibold text-sm">JS</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-retro-900">John S.</h4>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= 3 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-retro-500">2 weeks ago</span>
+                      </div>
+                      <p className="text-retro-700 leading-relaxed">
+                        It's okay, nothing groundbreaking. Some good moments but overall feels like something I've seen before. The production quality is decent though.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* View More Reviews Button */}
+              <div className="mt-6 text-center">
+                <button className="px-6 py-2 border border-retro-300 text-retro-700 rounded-lg hover:bg-retro-50 transition-colors font-medium">
+                  View All Reviews
+                </button>
+              </div>
+            </div>
 
             {/* Synopsis */}
             {content.overview && (
