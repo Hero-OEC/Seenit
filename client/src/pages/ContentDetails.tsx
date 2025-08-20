@@ -398,9 +398,24 @@ export default function ContentDetails() {
             {content.overview && (
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-retro-900 mb-4">Synopsis</h2>
-                <p className="text-retro-700 leading-relaxed text-lg" data-testid="content-synopsis">
+                <p className="text-retro-700 leading-relaxed text-lg mb-6" data-testid="content-synopsis">
                   {content.overview}
                 </p>
+                
+                {/* Genre Tags */}
+                {content.genre && content.genre.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {content.genre.map((genre, index) => (
+                      <span 
+                        key={index}
+                        className="px-4 py-2 bg-retro-500 text-white rounded-full text-sm font-medium hover:bg-retro-600 transition-colors cursor-pointer"
+                        data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
