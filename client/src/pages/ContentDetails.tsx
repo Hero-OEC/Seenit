@@ -546,11 +546,11 @@ export default function ContentDetails() {
               </div>
 
               {/* Recommended Content Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="flex gap-4 overflow-x-auto pb-2">
                 {getRecommendedContent(content).map((item, index) => (
                   <div 
                     key={index}
-                    className="group cursor-pointer"
+                    className="group cursor-pointer flex-shrink-0 w-40"
                     data-testid={`recommended-${index}`}
                     onClick={() => navigate(`/content/${item.id}`)}
                   >
