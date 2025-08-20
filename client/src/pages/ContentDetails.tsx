@@ -1,9 +1,9 @@
 import { useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Star, Play, ExternalLink, ChevronDown } from "lucide-react";
-import { Link } from "wouter";
+import { Star, Play, ExternalLink, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { Content } from "@shared/schema";
+import Navbar from "@/components/Navbar";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
@@ -15,12 +15,19 @@ export default function ContentDetails() {
     enabled: !!params?.id,
   });
 
+  const handleSearch = (query: string) => {
+    console.log(`Search: ${query}`);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-retro-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-500 mx-auto mb-4"></div>
-          <p className="text-retro-700">Loading content details...</p>
+      <div className="min-h-screen bg-retro-50">
+        <Navbar onSearch={handleSearch} />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-500 mx-auto mb-4"></div>
+            <p className="text-retro-700">Loading content details...</p>
+          </div>
         </div>
       </div>
     );
@@ -28,15 +35,13 @@ export default function ContentDetails() {
 
   if (!content) {
     return (
-      <div className="min-h-screen bg-retro-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-retro-900 mb-4">Content Not Found</h1>
-          <p className="text-retro-700 mb-6">The content you're looking for doesn't exist.</p>
-          <Link href="/">
-            <button className="px-6 py-2 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors">
-              Back to Home
-            </button>
-          </Link>
+      <div className="min-h-screen bg-retro-50">
+        <Navbar onSearch={handleSearch} />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-retro-900 mb-4">Content Not Found</h1>
+            <p className="text-retro-700 mb-6">The content you're looking for doesn't exist.</p>
+          </div>
         </div>
       </div>
     );
@@ -134,20 +139,7 @@ export default function ContentDetails() {
 
   return (
     <div className="min-h-screen bg-retro-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-retro-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/">
-            <button 
-              className="inline-flex items-center gap-2 text-retro-700 hover:text-retro-900 transition-colors"
-              data-testid="back-button"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Home
-            </button>
-          </Link>
-        </div>
-      </div>
+      <Navbar onSearch={handleSearch} />
 
       {/* Content Details */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
