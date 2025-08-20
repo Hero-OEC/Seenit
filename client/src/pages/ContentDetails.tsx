@@ -263,7 +263,7 @@ export default function ContentDetails() {
       <Navbar onSearch={handleSearch} />
 
       {/* Content Details */}
-      <div className="max-w-7xl mx-auto py-8">
+      <div className="max-w-7xl mx-auto pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Poster and Actions */}
           <div className="lg:col-span-1">
