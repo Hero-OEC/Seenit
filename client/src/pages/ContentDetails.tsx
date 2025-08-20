@@ -435,66 +435,6 @@ export default function ContentDetails() {
               </div>
             )}
 
-            {/* Watchlist Section */}
-            <div className="bg-white rounded-lg p-6 mb-8">
-              <h2 className="text-2xl font-bold text-retro-900 mb-4">My Watchlist</h2>
-              
-              {/* Watchlist Status */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="relative">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-3 px-6 py-3 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors font-medium shadow-md"
-                    data-testid="watchlist-status-button"
-                  >
-                    <span>{selectedWatchlistStatus}</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  
-                  {isDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-retro-200 z-10 min-w-[200px]">
-                      {watchlistOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => handleWatchlistAction(option.value)}
-                          className="w-full px-6 py-3 text-left hover:bg-retro-50 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                          data-testid={`watchlist-status-option-${option.value}`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm text-retro-600">
-                  Set your viewing status for this {content.type === 'movie' ? 'movie' : content.type === 'tv' ? 'TV show' : 'anime'}
-                </div>
-              </div>
-
-              {/* Progress tracking for TV/Anime */}
-              {(content.type === "tv" || content.type === "anime") && content.episodes && (
-                <div className="border-t border-retro-200 pt-6">
-                  <h3 className="text-lg font-semibold text-retro-900 mb-4">Progress Tracking</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-retro-50 rounded-lg p-4">
-                      <div className="text-sm text-retro-600 mb-2">Episodes Watched</div>
-                      <div className="text-2xl font-bold text-retro-900">3 / {content.episodes}</div>
-                      <div className="w-full bg-retro-200 rounded-full h-2 mt-2">
-                        <div 
-                          className="bg-retro-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(3 / content.episodes) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    <div className="bg-retro-50 rounded-lg p-4">
-                      <div className="text-sm text-retro-600 mb-2">Current Season</div>
-                      <div className="text-2xl font-bold text-retro-900">{content.season || 1}</div>
-                      <div className="text-sm text-retro-600 mt-1">of {content.totalSeasons || 1} seasons</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Seasons and Episodes Section */}
             {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
