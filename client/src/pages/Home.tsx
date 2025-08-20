@@ -80,12 +80,12 @@ export default function Home() {
 
   const popularTVShows = [
     {
-      id: "tv1",
+      id: "2",
       posterUrl: "https://picsum.photos/300/450?random=7",
-      title: "House of the Dragon",
+      title: "Mystery Series",
       type: "tv" as const,
       status: "ongoing" as const,
-      season: 2
+      season: 3
     },
     {
       id: "tv2",
@@ -131,13 +131,13 @@ export default function Home() {
 
   const popularAnime = [
     {
-      id: "anime1",
+      id: "3",
       posterUrl: "https://picsum.photos/300/450?random=13",
-      title: "Attack on Titan",
+      title: "Adventure Quest",
       type: "anime" as const,
-      status: "finished" as const,
-      season: 4,
-      episode: 28
+      status: "ongoing" as const,
+      season: 2,
+      episode: 12
     },
     {
       id: "anime2",
