@@ -277,14 +277,28 @@ export default function ContentDetails() {
 
               {/* Watchlist Button with Dropdown */}
               <div className="relative mb-4 w-64 mx-auto">
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full flex items-center justify-between px-6 py-3 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors font-medium shadow-md"
-                  data-testid="watchlist-button"
-                >
-                  <span>{selectedWatchlistStatus}</span>
-                  <ChevronDown className="w-5 h-5" />
-                </button>
+                <div className="flex bg-retro-500 rounded-lg overflow-hidden shadow-md">
+                  {/* Main Action Button */}
+                  <button
+                    onClick={() => handleWatchlistAction('want_to_watch')}
+                    className="flex-1 px-6 py-3 text-white font-medium hover:bg-retro-600 transition-colors"
+                    data-testid="watchlist-main-button"
+                  >
+                    Want to Watch
+                  </button>
+                  
+                  {/* Separator Line */}
+                  <div className="w-px bg-retro-600"></div>
+                  
+                  {/* Dropdown Trigger */}
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="px-3 py-3 text-white hover:bg-retro-600 transition-colors"
+                    data-testid="watchlist-dropdown-trigger"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
                 
                 {isDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-retro-200 z-10">
