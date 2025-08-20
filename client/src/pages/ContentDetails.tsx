@@ -368,18 +368,29 @@ export default function ContentDetails() {
             {(content.imdbRating || content.rottenTomatoesRating || content.rating) && (
               <div className="flex flex-wrap gap-6 mb-6">
                 {content.imdbRating && (
-                  <div className="flex items-center gap-2" data-testid="imdb-rating">
-                    <span className="font-semibold text-retro-900">IMDb:</span>
+                  <div className="flex items-center gap-3" data-testid="imdb-rating">
+                    {/* IMDb Logo */}
+                    <svg className="w-12 h-6" viewBox="0 0 64 32" fill="none">
+                      <rect width="64" height="32" rx="4" fill="#F5C518"/>
+                      <text x="32" y="20" fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000">IMDb</text>
+                    </svg>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{content.imdbRating}/10</span>
+                      <span className="font-medium text-lg">{content.imdbRating}/10</span>
                     </div>
                   </div>
                 )}
                 {content.rottenTomatoesRating && (
-                  <div className="flex items-center gap-2" data-testid="rotten-tomatoes-rating">
-                    <span className="font-semibold text-retro-900">Rotten Tomatoes:</span>
-                    <span className="font-medium">{content.rottenTomatoesRating}%</span>
+                  <div className="flex items-center gap-3" data-testid="rotten-tomatoes-rating">
+                    {/* Rotten Tomatoes Logo */}
+                    <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
+                      <circle cx="16" cy="16" r="16" fill="#FA320A"/>
+                      <path d="M16 6c-1.5 0-3 .5-4 1.5l-2-2c-.5-.5-1.5-.5-2 0s-.5 1.5 0 2l2 2C9.5 11 9 12.5 9 14c0 3.9 3.1 7 7 7s7-3.1 7-7c0-1.5-.5-3-1.5-4l2-2c.5-.5.5-1.5 0-2s-1.5-.5-2 0l-2 2C18 6.5 16.5 6 16 6z" fill="#FFFFFF"/>
+                      <circle cx="13" cy="13" r="1" fill="#FA320A"/>
+                      <circle cx="19" cy="13" r="1" fill="#FA320A"/>
+                      <path d="M13 17c0 1.7 1.3 3 3 3s3-1.3 3-3" stroke="#FA320A" strokeWidth="1" fill="none"/>
+                    </svg>
+                    <span className="font-medium text-lg">{content.rottenTomatoesRating}%</span>
                   </div>
                 )}
                 {content.rating && !content.imdbRating && (
