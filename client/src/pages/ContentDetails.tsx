@@ -496,61 +496,6 @@ export default function ContentDetails() {
               )}
             </div>
 
-            {/* Recommended Content */}
-            <div className="bg-white rounded-lg p-6 mb-8">
-              <h2 className="text-2xl font-bold text-retro-900 mb-4">Recommended for You</h2>
-              
-              {/* Genre Tags */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {content.genre?.map((genre, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer"
-                    data-testid={`genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-
-              {/* Recommended Content Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {getRecommendedContent(content).map((item, index) => (
-                  <div 
-                    key={index}
-                    className="group cursor-pointer"
-                    data-testid={`recommended-${index}`}
-                    onClick={() => navigate(`/content/${item.id}`)}
-                  >
-                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-retro-100 mb-3 group-hover:shadow-lg transition-shadow">
-                      <img
-                        src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                        alt={`${item.title} poster`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <h3 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center justify-between text-xs text-retro-600">
-                      <span>{item.year}</span>
-                      <span className="capitalize bg-retro-50 px-2 py-1 rounded">
-                        {item.type}
-                      </span>
-                    </div>
-                    {item.rating && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <svg className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                        <span className="text-xs text-retro-600">{item.rating}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Seasons and Episodes Section */}
             {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
               <div className="bg-white rounded-lg p-6 shadow-md mb-8">
@@ -650,6 +595,61 @@ export default function ContentDetails() {
                 </div>
               </div>
             )}
+
+            {/* Recommended Content */}
+            <div className="bg-white rounded-lg p-6 mb-8">
+              <h2 className="text-2xl font-bold text-retro-900 mb-4">Recommended for You</h2>
+              
+              {/* Genre Tags */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {content.genre?.map((genre, index) => (
+                  <span 
+                    key={index}
+                    className="px-3 py-1 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer"
+                    data-testid={`genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+
+              {/* Recommended Content Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {getRecommendedContent(content).map((item, index) => (
+                  <div 
+                    key={index}
+                    className="group cursor-pointer"
+                    data-testid={`recommended-${index}`}
+                    onClick={() => navigate(`/content/${item.id}`)}
+                  >
+                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-retro-100 mb-3 group-hover:shadow-lg transition-shadow">
+                      <img
+                        src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                        alt={`${item.title} poster`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <h3 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1">
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center justify-between text-xs text-retro-600">
+                      <span>{item.year}</span>
+                      <span className="capitalize bg-retro-50 px-2 py-1 rounded">
+                        {item.type}
+                      </span>
+                    </div>
+                    {item.rating && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <svg className="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        <span className="text-xs text-retro-600">{item.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
