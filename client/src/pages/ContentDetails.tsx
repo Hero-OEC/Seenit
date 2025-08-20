@@ -423,7 +423,7 @@ export default function ContentDetails() {
                       {content.genre.map((genre, index) => (
                         <span 
                           key={index}
-                          className="px-4 py-2 bg-retro-500 text-white rounded-full text-sm font-medium hover:bg-retro-600 transition-colors cursor-pointer"
+                          className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
                           data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                           {genre}
