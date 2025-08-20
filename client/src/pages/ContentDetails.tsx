@@ -158,7 +158,7 @@ export default function ContentDetails() {
               </div>
 
               {/* Watchlist Button with Dropdown */}
-              <div className="relative mb-4">
+              <div className="relative mb-4 w-64 mx-auto">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="w-full flex items-center justify-between px-6 py-3 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors font-medium shadow-md"
@@ -186,7 +186,7 @@ export default function ContentDetails() {
 
               {/* Streaming Platforms */}
               {content.streamingPlatforms && content.streamingPlatforms.length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-md">
+                <div className="bg-white rounded-lg p-4 shadow-md w-64 mx-auto">
                   <h3 className="font-semibold text-retro-900 mb-3">Watch On</h3>
                   <div className="space-y-2">
                     {content.streamingPlatforms.map((platform, index) => (
