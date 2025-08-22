@@ -9,7 +9,7 @@ import ContentDisplay from "@/components/ContentDisplay";
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
   const [, navigate] = useLocation();
-  const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watchlist");
+  const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Want to Watch");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [userRating, setUserRating] = useState<number>(0);
@@ -170,10 +170,20 @@ export default function ContentDetails() {
     const option = watchlistOptions.find(opt => opt.value === status);
     if (option) {
       setSelectedWatchlistStatus(option.label);
-      // TODO: Add API call to update user's watchlist
-      console.log(`Added to watchlist with status: ${status}`);
+      console.log(`Watchlist updated: ${option.label}`);
     }
     setIsDropdownOpen(false);
+  };
+
+  const getWatchlistButtonColor = () => {
+    switch (selectedWatchlistStatus) {
+      case "Currently Watching":
+        return "bg-blue-500 hover:bg-blue-600";
+      case "Watched":
+        return "bg-green-500 hover:bg-green-600";
+      default:
+        return "bg-retro-500 hover:bg-retro-600";
+    }
   };
 
   const handleRatingClick = (rating: number) => {
@@ -366,14 +376,14 @@ export default function ContentDetails() {
 
               {/* Watchlist Button with Dropdown */}
               <div className="relative mb-4 w-64 mx-auto">
-                <div className="flex bg-retro-500 rounded-lg overflow-hidden shadow-md">
+                <div className={`flex ${getWatchlistButtonColor()} rounded-lg overflow-hidden shadow-md`}>
                   {/* Main Action Button */}
                   <button
-                    onClick={() => handleWatchlistAction('want_to_watch')}
-                    className="flex-1 px-6 py-3 text-white font-medium hover:bg-retro-600 transition-colors"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex-1 px-6 py-3 text-white font-medium transition-colors"
                     data-testid="watchlist-main-button"
                   >
-                    Want to Watch
+                    {selectedWatchlistStatus}
                   </button>
                   
                   {/* Separator Line */}
@@ -382,7 +392,7 @@ export default function ContentDetails() {
                   {/* Dropdown Trigger */}
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="px-3 py-3 text-white hover:bg-retro-600 transition-colors"
+                    className="px-3 py-3 text-white opacity-75 hover:opacity-100 transition-opacity"
                     data-testid="watchlist-dropdown-trigger"
                   >
                     <ChevronDown className="w-4 h-4" />
