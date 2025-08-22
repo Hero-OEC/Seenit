@@ -161,17 +161,22 @@ export default function ContentDetails() {
   };
 
   const watchlistOptions = [
-    { value: "want_to_watch", label: "Add to Watch List" },
     { value: "added_to_watch_list", label: "Added to Watch List" },
     { value: "watching", label: "Currently Watching" },
     { value: "watched", label: "Watched" },
+    { value: "remove_from_watch_list", label: "Remove from Watch List" },
   ];
 
   const handleWatchlistAction = (status: string) => {
-    const option = watchlistOptions.find(opt => opt.value === status);
-    if (option) {
-      setSelectedWatchlistStatus(option.label);
-      console.log(`Watchlist updated: ${option.label}`);
+    if (status === "remove_from_watch_list") {
+      setSelectedWatchlistStatus("Add to Watch List");
+      console.log(`Watchlist updated: Removed from watch list`);
+    } else {
+      const option = watchlistOptions.find(opt => opt.value === status);
+      if (option) {
+        setSelectedWatchlistStatus(option.label);
+        console.log(`Watchlist updated: ${option.label}`);
+      }
     }
     setIsDropdownOpen(false);
   };
@@ -422,7 +427,11 @@ export default function ContentDetails() {
                       <button
                         key={option.value}
                         onClick={() => handleWatchlistAction(option.value)}
-                        className="w-full px-6 py-3 text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0"
+                        className={`w-full px-6 py-3 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0 ${
+                          option.value === "remove_from_watch_list" 
+                            ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 
+                            : "text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700"
+                        }`}
                         data-testid={`watchlist-option-${option.value}`}
                       >
                         {option.label}
