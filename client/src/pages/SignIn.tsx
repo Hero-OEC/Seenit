@@ -55,11 +55,6 @@ export default function SignIn() {
       {/* Left Panel - Features Showcase */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-retro-500 to-retro-600 text-white p-12 flex-col justify-center">
         <div className="max-w-md">
-          <img 
-            src={seenitLogo} 
-            alt="Seenit Logo" 
-            className="h-16 w-auto mb-4"
-          />
           <h1 className="text-4xl font-bold mb-6">
             Welcome to <span className="text-retro-200">Seenit</span>
           </h1>
@@ -102,8 +97,13 @@ export default function SignIn() {
       {/* Right Panel - Sign In Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Logo for mobile */}
-          <div className="lg:hidden text-center mb-8">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <img 
+              src={seenitLogo} 
+              alt="Seenit Logo" 
+              className="h-12 w-auto mx-auto mb-3"
+            />
             <h1 className="text-3xl font-bold text-retro-900">Seenit</h1>
             <p className="text-retro-600 mt-2">Track your entertainment journey</p>
           </div>
