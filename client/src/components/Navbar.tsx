@@ -92,6 +92,13 @@ export default function Navbar({
                 >
                   Watchlist
                 </button>
+                <Link href="/schedule">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/schedule" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-schedule">
+                    Schedule
+                  </span>
+                </Link>
               </>
             ) : (
               <>
@@ -242,6 +249,13 @@ export default function Navbar({
                       data-testid="mobile-nav-watchlist"
                     >
                       Watchlist
+                    </button>
+                    <button
+                      onClick={() => { window.location.href = "/schedule"; setIsMobileMenuOpen(false); }}
+                      className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
+                      data-testid="mobile-nav-schedule-signed-in"
+                    >
+                      Schedule
                     </button>
                   </>
                 ) : (
