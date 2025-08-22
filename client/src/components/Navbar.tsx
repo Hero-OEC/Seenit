@@ -19,7 +19,7 @@ interface NavbarProps {
 export default function Navbar({ 
   isSignedIn = false, 
   userName = "John Doe",
-  onGetStarted = () => console.log("Get started clicked"),
+  onGetStarted = () => { window.location.href = "/signin"; },
   onWatchlist = () => console.log("Watchlist clicked"),
   onSchedule = () => console.log("Schedule clicked"),
   onProfile = () => console.log("Profile clicked"),

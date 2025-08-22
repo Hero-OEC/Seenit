@@ -4,6 +4,7 @@ import ComponentsPage from "@/pages/components";
 import Discover from "@/pages/Discover";
 import Schedule from "@/pages/Schedule";
 import ContentDetails from "@/pages/ContentDetails";
+import SignIn from "@/pages/SignIn";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/discover" component={Discover} />
       <Route path="/schedule" component={Schedule} />
       <Route path="/content/:id" component={ContentDetails} />
+      <Route path="/signin" component={SignIn} />
       <Route path="/components" component={ComponentsPage} />
       <Route>
         <div className="min-h-screen flex items-center justify-center bg-retro-50">
