@@ -161,7 +161,7 @@ export default function ContentDetails() {
   };
 
   const watchlistOptions = [
-    { value: "added_to_watch_list", label: "Added to Watch List" },
+    { value: "added_to_watch_list", label: "Want to Watch" },
     { value: "watching", label: "Currently Watching" },
     { value: "watched", label: "Watched" },
     { value: "remove_from_watch_list", label: "Remove from Watch List" },
