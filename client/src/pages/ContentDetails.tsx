@@ -14,6 +14,9 @@ export default function ContentDetails() {
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
+  const [userComment, setUserComment] = useState<string>("");
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false); // For demo purposes
+  const [userName, setUserName] = useState<string>("John Doe");
 
   const { data: content, isLoading } = useQuery<Content>({
     queryKey: [`/api/content/${params?.id}`],
@@ -292,7 +295,17 @@ export default function ContentDetails() {
 
   return (
     <div className="min-h-screen bg-retro-50">
-      <Navbar onSearch={handleSearch} />
+      <Navbar 
+        onSearch={handleSearch}
+        isSignedIn={isSignedIn}
+        userName={userName}
+        onGetStarted={() => setIsSignedIn(true)}
+        onSignOut={() => {
+          setIsSignedIn(false);
+          setUserRating(0);
+          setUserComment("");
+        }}
+      />
 
       {/* Content Details */}
       <div className="max-w-7xl mx-auto pt-24 pb-8">
@@ -460,21 +473,77 @@ export default function ContentDetails() {
             <div className="bg-white rounded-lg p-6 shadow-md mb-8">
               <h2 className="text-2xl font-bold text-retro-900 mb-6">User Reviews</h2>
               
-              {/* Your Rating */}
-              <div className="border-b border-retro-200 pb-6 mb-6">
-                <h3 className="text-lg font-semibold text-retro-900 mb-3">Rate This {content.type === 'movie' ? 'Movie' : content.type === 'tv' ? 'TV Show' : 'Anime'}</h3>
-                <div className="flex items-center gap-4">
-                  {renderStarRating()}
-                  {userRating > 0 && (
-                    <span className="text-sm text-retro-600 font-medium">
-                      {userRating} out of 5 stars
-                    </span>
-                  )}
+              {/* Write Review Section - Only show when signed in */}
+              {isSignedIn && (
+                <div className="border-b border-retro-200 pb-6 mb-6">
+                  <h3 className="text-lg font-semibold text-retro-900 mb-4">Rate & Review This {content.type === 'movie' ? 'Movie' : content.type === 'tv' ? 'TV Show' : 'Anime'}</h3>
+                  
+                  {/* Rating Section */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-retro-700 mb-2">Your Rating</label>
+                    <div className="flex items-center gap-4">
+                      {renderStarRating()}
+                      {userRating > 0 && (
+                        <span className="text-sm text-retro-600 font-medium">
+                          {userRating} out of 5 stars
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Comment Section */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-retro-700 mb-2">Your Review</label>
+                    <textarea
+                      value={userComment}
+                      onChange={(e) => setUserComment(e.target.value)}
+                      placeholder="Share your thoughts about this content..."
+                      className="w-full p-3 border border-retro-300 rounded-lg focus:ring-2 focus:ring-retro-500 focus:border-retro-500 resize-none"
+                      rows={4}
+                      maxLength={500}
+                    />
+                    <div className="text-right text-xs text-retro-500 mt-1">
+                      {userComment.length}/500 characters
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      {(userRating > 0 || userComment.trim()) && (
+                        <p className="text-sm text-retro-600">
+                          {userRating > 0 && userComment.trim() ? "Thanks for your rating and review!" : 
+                           userRating > 0 ? "Thanks for rating!" : ""}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (userRating > 0 || userComment.trim()) {
+                          console.log(`User review submitted: Rating: ${userRating}, Comment: ${userComment}`);
+                        }
+                      }}
+                      disabled={userRating === 0 && !userComment.trim()}
+                      className="px-6 py-2 bg-retro-500 text-white rounded-lg hover:bg-retro-600 disabled:bg-retro-300 disabled:cursor-not-allowed transition-colors font-medium"
+                    >
+                      Submit Review
+                    </button>
+                  </div>
                 </div>
-                {userRating > 0 && (
-                  <p className="text-sm text-retro-600 mt-2">Thanks for rating!</p>
-                )}
-              </div>
+              )}
+
+              {/* Sign In Prompt for non-signed in users */}
+              {!isSignedIn && (
+                <div className="border-b border-retro-200 pb-6 mb-6 text-center">
+                  <p className="text-retro-600 mb-4">Sign in to rate and review this {content.type === 'movie' ? 'movie' : content.type === 'tv' ? 'TV show' : 'anime'}</p>
+                  <button
+                    onClick={() => setIsSignedIn(true)}
+                    className="px-6 py-2 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors font-medium"
+                  >
+                    Sign In to Review
+                  </button>
+                </div>
+              )}
 
               {/* Sample Reviews */}
               <div className="space-y-6">
@@ -694,7 +763,7 @@ export default function ContentDetails() {
                     posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
                     title={item.title}
                     type={item.type as "movie" | "tv" | "anime"}
-                    status={item.status === "airing" ? "ongoing" : "finished"}
+                    status="finished"
                     year={item.year}
                     size="small"
                     className="flex-shrink-0 w-40"
