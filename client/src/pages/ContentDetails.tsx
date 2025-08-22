@@ -208,7 +208,9 @@ export default function ContentDetails() {
         year: 2023,
         genre: ["Mystery", "Thriller"],
         rating: "8.7",
-        poster: null
+        poster: null,
+        season: 2,
+        episode: 8
       },
       {
         id: "rec2", 
@@ -226,7 +228,9 @@ export default function ContentDetails() {
         year: 2023,
         genre: ["Sci-Fi", "Action"],
         rating: "9.1",
-        poster: null
+        poster: null,
+        season: 1,
+        episode: 12
       },
       {
         id: "rec4",
@@ -244,7 +248,9 @@ export default function ContentDetails() {
         year: 2023,
         genre: ["Sci-Fi", "Adventure"],
         rating: "8.5",
-        poster: null
+        poster: null,
+        season: 3,
+        episode: 4
       },
       {
         id: "rec6",
@@ -262,7 +268,9 @@ export default function ContentDetails() {
         year: 2023,
         genre: ["Comedy", "Drama"],
         rating: "8.3",
-        poster: null
+        poster: null,
+        season: 1,
+        episode: 6
       },
       {
         id: "rec8",
@@ -271,7 +279,9 @@ export default function ContentDetails() {
         year: 2024,
         genre: ["Fantasy", "Adventure"],
         rating: "8.8",
-        poster: null
+        poster: null,
+        season: 2,
+        episode: 3
       }
     ];
 
@@ -421,6 +431,15 @@ export default function ContentDetails() {
                           </span>
                           <span>{item.year}</span>
                         </div>
+                        {/* Season/Episode Info for TV Shows and Anime */}
+                        {(item.type === "tv" || item.type === "anime") && (item.season !== undefined || item.episode !== undefined) && (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1">
+                            <Play className="w-2.5 h-2.5 fill-white" />
+                            {item.season !== undefined && `S${item.season}`}
+                            {item.season !== undefined && item.episode !== undefined && " • "}
+                            {item.episode !== undefined && `E${item.episode}`}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
