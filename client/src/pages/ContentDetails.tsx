@@ -654,18 +654,20 @@ export default function ContentDetails() {
                             {isEpisodeWatched(selectedSeason, episode.number) ? (
                               <button 
                                 onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                className="flex-shrink-0 w-8 h-8 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
+                                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white text-sm font-medium transition-colors"
                                 title="Mark as unwatched"
                               >
-                                <Check className="w-4 h-4 text-white" />
+                                <Check className="w-4 h-4" />
+                                Watched
                               </button>
                             ) : (
                               <button 
                                 onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors"
+                                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-retro-500 hover:bg-retro-600 rounded-lg text-white text-sm font-medium transition-colors"
                                 title="Mark as watched"
                               >
-                                <Check className="w-4 h-4 text-white" />
+                                <Check className="w-4 h-4" />
+                                Mark as Watched
                               </button>
                             )}
                           </div>
