@@ -183,7 +183,7 @@ export default function ContentDetails() {
 
   const getWatchlistButtonColor = () => {
     switch (selectedWatchlistStatus) {
-      case "Added to Watch List":
+      case "Want to Watch":
         return "bg-green-500 hover:bg-green-600";
       case "Currently Watching":
         return "bg-blue-500 hover:bg-blue-600";
@@ -407,7 +407,7 @@ export default function ContentDetails() {
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className={`px-3 py-3 text-white transition-all ${
-                      selectedWatchlistStatus === "Added to Watch List"
+                      selectedWatchlistStatus === "Want to Watch"
                         ? "bg-green-500 hover:bg-green-600"
                         : selectedWatchlistStatus === "Currently Watching" 
                         ? "bg-blue-500 hover:bg-blue-600" 
