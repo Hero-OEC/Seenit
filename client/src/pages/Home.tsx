@@ -5,7 +5,7 @@ import EpisodeDisplay from "@/components/EpisodeDisplay";
 
 export default function Home() {
   const handleGetStarted = () => {
-    console.log("Get started clicked");
+    window.location.href = "/signin";
   };
 
   const handleBrowse = (type: string) => {
