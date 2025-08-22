@@ -469,6 +469,113 @@ export default function ContentDetails() {
               </div>
             )}
 
+
+            {/* Synopsis */}
+            {content.overview && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-retro-900 mb-4">Synopsis</h2>
+                <p className="text-retro-700 leading-relaxed text-lg mb-6" data-testid="content-synopsis">
+                  {content.overview}
+                </p>
+                
+                {/* Genre Tags */}
+                {content.genre && content.genre.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {content.genre.map((genre, index) => (
+                        <span 
+                          key={index}
+                          className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
+                          data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {genre}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+            {/* Seasons and Episodes Section */}
+            {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
+              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+                <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
+
+                {/* Season Tabs */}
+                {content.totalSeasons && content.totalSeasons > 1 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {Array.from({ length: content.totalSeasons }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setSelectedSeason(i + 1)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          selectedSeason === i + 1
+                            ? 'bg-retro-500 text-white shadow-md'
+                            : 'border border-retro-300 text-retro-700 hover:bg-retro-50'
+                        }`}
+                        data-testid={`season-tab-${i + 1}`}
+                      >
+                        Season {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Episode List */}
+                <div>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-retro-900">Season {selectedSeason} Episodes</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {/* Sample episodes - in a real app this would come from API */}
+                    {generateSampleEpisodes(content).map((episode, index) => (
+                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors cursor-pointer" data-testid={`episode-${episode.number}`}>
+                        <div className="flex-shrink-0 w-20 h-12 bg-retro-200 rounded overflow-hidden">
+                          <img 
+                            src={`https://picsum.photos/160/90?random=${content.id}-ep${episode.number}`}
+                            alt={`Episode ${episode.number} thumbnail`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-medium text-retro-900 mb-1">
+                                {episode.number}. {episode.title}
+                              </h4>
+                              <p className="text-sm text-retro-600 line-clamp-2 mb-2">
+                                {episode.description}
+                              </p>
+                              <div className="flex items-center gap-4 text-xs text-retro-500">
+                                <span>{episode.duration}m</span>
+                                <span>{episode.airDate}</span>
+                                {episode.rating && <span>★ {episode.rating}</span>}
+                              </div>
+                            </div>
+                            {episode.watched ? (
+                              <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            ) : (
+                              <button className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors">
+                                <Play className="w-4 h-4 text-white fill-white" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* User Reviews Section */}
             <div className="bg-white rounded-lg p-6 shadow-md mb-8">
               <h2 className="text-2xl font-bold text-retro-900 mb-6">User Reviews</h2>
@@ -630,112 +737,6 @@ export default function ContentDetails() {
                 </button>
               </div>
             </div>
-
-            {/* Synopsis */}
-            {content.overview && (
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-retro-900 mb-4">Synopsis</h2>
-                <p className="text-retro-700 leading-relaxed text-lg mb-6" data-testid="content-synopsis">
-                  {content.overview}
-                </p>
-                
-                {/* Genre Tags */}
-                {content.genre && content.genre.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {content.genre.map((genre, index) => (
-                        <span 
-                          key={index}
-                          className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
-                          data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-
-            {/* Seasons and Episodes Section */}
-            {(content.type === "tv" || content.type === "anime") && (content.episodes || content.totalSeasons) && (
-              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
-                <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
-
-                {/* Season Tabs */}
-                {content.totalSeasons && content.totalSeasons > 1 && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {Array.from({ length: content.totalSeasons }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => setSelectedSeason(i + 1)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                          selectedSeason === i + 1
-                            ? 'bg-retro-500 text-white shadow-md'
-                            : 'border border-retro-300 text-retro-700 hover:bg-retro-50'
-                        }`}
-                        data-testid={`season-tab-${i + 1}`}
-                      >
-                        Season {i + 1}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Episode List */}
-                <div>
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-retro-900">Season {selectedSeason} Episodes</h3>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {/* Sample episodes - in a real app this would come from API */}
-                    {generateSampleEpisodes(content).map((episode, index) => (
-                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors cursor-pointer" data-testid={`episode-${episode.number}`}>
-                        <div className="flex-shrink-0 w-20 h-12 bg-retro-200 rounded overflow-hidden">
-                          <img 
-                            src={`https://picsum.photos/160/90?random=${content.id}-ep${episode.number}`}
-                            alt={`Episode ${episode.number} thumbnail`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="font-medium text-retro-900 mb-1">
-                                {episode.number}. {episode.title}
-                              </h4>
-                              <p className="text-sm text-retro-600 line-clamp-2 mb-2">
-                                {episode.description}
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-retro-500">
-                                <span>{episode.duration}m</span>
-                                <span>{episode.airDate}</span>
-                                {episode.rating && <span>★ {episode.rating}</span>}
-                              </div>
-                            </div>
-                            {episode.watched ? (
-                              <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                            ) : (
-                              <button className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors">
-                                <Play className="w-4 h-4 text-white fill-white" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Recommended Content */}
             <div className="bg-white rounded-lg p-6 mb-8">
