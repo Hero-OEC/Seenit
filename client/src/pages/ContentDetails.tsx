@@ -625,51 +625,43 @@ export default function ContentDetails() {
                     <h3 className="text-lg font-semibold text-retro-900">Season {selectedSeason} Episodes</h3>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-6">
                     {/* Sample episodes - in a real app this would come from API */}
                     {generateSampleEpisodes(content).map((episode, index) => (
-                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors" data-testid={`episode-${episode.number}`}>
-                        <div className="flex-shrink-0 w-20 h-12 bg-retro-200 rounded overflow-hidden">
-                          <img 
-                            src={`https://picsum.photos/160/90?random=${content.id}-ep${episode.number}`}
-                            alt={`Episode ${episode.number} thumbnail`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="font-medium text-retro-900 mb-1">
-                                {episode.number}. {episode.title}
+                      <div key={index} className="border-b border-retro-200 pb-6 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-lg font-medium text-blue-600 hover:text-blue-700 cursor-pointer transition-colors">
+                                S{selectedSeason.toString().padStart(2, '0')} E{episode.number.toString().padStart(2, '0')} • {episode.title}
                               </h4>
-                              <p className="text-sm text-retro-600 line-clamp-2 mb-2">
-                                {episode.description}
-                              </p>
-                              <div className="flex items-center gap-4 text-xs text-retro-500">
-                                <span>{episode.duration}m</span>
-                                <span>{episode.airDate}</span>
+                              {isEpisodeWatched(selectedSeason, episode.number) && (
+                                <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                  <Check className="w-3 h-3" />
+                                  Watched
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-retro-500 mb-3">{episode.airDate}</p>
+                            <p className="text-retro-700 leading-relaxed mb-4">{episode.description}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4 text-sm text-retro-500">
+                                <span>{episode.duration} min</span>
                                 {episode.rating && <span>★ {episode.rating}</span>}
                               </div>
+                              <button 
+                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  isEpisodeWatched(selectedSeason, episode.number)
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-retro-500 hover:bg-retro-600 text-white'
+                                }`}
+                                title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
+                              >
+                                <Check className="w-4 h-4" />
+                                {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
+                              </button>
                             </div>
-                            {isEpisodeWatched(selectedSeason, episode.number) ? (
-                              <button 
-                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-green-500 hover:bg-green-600 rounded-lg text-white text-sm font-medium transition-colors"
-                                title="Mark as unwatched"
-                              >
-                                <Check className="w-4 h-4" />
-                                Watched
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-retro-500 hover:bg-retro-600 rounded-lg text-white text-sm font-medium transition-colors"
-                                title="Mark as watched"
-                              >
-                                <Check className="w-4 h-4" />
-                                Mark as Watched
-                              </button>
-                            )}
                           </div>
                         </div>
                       </div>
