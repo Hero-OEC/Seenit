@@ -625,10 +625,10 @@ export default function ContentDetails() {
                     <h3 className="text-lg font-semibold text-retro-900">Season {selectedSeason} Episodes</h3>
                   </div>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {/* Sample episodes - in a real app this would come from API */}
                     {generateSampleEpisodes(content).map((episode, index) => (
-                      <div key={index} className="border-b border-retro-200 pb-6 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
+                      <div key={index} className="border-b border-retro-200 pb-4 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
