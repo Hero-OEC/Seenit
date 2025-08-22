@@ -102,10 +102,8 @@ export default function SignIn() {
             <img 
               src={seenitLogo} 
               alt="Seenit Logo" 
-              className="h-12 w-auto mx-auto mb-3"
+              className="h-20 w-auto mx-auto"
             />
-            <h1 className="text-3xl font-bold text-retro-900">Seenit</h1>
-            <p className="text-retro-600 mt-2">Track your entertainment journey</p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-8">
