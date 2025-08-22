@@ -162,6 +162,7 @@ export default function ContentDetails() {
 
   const watchlistOptions = [
     { value: "want_to_watch", label: "Add to Watch List" },
+    { value: "added_to_watch_list", label: "Added to Watch List" },
     { value: "watching", label: "Currently Watching" },
     { value: "watched", label: "Watched" },
   ];
@@ -177,10 +178,12 @@ export default function ContentDetails() {
 
   const getWatchlistButtonColor = () => {
     switch (selectedWatchlistStatus) {
+      case "Added to Watch List":
+        return "bg-green-500 hover:bg-green-600";
       case "Currently Watching":
         return "bg-blue-500 hover:bg-blue-600";
       case "Watched":
-        return "bg-green-500 hover:bg-green-600";
+        return "bg-gray-500 hover:bg-gray-600";
       default:
         return "bg-retro-500 hover:bg-retro-600";
     }
@@ -380,14 +383,11 @@ export default function ContentDetails() {
                   {/* Main Action Button */}
                   <button
                     onClick={() => {
-                      // Determine the next logical action based on current status
+                      // Only add to watch list if not already added
                       if (selectedWatchlistStatus === "Add to Watch List") {
-                        handleWatchlistAction("watching");
-                      } else if (selectedWatchlistStatus === "Currently Watching") {
-                        handleWatchlistAction("watched");
-                      } else if (selectedWatchlistStatus === "Watched") {
-                        handleWatchlistAction("want_to_watch");
+                        handleWatchlistAction("added_to_watch_list");
                       }
+                      // For other states, do nothing - user must use dropdown
                     }}
                     className={`flex-1 px-6 py-3 text-white font-medium transition-colors ${getWatchlistButtonColor()}`}
                     data-testid="watchlist-main-button"
@@ -402,10 +402,12 @@ export default function ContentDetails() {
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className={`px-3 py-3 text-white transition-all ${
-                      selectedWatchlistStatus === "Currently Watching" 
+                      selectedWatchlistStatus === "Added to Watch List"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : selectedWatchlistStatus === "Currently Watching" 
                         ? "bg-blue-500 hover:bg-blue-600" 
                         : selectedWatchlistStatus === "Watched"
-                        ? "bg-green-500 hover:bg-green-600"
+                        ? "bg-gray-500 hover:bg-gray-600"
                         : "bg-retro-500 hover:bg-retro-600"
                     } opacity-90 hover:opacity-100`}
                     data-testid="watchlist-dropdown-trigger"
