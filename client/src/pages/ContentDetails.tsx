@@ -376,7 +376,7 @@ export default function ContentDetails() {
 
               {/* Watchlist Button with Dropdown */}
               <div className="relative mb-4 w-64 mx-auto">
-                <div className={`flex ${getWatchlistButtonColor()} rounded-lg overflow-hidden shadow-md`}>
+                <div className="flex rounded-lg overflow-hidden shadow-md">
                   {/* Main Action Button */}
                   <button
                     onClick={() => {
@@ -389,7 +389,7 @@ export default function ContentDetails() {
                         handleWatchlistAction("want_to_watch");
                       }
                     }}
-                    className="flex-1 px-6 py-3 text-white font-medium transition-colors"
+                    className={`flex-1 px-6 py-3 text-white font-medium transition-colors ${getWatchlistButtonColor()}`}
                     data-testid="watchlist-main-button"
                   >
                     {selectedWatchlistStatus}
@@ -401,7 +401,13 @@ export default function ContentDetails() {
                   {/* Dropdown Trigger */}
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="px-3 py-3 text-white opacity-75 hover:opacity-100 transition-opacity"
+                    className={`px-3 py-3 text-white transition-all ${
+                      selectedWatchlistStatus === "Currently Watching" 
+                        ? "bg-blue-500 hover:bg-blue-600" 
+                        : selectedWatchlistStatus === "Watched"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-retro-500 hover:bg-retro-600"
+                    } opacity-90 hover:opacity-100`}
                     data-testid="watchlist-dropdown-trigger"
                   >
                     <ChevronDown className="w-4 h-4" />
