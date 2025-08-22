@@ -632,7 +632,7 @@ export default function ContentDetails() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                              <h4 className="text-lg font-medium text-blue-600 hover:text-blue-700 cursor-pointer transition-colors">
+                              <h4 className="text-lg font-medium text-retro-900">
                                 S{selectedSeason.toString().padStart(2, '0')} E{episode.number.toString().padStart(2, '0')} • {episode.title}
                               </h4>
                               {isEpisodeWatched(selectedSeason, episode.number) && (
