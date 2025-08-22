@@ -1,6 +1,6 @@
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Star, Play, ExternalLink, ChevronDown } from "lucide-react";
+import { Star, Play, ExternalLink, ChevronDown, Check } from "lucide-react";
 import { useState } from "react";
 import type { Content } from "@shared/schema";
 import Navbar from "@/components/Navbar";
@@ -16,6 +16,7 @@ export default function ContentDetails() {
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false); // For demo purposes
+  const [watchedEpisodes, setWatchedEpisodes] = useState<{[key: string]: boolean}>({});
   const [userName, setUserName] = useState<string>("John Doe");
 
   const { data: content, isLoading } = useQuery<Content>({
@@ -25,6 +26,19 @@ export default function ContentDetails() {
 
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);
+  };
+
+  const toggleEpisodeWatched = (seasonNumber: number, episodeNumber: number) => {
+    const episodeKey = `s${seasonNumber}e${episodeNumber}`;
+    setWatchedEpisodes(prev => ({
+      ...prev,
+      [episodeKey]: !prev[episodeKey]
+    }));
+  };
+
+  const isEpisodeWatched = (seasonNumber: number, episodeNumber: number) => {
+    const episodeKey = `s${seasonNumber}e${episodeNumber}`;
+    return watchedEpisodes[episodeKey] || false;
   };
 
   if (isLoading) {
@@ -597,7 +611,7 @@ export default function ContentDetails() {
                   <div className="space-y-3">
                     {/* Sample episodes - in a real app this would come from API */}
                     {generateSampleEpisodes(content).map((episode, index) => (
-                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors cursor-pointer" data-testid={`episode-${episode.number}`}>
+                      <div key={index} className="flex items-start gap-4 p-4 border border-retro-200 rounded-lg hover:bg-retro-50 transition-colors" data-testid={`episode-${episode.number}`}>
                         <div className="flex-shrink-0 w-20 h-12 bg-retro-200 rounded overflow-hidden">
                           <img 
                             src={`https://picsum.photos/160/90?random=${content.id}-ep${episode.number}`}
@@ -620,15 +634,21 @@ export default function ContentDetails() {
                                 {episode.rating && <span>★ {episode.rating}</span>}
                               </div>
                             </div>
-                            {episode.watched ? (
-                              <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
+                            {isEpisodeWatched(selectedSeason, episode.number) ? (
+                              <button 
+                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                className="flex-shrink-0 w-8 h-8 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
+                                title="Mark as unwatched"
+                              >
+                                <Check className="w-4 h-4 text-white" />
+                              </button>
                             ) : (
-                              <button className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors">
-                                <Play className="w-4 h-4 text-white fill-white" />
+                              <button 
+                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                className="flex-shrink-0 w-8 h-8 bg-retro-500 hover:bg-retro-600 rounded-full flex items-center justify-center transition-colors"
+                                title="Mark as watched"
+                              >
+                                <Check className="w-4 h-4 text-white" />
                               </button>
                             )}
                           </div>
