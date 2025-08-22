@@ -382,7 +382,7 @@ export default function ContentDetails() {
                     onClick={() => {
                       // Determine the next logical action based on current status
                       if (selectedWatchlistStatus === "Add to Watch List") {
-                        handleWatchlistAction("want_to_watch");
+                        handleWatchlistAction("watching");
                       } else if (selectedWatchlistStatus === "Currently Watching") {
                         handleWatchlistAction("watched");
                       } else if (selectedWatchlistStatus === "Watched") {
