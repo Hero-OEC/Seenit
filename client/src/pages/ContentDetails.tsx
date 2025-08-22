@@ -1,7 +1,7 @@
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Star, Play, ExternalLink, ChevronDown, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Content } from "@shared/schema";
 import Navbar from "@/components/Navbar";
 import ContentDisplay from "@/components/ContentDisplay";
@@ -23,6 +23,23 @@ export default function ContentDetails() {
     queryKey: [`/api/content/${params?.id}`],
     enabled: !!params?.id,
   });
+
+  // Initialize watched episodes from the generated sample data
+  useEffect(() => {
+    if (!content || (content.type !== "tv" && content.type !== "anime")) return;
+    
+    const episodes = generateSampleEpisodes(content);
+    const initialWatchedState: {[key: string]: boolean} = {};
+    
+    episodes.forEach(episode => {
+      if (episode.watched) {
+        const episodeKey = `s${selectedSeason}e${episode.number}`;
+        initialWatchedState[episodeKey] = true;
+      }
+    });
+    
+    setWatchedEpisodes(prev => ({ ...prev, ...initialWatchedState }));
+  }, [content, selectedSeason]);
 
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);
