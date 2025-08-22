@@ -23,27 +23,27 @@ export default function SignIn() {
 
   const features = [
     {
-      icon: <Star className="w-5 h-5 text-yellow-500" />,
+      icon: <Star className="w-5 h-5 text-white" />,
       title: "Personal Ratings & Reviews",
       description: "Rate and review your favorite movies, TV shows, and anime"
     },
     {
-      icon: <Heart className="w-5 h-5 text-red-500" />,
+      icon: <Heart className="w-5 h-5 text-white" />,
       title: "Custom Watchlists",
       description: "Create and organize your want-to-watch, watching, and watched lists"
     },
     {
-      icon: <TrendingUp className="w-5 h-5 text-green-500" />,
+      icon: <TrendingUp className="w-5 h-5 text-white" />,
       title: "Trending Content",
       description: "Discover what's popular and trending across all platforms"
     },
     {
-      icon: <Clock className="w-5 h-5 text-blue-500" />,
+      icon: <Clock className="w-5 h-5 text-white" />,
       title: "Track Your Progress",
       description: "Keep track of episodes watched and your viewing progress"
     },
     {
-      icon: <Play className="w-5 h-5 text-purple-500" />,
+      icon: <Play className="w-5 h-5 text-white" />,
       title: "Streaming Links",
       description: "Find where to watch your content across different platforms"
     }
@@ -63,8 +63,8 @@ export default function SignIn() {
           
           <div className="space-y-6">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4 group">
-                <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
                   {feature.icon}
                 </div>
                 <div>
