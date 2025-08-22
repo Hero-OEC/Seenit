@@ -382,6 +382,62 @@ export default function ContentDetails() {
                   </div>
                 </div>
               )}
+
+              {/* Recommended Content */}
+              <div className="bg-white rounded-lg p-4 shadow-md mt-6 w-64 mx-auto">
+                <h3 className="text-lg font-bold text-retro-900 mb-4">Recommended for You</h3>
+                
+                {/* Genre Tags */}
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {content.genre?.slice(0, 3).map((genre, index) => (
+                    <span 
+                      key={index}
+                      className="px-2 py-1 bg-retro-100 text-retro-700 rounded-full text-xs font-medium hover:bg-retro-200 transition-colors cursor-pointer"
+                      data-testid={`rec-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Recommended Content List - Vertical */}
+                <div className="space-y-3">
+                  {getRecommendedContent(content).slice(0, 6).map((item, index) => (
+                    <div key={index} className="flex gap-3 cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid={`recommended-${index}`}>
+                      <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
+                        <img 
+                          src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                          alt={`${item.title} poster`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1">
+                          {item.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-retro-600">
+                          <span className="capitalize">{item.type}</span>
+                          <span>•</span>
+                          <span>{item.year}</span>
+                        </div>
+                        {item.rating && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs text-retro-600">{item.rating}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* View More Button */}
+                <div className="mt-4 text-center">
+                  <button className="text-sm text-retro-600 hover:text-retro-800 font-medium">
+                    View More
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -738,41 +794,6 @@ export default function ContentDetails() {
               </div>
             </div>
 
-            {/* Recommended Content */}
-            <div className="bg-white rounded-lg p-6 mb-8">
-              <h2 className="text-2xl font-bold text-retro-900 mb-4">Recommended for You</h2>
-              
-              {/* Genre Tags */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                {content.genre?.map((genre, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer"
-                    data-testid={`genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-
-              {/* Recommended Content Grid */}
-              <div className="flex gap-4">
-                {getRecommendedContent(content).slice(0, 4).map((item, index) => (
-                  <ContentDisplay
-                    key={index}
-                    id={item.id}
-                    posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                    title={item.title}
-                    type={item.type as "movie" | "tv" | "anime"}
-                    status="finished"
-                    year={item.year}
-                    size="small"
-                    className="flex-shrink-0 w-40"
-                    data-testid={`recommended-${index}`}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
