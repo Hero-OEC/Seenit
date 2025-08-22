@@ -62,7 +62,7 @@ export default function ContentDetails() {
       case "tv":
         return "bg-emerald-500 text-white border-emerald-600";
       case "anime":
-        return "bg-violet-500 text-white border-violet-600";
+        return "bg-orange-500 text-white border-orange-600";
       default:
         return "bg-slate-500 text-white border-slate-600";
     }
