@@ -9,7 +9,7 @@ import ContentDisplay from "@/components/ContentDisplay";
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
   const [, navigate] = useLocation();
-  const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Want to Watch");
+  const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watch List");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [userRating, setUserRating] = useState<number>(0);
@@ -161,7 +161,7 @@ export default function ContentDetails() {
   };
 
   const watchlistOptions = [
-    { value: "want_to_watch", label: "Want to Watch" },
+    { value: "want_to_watch", label: "Add to Watch List" },
     { value: "watching", label: "Currently Watching" },
     { value: "watched", label: "Watched" },
   ];
