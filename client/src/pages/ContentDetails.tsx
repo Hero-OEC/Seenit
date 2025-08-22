@@ -379,7 +379,16 @@ export default function ContentDetails() {
                 <div className={`flex ${getWatchlistButtonColor()} rounded-lg overflow-hidden shadow-md`}>
                   {/* Main Action Button */}
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onClick={() => {
+                      // Determine the next logical action based on current status
+                      if (selectedWatchlistStatus === "Add to Watch List") {
+                        handleWatchlistAction("want_to_watch");
+                      } else if (selectedWatchlistStatus === "Currently Watching") {
+                        handleWatchlistAction("watched");
+                      } else if (selectedWatchlistStatus === "Watched") {
+                        handleWatchlistAction("want_to_watch");
+                      }
+                    }}
                     className="flex-1 px-6 py-3 text-white font-medium transition-colors"
                     data-testid="watchlist-main-button"
                   >
