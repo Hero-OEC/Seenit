@@ -420,7 +420,7 @@ export default function ContentDetails() {
                       <button
                         key={option.value}
                         onClick={() => handleWatchlistAction(option.value)}
-                        className="w-full px-6 py-3 text-left hover:bg-retro-50 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                        className="w-full px-6 py-3 text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0"
                         data-testid={`watchlist-option-${option.value}`}
                       >
                         {option.label}
