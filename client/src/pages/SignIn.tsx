@@ -180,6 +180,16 @@ export default function SignIn() {
                   "Sign In"
                 )}
               </Button>
+
+              {/* Temporary Demo Button */}
+              <Button
+                type="button"
+                onClick={() => navigate("/")}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 mt-3"
+                data-testid="demo-signin-button"
+              >
+                Demo Sign In (Skip Authentication)
+              </Button>
             </form>
 
             <div className="mt-6 text-center">
