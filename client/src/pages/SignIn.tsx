@@ -4,22 +4,39 @@ import { Button } from "@/components/ui/button";
 import Input from "@/components/Input";
 import { Check, Play, Star, TrendingUp, Heart, Clock } from "lucide-react";
 import seenitLogo from "@/assets/Seenit.svg";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignIn() {
   const [, navigate] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate sign in process
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await signIn(email, password);
       navigate("/");
-    }, 1500);
+    } catch (error) {
+      console.error("Sign in failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("demo@seenit.com", "demo");
+      navigate("/");
+    } catch (error) {
+      console.error("Demo sign in failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const features = [
@@ -184,11 +201,19 @@ export default function SignIn() {
               {/* Temporary Demo Button */}
               <Button
                 type="button"
-                onClick={() => navigate("/")}
+                onClick={handleDemoSignIn}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 mt-3"
+                disabled={isLoading}
                 data-testid="demo-signin-button"
               >
-                Demo Sign In (Skip Authentication)
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Signing In...
+                  </div>
+                ) : (
+                  "Demo Sign In (Skip Authentication)"
+                )}
               </Button>
             </form>
 
