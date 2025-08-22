@@ -423,7 +423,12 @@ export default function ContentDetails() {
                 
                 {isDropdownOpen && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-retro-200 z-10">
-                    {watchlistOptions.map((option) => (
+                    {watchlistOptions
+                      .filter(option => 
+                        // Only show remove option if item is already added to watchlist
+                        option.value !== "remove_from_watch_list" || selectedWatchlistStatus !== "Add to Watch List"
+                      )
+                      .map((option) => (
                       <button
                         key={option.value}
                         onClick={() => handleWatchlistAction(option.value)}
