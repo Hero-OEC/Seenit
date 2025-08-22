@@ -421,12 +421,6 @@ export default function ContentDetails() {
                           </span>
                           <span>{item.year}</span>
                         </div>
-                        {item.rating && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs text-retro-600">{item.rating}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))}
