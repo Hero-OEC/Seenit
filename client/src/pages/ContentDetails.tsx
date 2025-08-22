@@ -186,7 +186,7 @@ export default function ContentDetails() {
       case "Want to Watch":
         return "bg-green-500 hover:bg-green-600";
       case "Currently Watching":
-        return "bg-blue-500 hover:bg-blue-600";
+        return "bg-orange-500 hover:bg-orange-600";
       case "Watched":
         return "bg-gray-500 hover:bg-gray-600";
       default:
@@ -410,7 +410,7 @@ export default function ContentDetails() {
                       selectedWatchlistStatus === "Want to Watch"
                         ? "bg-green-500 hover:bg-green-600"
                         : selectedWatchlistStatus === "Currently Watching" 
-                        ? "bg-blue-500 hover:bg-blue-600" 
+                        ? "bg-orange-500 hover:bg-orange-600" 
                         : selectedWatchlistStatus === "Watched"
                         ? "bg-gray-500 hover:bg-gray-600"
                         : "bg-retro-500 hover:bg-retro-600"
