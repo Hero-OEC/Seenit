@@ -415,9 +415,10 @@ export default function ContentDetails() {
                         <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1">
                           {item.title}
                         </h4>
-                        <div className="flex items-center gap-2 text-xs text-retro-600">
-                          <span className="capitalize">{item.type}</span>
-                          <span>•</span>
+                        <div className="flex items-center gap-2 text-xs text-retro-600 mb-1">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getTypeBadgeColor(item.type)}`}>
+                            {getTypeLabel(item.type)}
+                          </span>
                           <span>{item.year}</span>
                         </div>
                         {item.rating && (
