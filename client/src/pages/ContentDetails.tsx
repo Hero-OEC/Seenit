@@ -431,12 +431,6 @@ export default function ContentDetails() {
                   ))}
                 </div>
 
-                {/* View More Button */}
-                <div className="mt-4 text-center">
-                  <button className="text-sm text-retro-600 hover:text-retro-800 font-medium">
-                    View More
-                  </button>
-                </div>
               </div>
             </div>
           </div>
