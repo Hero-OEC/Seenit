@@ -401,7 +401,15 @@ export default function ContentDetails() {
                   </button>
                   
                   {/* Separator Line */}
-                  <div className="w-px bg-retro-600"></div>
+                  <div className={`w-px ${
+                    selectedWatchlistStatus === "Want to Watch"
+                      ? "bg-green-600"
+                      : selectedWatchlistStatus === "Currently Watching" 
+                      ? "bg-orange-600" 
+                      : selectedWatchlistStatus === "Watched"
+                      ? "bg-gray-600"
+                      : "bg-retro-600"
+                  }`}></div>
                   
                   {/* Dropdown Trigger */}
                   <button
