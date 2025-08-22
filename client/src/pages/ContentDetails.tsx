@@ -649,18 +649,20 @@ export default function ContentDetails() {
                                 <span>{episode.duration} min</span>
                                 {episode.rating && <span>★ {episode.rating}</span>}
                               </div>
-                              <button 
-                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  isEpisodeWatched(selectedSeason, episode.number)
-                                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                                    : 'bg-retro-500 hover:bg-retro-600 text-white'
-                                }`}
-                                title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
-                              >
-                                <Check className="w-4 h-4" />
-                                {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
-                              </button>
+                              {isSignedIn && (
+                                <button 
+                                  onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    isEpisodeWatched(selectedSeason, episode.number)
+                                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                                      : 'bg-retro-500 hover:bg-retro-600 text-white'
+                                  }`}
+                                  title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
+                                >
+                                  <Check className="w-4 h-4" />
+                                  {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
