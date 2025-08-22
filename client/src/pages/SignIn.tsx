@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import Input from "@/components/Input";
 import { Check, Play, Star, TrendingUp, Heart, Clock } from "lucide-react";
+import seenitLogo from "@/assets/Seenit.svg";
 
 export default function SignIn() {
   const [, navigate] = useLocation();
@@ -54,6 +55,11 @@ export default function SignIn() {
       {/* Left Panel - Features Showcase */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-retro-500 to-retro-600 text-white p-12 flex-col justify-center">
         <div className="max-w-md">
+          <img 
+            src={seenitLogo} 
+            alt="Seenit Logo" 
+            className="h-16 w-auto mb-4"
+          />
           <h1 className="text-4xl font-bold mb-6">
             Welcome to <span className="text-retro-200">Seenit</span>
           </h1>
