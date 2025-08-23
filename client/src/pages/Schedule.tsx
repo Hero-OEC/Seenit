@@ -126,8 +126,7 @@ export default function Schedule() {
     return {
       currentSeason,
       currentEpisode,
-      status: Math.random() > 0.5 ? "Airing" : "Upcoming",
-      airTime: `${Math.floor(Math.random() * 12) + 1}:${Math.random() > 0.5 ? '00' : '30'} ${Math.random() > 0.5 ? 'PM' : 'AM'}`
+      status: Math.random() > 0.5 ? "Airing" : "Upcoming"
     };
   };
 
@@ -265,11 +264,6 @@ export default function Schedule() {
                                       onClick={() => console.log(`Clicked ${item.title}`)}
                                       className="w-full"
                                     />
-                                    <div className="mt-1 text-center">
-                                      <p className="text-xs text-retro-500 font-medium">
-                                        {episodeInfo.airTime}
-                                      </p>
-                                    </div>
                                   </div>
                                 );
                               })}
