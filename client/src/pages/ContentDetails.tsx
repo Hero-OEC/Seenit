@@ -4,6 +4,7 @@ import { Star, Play, ExternalLink, ChevronDown, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Content } from "@shared/schema";
 import ContentDisplay from "@/components/ContentDisplay";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
@@ -14,9 +15,8 @@ export default function ContentDetails() {
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
-  const [isSignedIn, setIsSignedIn] = useState<boolean>(false); // For demo purposes
   const [watchedEpisodes, setWatchedEpisodes] = useState<{[key: string]: boolean}>({});
-  const [userName, setUserName] = useState<string>("John Doe");
+  const { user, isSignedIn } = useAuth();
 
   const { data: content, isLoading } = useQuery<Content>({
     queryKey: [`/api/content/${params?.id}`],
@@ -775,7 +775,7 @@ export default function ContentDetails() {
                 <div className="border-b border-retro-200 pb-6 mb-6 text-center">
                   <p className="text-retro-600 mb-4">Sign in to rate and review this {content.type === 'movie' ? 'movie' : content.type === 'tv' ? 'TV show' : 'anime'}</p>
                   <button
-                    onClick={() => setIsSignedIn(true)}
+                    onClick={() => navigate("/signin")}
                     className="px-6 py-2 bg-retro-500 text-white rounded-lg hover:bg-retro-600 transition-colors font-medium"
                   >
                     Sign In to Review
