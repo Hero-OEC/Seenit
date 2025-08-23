@@ -288,6 +288,64 @@ export class MemStorage implements IStorage {
     sampleContent.forEach(content => {
       this.content.set(content.id, content);
     });
+
+    // Initialize sample user content for demo user (id: '1')
+    const sampleUserContent: UserContent[] = [
+      {
+        id: randomUUID(),
+        userId: '1',
+        contentId: '2', // Mystery Series
+        status: 'watching',
+        progress: 15,
+        userRating: 4,
+        addedAt: new Date('2024-08-20'),
+        updatedAt: new Date('2024-08-22')
+      },
+      {
+        id: randomUUID(),
+        userId: '1',
+        contentId: '3', // Adventure Quest
+        status: 'watching',
+        progress: 8,
+        userRating: null,
+        addedAt: new Date('2024-08-18'),
+        updatedAt: new Date('2024-08-21')
+      },
+      {
+        id: randomUUID(),
+        userId: '1',
+        contentId: '1', // Action Hero
+        status: 'want_to_watch',
+        progress: 0,
+        userRating: null,
+        addedAt: new Date('2024-08-15'),
+        updatedAt: new Date('2024-08-15')
+      },
+      {
+        id: randomUUID(),
+        userId: '1',
+        contentId: '4', // Love Story
+        status: 'want_to_watch',
+        progress: 0,
+        userRating: null,
+        addedAt: new Date('2024-08-19'),
+        updatedAt: new Date('2024-08-19')
+      },
+      {
+        id: randomUUID(),
+        userId: '1',
+        contentId: '5', // Space Odyssey
+        status: 'want_to_watch',
+        progress: 0,
+        userRating: null,
+        addedAt: new Date('2024-08-16'),
+        updatedAt: new Date('2024-08-16')
+      }
+    ];
+
+    sampleUserContent.forEach(userContent => {
+      this.userContent.set(userContent.id, userContent);
+    });
   }
 }
 

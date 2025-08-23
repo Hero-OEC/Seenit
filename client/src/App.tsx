@@ -5,6 +5,7 @@ import Discover from "@/pages/Discover";
 import Schedule from "@/pages/Schedule";
 import ContentDetails from "@/pages/ContentDetails";
 import SignIn from "@/pages/SignIn";
+import Watchlist from "@/pages/Watchlist";
 import Navbar from "@/components/Navbar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
@@ -22,8 +23,7 @@ function AppContent() {
   };
 
   const handleWatchlist = () => {
-    // TODO: Navigate to watchlist page when implemented
-    console.log("Navigate to watchlist");
+    setLocation("/watchlist");
   };
 
   const handleProfile = () => {
@@ -52,6 +52,7 @@ function AppContent() {
           <Route path="/" component={Home} />
           <Route path="/discover" component={Discover} />
           <Route path="/schedule" component={Schedule} />
+          <Route path="/watchlist" component={Watchlist} />
           <Route path="/content/:id" component={ContentDetails} />
           <Route path="/signin" component={SignIn} />
           <Route path="/components" component={ComponentsPage} />

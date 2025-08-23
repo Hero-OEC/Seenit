@@ -85,13 +85,13 @@ export default function Navbar({
                     Home
                   </span>
                 </Link>
-                <button
-                  onClick={onWatchlist}
-                  className="font-headline text-sm text-retro-900 hover:text-retro-500 transition-colors"
-                  data-testid="nav-watchlist"
-                >
-                  Watchlist
-                </button>
+                <Link href="/watchlist">
+                  <span className={`font-headline text-sm transition-colors cursor-pointer ${
+                    location === "/watchlist" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
+                  }`} data-testid="nav-watchlist">
+                    Watchlist
+                  </span>
+                </Link>
                 <Link href="/schedule">
                   <span className={`font-headline text-sm transition-colors cursor-pointer ${
                     location === "/schedule" ? "text-retro-600 font-semibold" : "text-retro-900 hover:text-retro-500"
@@ -244,7 +244,7 @@ export default function Navbar({
                       Home
                     </button>
                     <button
-                      onClick={() => { onWatchlist(); setIsMobileMenuOpen(false); }}
+                      onClick={() => { window.location.href = "/watchlist"; setIsMobileMenuOpen(false); }}
                       className="block w-full text-left py-2 px-3 font-headline text-sm text-retro-900 hover:bg-retro-100 rounded-lg transition-colors"
                       data-testid="mobile-nav-watchlist"
                     >
