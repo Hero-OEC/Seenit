@@ -5,7 +5,7 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
 import ContentDisplay from "@/components/ContentDisplay";
-import { Calendar, Tv } from "lucide-react";
+import { Calendar, Tv, ChevronDown, ChevronRight } from "lucide-react";
 import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
 
@@ -17,6 +17,7 @@ export default function Schedule() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortBy>("air_date");
   const [location] = useLocation();
+  const [openDays, setOpenDays] = useState<Set<number>>(new Set([0])); // Today is open by default
 
   // Parse URL parameters to set initial content type
   useEffect(() => {
@@ -79,23 +80,65 @@ export default function Schedule() {
       }
     });
 
-  // Mock episode data for demonstration
-  const getEpisodeInfo = (item: Content) => {
+  // Generate 7 days starting from today
+  const generateWeekDays = () => {
+    const days = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      days.push({
+        index: i,
+        dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()],
+        fullDayName: dayNames[date.getDay()],
+        date: date.getDate(),
+        month: monthNames[date.getMonth()],
+        fullDate: date,
+        isToday: i === 0
+      });
+    }
+    return days;
+  };
+
+  const weekDays = generateWeekDays();
+
+  // Toggle day section open/closed
+  const toggleDay = (dayIndex: number) => {
+    const newOpenDays = new Set(openDays);
+    if (newOpenDays.has(dayIndex)) {
+      newOpenDays.delete(dayIndex);
+    } else {
+      newOpenDays.add(dayIndex);
+    }
+    setOpenDays(newOpenDays);
+  };
+
+  // Mock episode data and distribute across the week
+  const getEpisodeInfo = (item: Content, dayIndex: number) => {
     const currentSeason = Math.floor(Math.random() * 5) + 1;
-    const totalSeasons = currentSeason + Math.floor(Math.random() * 3);
     const currentEpisode = Math.floor(Math.random() * 12) + 1;
-    const totalEpisodes = currentEpisode + Math.floor(Math.random() * 8);
-    const nextAirDate = new Date();
-    nextAirDate.setDate(nextAirDate.getDate() + Math.floor(Math.random() * 14));
     
     return {
       currentSeason,
-      totalSeasons,
       currentEpisode,
-      totalEpisodes,
-      nextAirDate: nextAirDate.toLocaleDateString(),
-      status: Math.random() > 0.5 ? "Airing" : "Upcoming"
+      status: Math.random() > 0.5 ? "Airing" : "Upcoming",
+      airTime: `${Math.floor(Math.random() * 12) + 1}:${Math.random() > 0.5 ? '00' : '30'} ${Math.random() > 0.5 ? 'PM' : 'AM'}`
     };
+  };
+
+  // Distribute content across the week for each day
+  const getContentForDay = (dayIndex: number) => {
+    const shuffledContent = [...filteredAndSortedContent].sort(() => Math.random() - 0.5);
+    const contentPerDay = Math.ceil(shuffledContent.length / 7);
+    const startIndex = dayIndex * contentPerDay;
+    const endIndex = Math.min(startIndex + contentPerDay, shuffledContent.length);
+    
+    return shuffledContent.slice(startIndex, endIndex);
   };
 
   return (
@@ -144,43 +187,104 @@ export default function Schedule() {
               </div>
             </div>
 
-            {/* Content Grid */}
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-retro-900 mb-4 capitalize">
-                {contentTypeConfig[activeContentType].label}
-              </h2>
-              
+            {/* Weekly Schedule Sections */}
+            <div className="space-y-4">
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="bg-retro-200 rounded-lg aspect-[16/9] mb-3"></div>
-                      <div className="bg-retro-200 rounded h-4 mb-2"></div>
-                      <div className="bg-retro-200 rounded h-3 w-3/4"></div>
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="animate-pulse bg-white rounded-lg p-6 shadow-sm">
+                      <div className="bg-retro-200 rounded h-6 w-48 mb-4"></div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {Array.from({ length: 3 }).map((_, j) => (
+                          <div key={j} className="bg-retro-200 rounded-lg aspect-[16/9]"></div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {filteredAndSortedContent.map((item) => {
-                    const episodeInfo = getEpisodeInfo(item);
-                    
-                    return (
-                      <ContentDisplay
-                        key={item.id}
-                        posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                        title={item.title}
-                        type={activeContentType as "tv" | "anime"}
-                        status={episodeInfo.status === "Airing" ? "ongoing" : "coming-soon"}
-                        season={episodeInfo.currentSeason}
-                        episode={episodeInfo.currentEpisode}
-                        size="small"
-                        onClick={() => console.log(`Clicked ${item.title}`)}
-                        className="w-full"
-                      />
-                    );
-                  })}
-                </div>
+                weekDays.map((day) => {
+                  const dayContent = getContentForDay(day.index);
+                  const isOpen = openDays.has(day.index);
+                  
+                  return (
+                    <div key={day.index} className="bg-white rounded-lg shadow-sm border border-retro-200 overflow-hidden">
+                      {/* Day Header - Always visible */}
+                      <button
+                        onClick={() => toggleDay(day.index)}
+                        className="w-full flex items-center justify-between p-6 hover:bg-retro-50 transition-colors text-left"
+                        data-testid={`day-header-${day.index}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex items-center justify-center w-12 h-12 rounded-full ${
+                            day.isToday 
+                              ? 'bg-retro-500 text-white' 
+                              : 'bg-retro-100 text-retro-700'
+                          }`}>
+                            <span className="font-bold text-lg">{day.date}</span>
+                          </div>
+                          <div>
+                            <h2 className={`text-xl font-semibold ${
+                              day.isToday ? 'text-retro-900' : 'text-retro-800'
+                            }`}>
+                              {day.dayName}
+                              {day.isToday && <span className="ml-2 text-sm font-normal text-retro-600">• What's New</span>}
+                            </h2>
+                            <p className="text-sm text-retro-500">
+                              {day.month} {day.date} • {dayContent.length} show{dayContent.length !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isOpen ? (
+                            <ChevronDown className="w-5 h-5 text-retro-400" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-retro-400" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Day Content - Collapsible */}
+                      {isOpen && (
+                        <div className="border-t border-retro-200 p-6">
+                          {dayContent.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                              {dayContent.map((item) => {
+                                const episodeInfo = getEpisodeInfo(item, day.index);
+                                
+                                return (
+                                  <div key={`${day.index}-${item.id}`} className="group">
+                                    <ContentDisplay
+                                      posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                                      title={item.title}
+                                      type={activeContentType as "tv" | "anime"}
+                                      status={episodeInfo.status === "Airing" ? "ongoing" : "coming-soon"}
+                                      season={episodeInfo.currentSeason}
+                                      episode={episodeInfo.currentEpisode}
+                                      size="small"
+                                      onClick={() => console.log(`Clicked ${item.title}`)}
+                                      className="w-full"
+                                    />
+                                    <div className="mt-2 text-center">
+                                      <p className="text-xs text-retro-500 font-medium">
+                                        {episodeInfo.airTime}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <Calendar className="w-12 h-12 mx-auto text-retro-300 mb-3" />
+                              <p className="text-retro-500">No shows scheduled for this day</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
 
               {!isLoading && filteredAndSortedContent.length === 0 && (
