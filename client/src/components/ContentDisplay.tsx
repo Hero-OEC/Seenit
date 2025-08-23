@@ -19,8 +19,8 @@ export interface ContentDisplayProps {
   episode?: number;
   /** Optional year of release */
   year?: number;
-  /** Size variant - default or small */
-  size?: "default" | "small";
+  /** Size variant - default, small, or list */
+  size?: "default" | "small" | "list";
   /** Click handler for the content card */
   onClick?: () => void;
   /** Additional CSS classes */
@@ -98,6 +98,7 @@ export default function ContentDisplay({
   };
 
   const isSmall = size === "small";
+  const isList = size === "list";
 
   const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
     if (id) {
@@ -124,6 +125,45 @@ export default function ContentDisplay({
     );
   };
 
+  // List variant layout (horizontal)
+  if (isList) {
+    return (
+      <ContentWrapper>
+        <div className="flex gap-3 cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid="content-display-list">
+          <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
+            <img 
+              src={posterUrl}
+              alt={`${title} poster`}
+              className="w-full h-full object-cover"
+              data-testid="content-poster-list"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1" data-testid="content-title-list">
+              {title}
+            </h4>
+            <div className="flex items-center gap-2 text-xs text-retro-600 mb-1">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getTypeBadgeColor(type)}`} data-testid="content-type-badge-list">
+                {getTypeLabel(type)}
+              </span>
+              {year && <span data-testid="content-year-list">{year}</span>}
+            </div>
+            {/* Season/Episode Info for TV Shows and Anime */}
+            {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1" data-testid="content-episode-info-list">
+                <Play className="w-2.5 h-2.5 fill-white" />
+                {season !== undefined && `S${season}`}
+                {season !== undefined && episode !== undefined && " • "}
+                {episode !== undefined && `E${episode}`}
+              </div>
+            )}
+          </div>
+        </div>
+      </ContentWrapper>
+    );
+  }
+
+  // Default and small variant layout (vertical)
   return (
     <ContentWrapper>
       {/* Poster Container - 2:3 Aspect Ratio */}

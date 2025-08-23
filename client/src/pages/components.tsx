@@ -6,6 +6,7 @@ import RadioButton from "@/components/RadioButton";
 import Checkbox from "@/components/Checkbox";
 import Toggle from "@/components/Toggle";
 import ContentDisplay from "@/components/ContentDisplay";
+import SidePanel from "@/components/SidePanel";
 import Tags, { Tag, MOVIE_GENRES, TV_GENRES, ANIME_GENRES } from "@/components/Tags";
 import { HeroSection } from "@/components/HeroSection";
 
@@ -996,6 +997,42 @@ import Input from "@/components/Input";
               </div>
             </div>
 
+            {/* List Variant Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">List Variant (Horizontal Layout)</h3>
+              <div className="space-y-3 bg-gray-50 p-4 rounded-lg max-w-md">
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
+                  title="Avatar: The Way of Water"
+                  type="movie"
+                  status="finished"
+                  year={2022}
+                  size="list"
+                  onClick={() => alert("Clicked Avatar!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/1qpUk27LVI9UoTS7S0EixUBj5aR.jpg"
+                  title="The Last of Us"
+                  type="tv"
+                  status="finished"
+                  season={1}
+                  episode={9}
+                  size="list"
+                  onClick={() => alert("Clicked The Last of Us!")}
+                />
+                <ContentDisplay
+                  posterUrl="https://image.tmdb.org/t/p/w300/tL4McUK15VMrQWiuxG9VkdTOpaR.jpg"
+                  title="Attack on Titan"
+                  type="anime"
+                  status="finished"
+                  season={4}
+                  episode={28}
+                  size="list"
+                  onClick={() => alert("Clicked Attack on Titan!")}
+                />
+              </div>
+            </div>
+
             {/* Usage Examples */}
             <div>
               <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
@@ -1052,8 +1089,247 @@ import ContentDisplay from "@/components/ContentDisplay";
   status="finished"
   size="small"
   onClick={() => handleClick()}
+/>
+
+// List variant (horizontal layout)
+<ContentDisplay
+  posterUrl="https://example.com/poster.jpg"
+  title="List Item"
+  type="tv"
+  status="ongoing"
+  season={2}
+  episode={8}
+  size="list"
+  onClick={() => handleClick()}
 />`}
                 </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SidePanel Component Showcase */}
+        <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
+          <h2 className="font-semibold text-2xl text-retro-900 mb-6">
+            SidePanel Component
+          </h2>
+          <p className="text-gray-600 mb-6">
+            A versatile side panel component for displaying related content, recommendations, or watchlists. Features horizontal content layout with genre tags and customizable styling.
+          </p>
+
+          <div className="space-y-8">
+            {/* Basic Side Panel Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Side Panels</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Recommendations Panel */}
+                <SidePanel
+                  title="Recommended for You"
+                  genreTags={["Action", "Adventure", "Sci-Fi"]}
+                  items={[
+                    {
+                      id: "rec-1",
+                      posterUrl: "https://picsum.photos/300/450?random=101",
+                      title: "Action Chronicles",
+                      type: "movie",
+                      year: 2024
+                    },
+                    {
+                      id: "rec-2",
+                      posterUrl: "https://picsum.photos/300/450?random=102",
+                      title: "Cyber Anime",
+                      type: "anime",
+                      year: 2023,
+                      season: 1,
+                      episode: 12
+                    },
+                    {
+                      id: "rec-3",
+                      posterUrl: "https://picsum.photos/300/450?random=103",
+                      title: "Space Odyssey",
+                      type: "tv",
+                      year: 2023,
+                      season: 3,
+                      episode: 4
+                    },
+                    {
+                      id: "rec-4",
+                      posterUrl: "https://picsum.photos/300/450?random=104",
+                      title: "Fantasy Quest",
+                      type: "anime",
+                      year: 2024,
+                      season: 2,
+                      episode: 3
+                    }
+                  ]}
+                  onItemClick={(item) => alert(`Clicked ${item.title}!`)}
+                  onGenreClick={(genre) => alert(`Clicked genre: ${genre}!`)}
+                />
+
+                {/* Watchlist Panel */}
+                <SidePanel
+                  title="Continue Watching"
+                  items={[
+                    {
+                      id: "watch-1",
+                      posterUrl: "https://picsum.photos/300/450?random=201",
+                      title: "Romance Heights",
+                      type: "movie",
+                      year: 2024
+                    },
+                    {
+                      id: "watch-2",
+                      posterUrl: "https://picsum.photos/300/450?random=202",
+                      title: "Horror Nights",
+                      type: "movie",
+                      year: 2024
+                    },
+                    {
+                      id: "watch-3",
+                      posterUrl: "https://picsum.photos/300/450?random=203",
+                      title: "Mystery Detective",
+                      type: "tv",
+                      year: 2023,
+                      season: 2,
+                      episode: 8
+                    }
+                  ]}
+                  maxItems={3}
+                  onItemClick={(item) => alert(`Continue watching ${item.title}!`)}
+                />
+              </div>
+            </div>
+
+            {/* Different Width Panels */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Different Widths</h3>
+              <div className="flex flex-wrap gap-6 justify-center">
+                <SidePanel
+                  title="Narrow Panel"
+                  width="w-48"
+                  items={[
+                    {
+                      id: "narrow-1",
+                      posterUrl: "https://picsum.photos/300/450?random=301",
+                      title: "Short Title",
+                      type: "movie",
+                      year: 2024
+                    },
+                    {
+                      id: "narrow-2",
+                      posterUrl: "https://picsum.photos/300/450?random=302",
+                      title: "Another One",
+                      type: "tv",
+                      year: 2023,
+                      season: 1,
+                      episode: 5
+                    }
+                  ]}
+                  maxItems={2}
+                />
+
+                <SidePanel
+                  title="Wide Panel"
+                  width="w-80"
+                  genreTags={["Drama", "Thriller", "Mystery", "Crime"]}
+                  items={[
+                    {
+                      id: "wide-1",
+                      posterUrl: "https://picsum.photos/300/450?random=401",
+                      title: "Long Title That Spans Multiple Lines",
+                      type: "movie",
+                      year: 2024
+                    },
+                    {
+                      id: "wide-2",
+                      posterUrl: "https://picsum.photos/300/450?random=402",
+                      title: "Crime Investigation Series",
+                      type: "tv",
+                      year: 2023,
+                      season: 4,
+                      episode: 12
+                    }
+                  ]}
+                  maxItems={2}
+                />
+              </div>
+            </div>
+
+            {/* Usage Examples */}
+            <div>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">Usage Examples</h3>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <pre className="text-sm text-gray-800 overflow-x-auto">
+{`// Import the SidePanel component
+import SidePanel from "@/components/SidePanel";
+
+// Basic side panel
+<SidePanel
+  title="Recommended for You"
+  items={contentItems}
+  onItemClick={(item) => handleItemClick(item)}
+/>
+
+// With genre tags
+<SidePanel
+  title="Similar Movies"
+  genreTags={["Action", "Adventure", "Sci-Fi"]}
+  items={movieItems}
+  onGenreClick={(genre) => filterByGenre(genre)}
+/>
+
+// Custom width and max items
+<SidePanel
+  title="Continue Watching"
+  width="w-80"
+  maxItems={4}
+  items={watchlistItems}
+/>
+
+// Item structure
+const items = [
+  {
+    id: "1",
+    posterUrl: "/poster.jpg",
+    title: "Content Title",
+    type: "movie", // or "tv" or "anime"
+    year: 2024,
+    season: 1, // optional for tv/anime
+    episode: 5 // optional for tv/anime
+  }
+];`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Features List */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium text-lg text-retro-900 mb-3">Features</h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li>• Uses ContentDisplay component with list variant</li>
+                  <li>• Optional genre tags at the top</li>
+                  <li>• Customizable panel width</li>
+                  <li>• Click handlers for items and genres</li>
+                  <li>• Maximum items limit with "View All" button</li>
+                  <li>• Responsive design with shadow and rounded corners</li>
+                  <li>• Empty state handling</li>
+                  <li>• Consistent with retro design theme</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-lg text-retro-900 mb-3">Use Cases</h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li>• Content recommendations</li>
+                  <li>• Related/similar content suggestions</li>
+                  <li>• User watchlists and favorites</li>
+                  <li>• Recently viewed content</li>
+                  <li>• Continue watching lists</li>
+                  <li>• Genre-based content collections</li>
+                  <li>• Sidebar navigation for content</li>
+                  <li>• Content discovery panels</li>
+                </ul>
               </div>
             </div>
           </div>
