@@ -188,13 +188,13 @@ export default function Schedule() {
             </div>
 
             {/* Weekly Schedule Sections */}
-            <div className="space-y-4">
+            <div className="space-y-2">
               {isLoading ? (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white rounded-lg p-6 shadow-sm">
-                      <div className="bg-retro-200 rounded h-6 w-48 mb-4"></div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div key={i} className="animate-pulse bg-white rounded-lg p-4 shadow-sm">
+                      <div className="bg-retro-200 rounded h-4 w-36 mb-3"></div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {Array.from({ length: 3 }).map((_, j) => (
                           <div key={j} className="bg-retro-200 rounded-lg aspect-[16/9]"></div>
                         ))}
@@ -212,43 +212,43 @@ export default function Schedule() {
                       {/* Day Header - Always visible */}
                       <button
                         onClick={() => toggleDay(day.index)}
-                        className="w-full flex items-center justify-between p-6 hover:bg-retro-50 transition-colors text-left"
+                        className="w-full flex items-center justify-between p-4 hover:bg-retro-50 transition-colors text-left"
                         data-testid={`day-header-${day.index}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className={`flex items-center justify-center w-12 h-12 rounded-full ${
+                        <div className="flex items-center gap-3">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
                             day.isToday 
                               ? 'bg-retro-500 text-white' 
                               : 'bg-retro-100 text-retro-700'
                           }`}>
-                            <span className="font-bold text-lg">{day.date}</span>
+                            <span className="font-bold text-sm">{day.date}</span>
                           </div>
                           <div>
-                            <h2 className={`text-xl font-semibold ${
+                            <h2 className={`text-lg font-semibold ${
                               day.isToday ? 'text-retro-900' : 'text-retro-800'
                             }`}>
                               {day.dayName}
-                              {day.isToday && <span className="ml-2 text-sm font-normal text-retro-600">• What's New</span>}
+                              {day.isToday && <span className="ml-2 text-xs font-normal text-retro-600">• What's New</span>}
                             </h2>
-                            <p className="text-sm text-retro-500">
+                            <p className="text-xs text-retro-500">
                               {day.month} {day.date} • {dayContent.length} show{dayContent.length !== 1 ? 's' : ''}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {isOpen ? (
-                            <ChevronDown className="w-5 h-5 text-retro-400" />
+                            <ChevronDown className="w-4 h-4 text-retro-400" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-retro-400" />
+                            <ChevronRight className="w-4 h-4 text-retro-400" />
                           )}
                         </div>
                       </button>
 
                       {/* Day Content - Collapsible */}
                       {isOpen && (
-                        <div className="border-t border-retro-200 p-6">
+                        <div className="border-t border-retro-200 p-4">
                           {dayContent.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                               {dayContent.map((item) => {
                                 const episodeInfo = getEpisodeInfo(item, day.index);
                                 
@@ -265,7 +265,7 @@ export default function Schedule() {
                                       onClick={() => console.log(`Clicked ${item.title}`)}
                                       className="w-full"
                                     />
-                                    <div className="mt-2 text-center">
+                                    <div className="mt-1 text-center">
                                       <p className="text-xs text-retro-500 font-medium">
                                         {episodeInfo.airTime}
                                       </p>
@@ -275,9 +275,9 @@ export default function Schedule() {
                               })}
                             </div>
                           ) : (
-                            <div className="text-center py-8">
-                              <Calendar className="w-12 h-12 mx-auto text-retro-300 mb-3" />
-                              <p className="text-retro-500">No shows scheduled for this day</p>
+                            <div className="text-center py-6">
+                              <Calendar className="w-8 h-8 mx-auto text-retro-300 mb-2" />
+                              <p className="text-sm text-retro-500">No shows scheduled for this day</p>
                             </div>
                           )}
                         </div>
