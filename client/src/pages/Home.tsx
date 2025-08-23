@@ -1,5 +1,4 @@
 import { HeroSection } from "@/components/HeroSection";
-import Navbar from "@/components/Navbar";
 import ContentDisplay from "@/components/ContentDisplay";
 import EpisodeDisplay from "@/components/EpisodeDisplay";
 import { useAuth } from "@/contexts/AuthContext";
@@ -239,17 +238,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-retro-50 relative">
-      <Navbar
-        isSignedIn={isSignedIn}
-        userName={user?.name}
-        onGetStarted={handleGetStarted}
-        onSchedule={handleSchedule}
-        onSearch={handleSearch}
-        onSignOut={signOut}
-        onProfile={() => console.log("Profile clicked")}
-        onWatchlist={() => console.log("Watchlist clicked")}
-      />
-      
       <main>
         <HeroSection
           content={{

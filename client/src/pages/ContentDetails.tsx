@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Star, Play, ExternalLink, ChevronDown, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Content } from "@shared/schema";
-import Navbar from "@/components/Navbar";
 import ContentDisplay from "@/components/ContentDisplay";
 
 export default function ContentDetails() {
@@ -61,7 +60,6 @@ export default function ContentDetails() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-retro-50">
-        <Navbar onSearch={handleSearch} />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-retro-500 mx-auto mb-4"></div>
@@ -75,7 +73,6 @@ export default function ContentDetails() {
   if (!content) {
     return (
       <div className="min-h-screen bg-retro-50">
-        <Navbar onSearch={handleSearch} />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-retro-900 mb-4">Content Not Found</h1>
@@ -354,20 +351,8 @@ export default function ContentDetails() {
 
   return (
     <div className="min-h-screen bg-retro-50">
-      <Navbar 
-        onSearch={handleSearch}
-        isSignedIn={isSignedIn}
-        userName={userName}
-        onGetStarted={() => setIsSignedIn(true)}
-        onSignOut={() => {
-          setIsSignedIn(false);
-          setUserRating(0);
-          setUserComment("");
-        }}
-      />
-
       {/* Content Details */}
-      <div className="max-w-7xl mx-auto pt-24 pb-8">
+      <div className="max-w-7xl mx-auto pt-8 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Poster and Actions */}
           <div className="lg:col-span-1">

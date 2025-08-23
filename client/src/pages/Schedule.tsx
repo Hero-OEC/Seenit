@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
@@ -101,13 +100,6 @@ export default function Schedule() {
 
   return (
     <div className="min-h-screen bg-retro-50">
-      <Navbar 
-        isSignedIn={false}
-        onGetStarted={() => console.log("Get started clicked")}
-        onSchedule={() => window.location.href = "/schedule"}
-        onSearch={(query: string) => console.log(`Search: ${query}`)}
-      />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
