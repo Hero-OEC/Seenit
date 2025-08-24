@@ -81,7 +81,7 @@ export default function StatusUpdateButton({
 
   return (
     <div className={`relative ${size === 'small' ? 'mb-0' : 'mb-4'} ${containerWidth} ${className}`}>
-      <div className={`flex ${buttonHeight} rounded-lg overflow-hidden ${isSmall ? 'shadow-sm' : 'shadow-md'}`}>
+      <div className={`flex ${buttonHeight} rounded-5px overflow-hidden ${isSmall ? 'shadow-sm' : 'shadow-md'}`}>
         {/* Main Action Button */}
         <button
           onClick={(e) => {
