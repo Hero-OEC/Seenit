@@ -83,7 +83,11 @@ export default function StatusUpdateButton({
       <div className={`flex rounded-lg overflow-hidden ${isSmall ? 'shadow-sm' : 'shadow-md'}`}>
         {/* Main Action Button */}
         <button
-          onClick={handleMainClick}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleMainClick();
+          }}
           className={`flex-1 ${buttonPadding} text-white font-medium transition-colors ${fontSize} ${getStatusButtonColor()}`}
           data-testid={`${testIdPrefix}-main-button`}
         >
@@ -95,7 +99,11 @@ export default function StatusUpdateButton({
         
         {/* Dropdown Trigger */}
         <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDropdownOpen(!isDropdownOpen);
+          }}
           className={`${dropdownTriggerPadding} text-white transition-all ${getStatusButtonColor()} opacity-90 hover:opacity-100`}
           data-testid={`${testIdPrefix}-dropdown-trigger`}
         >
@@ -113,7 +121,11 @@ export default function StatusUpdateButton({
             .map((option) => (
             <button
               key={option.value}
-              onClick={() => handleOptionClick(option.value)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOptionClick(option.value);
+              }}
               className={`w-full ${dropdownPadding} transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0 ${fontSize} ${
                 option.value === "remove_from_watch_list" 
                   ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 

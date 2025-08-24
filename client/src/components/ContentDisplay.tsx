@@ -187,7 +187,10 @@ export default function ContentDisplay({
           {showWatchlistDropdown && (
             <div 
               className="mt-2"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
             >
               <StatusUpdateButton
                 status={watchlistStatus}
