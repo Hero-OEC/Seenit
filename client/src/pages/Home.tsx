@@ -1,12 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
 import { HeroSection } from "@/components/HeroSection";
 import ContentDisplay from "@/components/ContentDisplay";
 import EpisodeDisplay from "@/components/EpisodeDisplay";
+import SidePanel, { type SidePanelItem } from "@/components/SidePanel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 
 export default function Home() {
   const { isSignedIn, user, signOut } = useAuth();
   const [, navigate] = useLocation();
+
+  // Fetch user data when signed in
+  const { data: currentlyWatching } = useQuery<any[]>({
+    queryKey: ["/api/users", user?.id, "content/status/watching"],
+    enabled: !!user?.id && isSignedIn,
+  });
+
+  const { data: recommendedContent } = useQuery<any[]>({
+    queryKey: ["/api/content", "recommended"],
+    enabled: !!user?.id && isSignedIn,
+  });
 
   const handleGetStarted = () => {
     navigate("/signin");
@@ -236,27 +249,207 @@ export default function Home() {
     }
   ];
 
+  // Transform currently watching data for SidePanel
+  const currentlyWatchingSidePanelItems: SidePanelItem[] = (currentlyWatching || []).map(item => ({
+    id: item.content?.id || item.id,
+    posterUrl: item.content?.poster || "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
+    title: item.content?.title || "Unknown Title",
+    type: item.content?.type || "movie",
+    year: item.content?.year || undefined,
+    season: item.content?.season || undefined,
+    episode: undefined
+  })).filter(item => item.title !== "Unknown Title");
+
+  // Transform recommended content for SidePanel
+  const recommendedSidePanelItems: SidePanelItem[] = (recommendedContent || popularMovies.slice(0, 4)).map(item => ({
+    id: item.id,
+    posterUrl: item.posterUrl || item.poster || `https://picsum.photos/300/450?random=${item.id}`,
+    title: item.title,
+    type: item.type,
+    year: item.year || undefined,
+    season: item.season || undefined,
+    episode: item.episode || undefined
+  }));
+
+  const handleWatchlistAction = (itemId: string, action: string) => {
+    console.log(`Watchlist action for ${itemId}: ${action}`);
+  };
+
   return (
     <div className="min-h-screen bg-retro-50 relative">
       <main>
-        <HeroSection
-          content={{
-            id: "featured-movie",
-            title: "Dune: Part Two",
-            description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
-            year: 2024,
-            rating: "PG-13",
-            duration: "2h 46m",
-            genres: ["Sci-Fi", "Adventure", "Drama"],
-            platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
-            trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
-          }}
-          onAddToList={() => console.log("Add to Watchlist clicked!")}
-          onViewDetails={() => console.log("View Details clicked!")}
-        />
+        {/* Show hero section only when not signed in */}
+        {!isSignedIn && (
+          <HeroSection
+            content={{
+              id: "featured-movie",
+              title: "Dune: Part Two",
+              description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
+              year: 2024,
+              rating: "PG-13",
+              duration: "2h 46m",
+              genres: ["Sci-Fi", "Adventure", "Drama"],
+              platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
+              trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+              posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+            }}
+            onAddToList={() => console.log("Add to Watchlist clicked!")}
+            onViewDetails={() => console.log("View Details clicked!")}
+          />
+        )}
         
-        {/* Content sections below hero */}
+        {/* Signed-in user layout */}
+        {isSignedIn && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Left Sidebar - Currently Watching */}
+              <aside className="lg:w-80 flex-shrink-0">
+                <SidePanel
+                  title="Currently Watching"
+                  items={currentlyWatchingSidePanelItems}
+                  variant="currently-watching"
+                  width="w-full"
+                  onItemClick={(item) => navigate(`/content/${item.id}`)}
+                  onWatchlistAction={handleWatchlistAction}
+                  maxItems={6}
+                />
+              </aside>
+
+              {/* Main Content */}
+              <main className="flex-1 space-y-12">
+                {/* New Movies Section */}
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-retro-900">New Movies</h2>
+                    <button 
+                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
+                      onClick={() => handleBrowse("Movies")}
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {popularMovies.slice(0, 4).map((movie) => (
+                      <ContentDisplay
+                        key={movie.id}
+                        id={movie.id}
+                        posterUrl={movie.posterUrl}
+                        title={movie.title}
+                        type={movie.type}
+                        status={movie.status}
+                        year={movie.year}
+                        onClick={() => console.log(`Clicked movie: ${movie.title}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* New TV Episodes Section */}
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-retro-900">New TV Episodes</h2>
+                    <button 
+                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
+                      onClick={() => handleBrowse("TV Shows")}
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {newEpisodes.filter(ep => ep.type === "tv").slice(0, 3).map((episode) => (
+                      <EpisodeDisplay
+                        key={episode.id}
+                        thumbnailUrl={episode.thumbnailUrl}
+                        showTitle={episode.showTitle}
+                        episodeTitle={episode.episodeTitle}
+                        type={episode.type}
+                        status={episode.status}
+                        season={episode.season}
+                        episode={episode.episode}
+                        duration={episode.duration}
+                        onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* New Anime Episodes Section */}
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-retro-900">New Anime Episodes</h2>
+                    <button 
+                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
+                      onClick={() => handleBrowse("Anime")}
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {newEpisodes.filter(ep => ep.type === "anime").slice(0, 3).map((episode) => (
+                      <EpisodeDisplay
+                        key={episode.id}
+                        thumbnailUrl={episode.thumbnailUrl}
+                        showTitle={episode.showTitle}
+                        episodeTitle={episode.episodeTitle}
+                        type={episode.type}
+                        status={episode.status}
+                        season={episode.season}
+                        episode={episode.episode}
+                        duration={episode.duration}
+                        onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* Genre-based Recommendations */}
+                <section>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-retro-900">Sci-Fi Recommendations</h2>
+                    <button 
+                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
+                      onClick={() => navigate("/discover?genre=sci-fi")}
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {[...popularMovies.slice(0, 2), ...popularAnime.slice(0, 2)].map((item) => (
+                      <ContentDisplay
+                        key={item.id}
+                        id={item.id}
+                        posterUrl={item.posterUrl}
+                        title={item.title}
+                        type={item.type}
+                        status={item.status}
+                        year={(item as any).year || undefined}
+                        season={(item as any).season || undefined}
+                        onClick={() => console.log(`Clicked: ${item.title}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              </main>
+
+              {/* Right Sidebar - Recommended for You */}
+              <aside className="lg:w-80 flex-shrink-0">
+                <SidePanel
+                  title="Recommended for You"
+                  items={recommendedSidePanelItems}
+                  variant="recommended"
+                  width="w-full"
+                  genreTags={["Action", "Adventure", "Sci-Fi"]}
+                  onItemClick={(item) => navigate(`/content/${item.id}`)}
+                  onGenreClick={(genre) => navigate(`/discover?genre=${genre.toLowerCase()}`)}
+                  maxItems={6}
+                />
+              </aside>
+            </div>
+          </div>
+        )}
+        
+        {/* Content sections below hero - only show for non-signed-in users */}
+        {!isSignedIn && (
         <div className="bg-retro-50">
           {/* Popular Movies Section */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -397,6 +590,7 @@ export default function Home() {
             </div>
           </section>
         </div>
+        )}
       </main>
     </div>
   );

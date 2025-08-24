@@ -44,7 +44,7 @@ export default function Navbar({
   }, [searchQuery]);
 
   // Search results query
-  const { data: searchResults, isLoading: isSearching } = useQuery({
+  const { data: searchResults, isLoading: isSearching } = useQuery<any[]>({
     queryKey: ["/api/content/search", debouncedSearchQuery],
     enabled: debouncedSearchQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
