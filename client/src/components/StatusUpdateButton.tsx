@@ -127,9 +127,9 @@ export default function StatusUpdateButton({
                 e.stopPropagation();
                 handleOptionClick(option.value);
               }}
-              className={`relative flex w-full cursor-pointer select-none items-center py-2 px-6 text-sm outline-none first:rounded-t-md last:rounded-b-md ${
+              className={`relative flex w-full cursor-pointer select-none items-center justify-center py-2 px-3 text-sm outline-none first:rounded-t-md last:rounded-b-md ${
                 option.value === "remove_from_watch_list" 
-                  ? "text-red-600 hover:bg-red-50 focus:bg-red-50 font-medium justify-center" 
+                  ? "text-red-600 hover:bg-red-50 focus:bg-red-50 font-medium" 
                   : "text-retro-900 hover:bg-retro-100 focus:bg-retro-100"
               }`}
               data-testid={`${testIdPrefix}-option-${option.value}`}
