@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import Button from "@/components/Button";
 import Dropdown from "@/components/Dropdown";
 import Input from "@/components/Input";
+import ContentDisplay from "@/components/ContentDisplay";
 import seenitLogo from "@/assets/Seenit.svg";
 
 interface NavbarProps {
@@ -28,17 +30,81 @@ export default function Navbar({
 }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Search results query
+  const { data: searchResults, isLoading: isSearching } = useQuery({
+    queryKey: ["/api/content/search", debouncedSearchQuery],
+    enabled: debouncedSearchQuery.length >= 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Handle clicks outside search to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Show/hide search results based on query and focus
+  useEffect(() => {
+    if (debouncedSearchQuery.length >= 2) {
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
+  }, [debouncedSearchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       onSearch(searchQuery.trim());
+      setShowSearchResults(false);
     }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const handleSearchFocus = () => {
+    if (debouncedSearchQuery.length >= 2) {
+      setShowSearchResults(true);
+    }
+  };
+
+  const handleResultClick = (contentId: string) => {
+    window.location.href = `/content/${contentId}`;
+    setShowSearchResults(false);
+    setSearchQuery("");
+  };
+
+  const mapStatusToContentStatus = (status: string | null) => {
+    switch (status) {
+      case "airing":
+        return "ongoing" as const;
+      case "completed":
+        return "finished" as const;
+      case "upcoming":
+        return "coming-soon" as const;
+      default:
+        return "finished" as const;
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -128,13 +194,14 @@ export default function Navbar({
           </div>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-[20rem] mx-6">
+          <div className="hidden md:flex flex-1 max-w-[20rem] mx-6 relative" ref={searchRef}>
             <form onSubmit={handleSearchSubmit} className="w-full">
               <Input
                 type="text"
                 placeholder="Search movies, TV shows, anime..."
                 value={searchQuery}
                 onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
                 leftIcon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -144,6 +211,45 @@ export default function Navbar({
                 data-testid="navbar-search"
               />
             </form>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-retro-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                {isSearching ? (
+                  <div className="p-4 text-center text-retro-600">
+                    <div className="animate-spin inline-block w-4 h-4 border-2 border-retro-300 border-t-retro-500 rounded-full"></div>
+                    <span className="ml-2">Searching...</span>
+                  </div>
+                ) : searchResults && searchResults.length > 0 ? (
+                  <div className="py-2">
+                    {searchResults.slice(0, 8).map((result: any) => (
+                      <div key={result.id} className="px-2">
+                        <ContentDisplay
+                          id={result.id}
+                          posterUrl={result.poster || `https://picsum.photos/300/450?random=${result.id}`}
+                          title={result.title}
+                          type={result.type}
+                          status={mapStatusToContentStatus(result.status)}
+                          year={result.year || undefined}
+                          season={result.season || undefined}
+                          size="list"
+                          onClick={() => handleResultClick(result.id)}
+                        />
+                      </div>
+                    ))}
+                    {searchResults.length > 8 && (
+                      <div className="px-4 py-2 text-xs text-retro-500 border-t border-retro-100">
+                        Showing first 8 results. Press Enter to see all results.
+                      </div>
+                    )}
+                  </div>
+                ) : debouncedSearchQuery.length >= 2 ? (
+                  <div className="p-4 text-center text-retro-600">
+                    No results found for "{debouncedSearchQuery}"
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -216,21 +322,63 @@ export default function Navbar({
           <div className="md:hidden bg-white border-t border-retro-200">
             <div className="px-4 py-4 space-y-4">
               {/* Mobile Search */}
-              <form onSubmit={handleSearchSubmit}>
-                <Input
-                  type="text"
-                  placeholder="Search movies, TV shows, anime..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  leftIcon={
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  }
-                  className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
-                  data-testid="mobile-navbar-search"
-                />
-              </form>
+              <div className="relative">
+                <form onSubmit={handleSearchSubmit}>
+                  <Input
+                    type="text"
+                    placeholder="Search movies, TV shows, anime..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={handleSearchFocus}
+                    leftIcon={
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    }
+                    className="bg-white/80 border-retro-300 focus:border-retro-500 focus:ring-retro-500"
+                    data-testid="mobile-navbar-search"
+                  />
+                </form>
+                
+                {/* Mobile Search Results Dropdown */}
+                {showSearchResults && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-retro-200 rounded-lg shadow-lg max-h-80 overflow-y-auto z-50">
+                    {isSearching ? (
+                      <div className="p-4 text-center text-retro-600">
+                        <div className="animate-spin inline-block w-4 h-4 border-2 border-retro-300 border-t-retro-500 rounded-full"></div>
+                        <span className="ml-2">Searching...</span>
+                      </div>
+                    ) : searchResults && searchResults.length > 0 ? (
+                      <div className="py-2">
+                        {searchResults.slice(0, 6).map((result: any) => (
+                          <div key={result.id} className="px-2">
+                            <ContentDisplay
+                              id={result.id}
+                              posterUrl={result.poster || `https://picsum.photos/300/450?random=${result.id}`}
+                              title={result.title}
+                              type={result.type}
+                              status={mapStatusToContentStatus(result.status)}
+                              year={result.year || undefined}
+                              season={result.season || undefined}
+                              size="list"
+                              onClick={() => handleResultClick(result.id)}
+                            />
+                          </div>
+                        ))}
+                        {searchResults.length > 6 && (
+                          <div className="px-4 py-2 text-xs text-retro-500 border-t border-retro-100">
+                            Showing first 6 results. Press Enter to see all results.
+                          </div>
+                        )}
+                      </div>
+                    ) : debouncedSearchQuery.length >= 2 ? (
+                      <div className="p-4 text-center text-retro-600">
+                        No results found for "{debouncedSearchQuery}"
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
 
               {/* Mobile Navigation */}
               <div className="space-y-3">
