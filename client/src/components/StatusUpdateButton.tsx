@@ -112,7 +112,7 @@ export default function StatusUpdateButton({
       </div>
       
       {isDropdownOpen && (
-        <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded ${isSmall ? 'shadow-md' : 'shadow-lg'} border border-retro-200 z-10`}>
+        <div className={`absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-retro-300 rounded-md shadow-lg max-h-60 overflow-auto`}>
           {options
             .filter(option => 
               // Remove "Currently Watching" option from dropdown
@@ -128,10 +128,10 @@ export default function StatusUpdateButton({
                 e.stopPropagation();
                 handleOptionClick(option.value);
               }}
-              className={`w-full ${dropdownPadding} transition-all duration-200 first:rounded-t last:rounded-b border-b border-retro-100 last:border-b-0 ${fontSize} ${
+              className={`relative flex w-full cursor-pointer select-none items-center py-2 px-3 text-sm outline-none first:rounded-t-md last:rounded-b-md ${
                 option.value === "remove_from_watch_list" 
-                  ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 
-                  : "text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700"
+                  ? "text-red-600 hover:bg-red-50 focus:bg-red-50 justify-center font-medium" 
+                  : "text-retro-900 hover:bg-retro-100 focus:bg-retro-100"
               }`}
               data-testid={`${testIdPrefix}-option-${option.value}`}
             >
