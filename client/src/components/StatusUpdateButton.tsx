@@ -72,10 +72,11 @@ export default function StatusUpdateButton({
 
   const isSmall = size === "small";
   const containerWidth = isSmall ? "w-full" : "w-64 mx-auto";
-  const buttonPadding = isSmall ? "px-3 py-2" : "px-6 py-3";
-  const dropdownPadding = isSmall ? "px-3 py-2" : "px-6 py-3";
+  const buttonPadding = isSmall ? "px-3 py-1.5" : "px-6 py-3";
+  const dropdownPadding = isSmall ? "px-3 py-1.5" : "px-6 py-3";
   const fontSize = isSmall ? "text-xs" : "text-base";
   const iconSize = isSmall ? "w-3 h-3" : "w-4 h-4";
+  const dropdownTriggerPadding = isSmall ? "px-2 py-1.5" : "px-3 py-3";
 
   return (
     <div className={`relative ${size === 'small' ? 'mb-0' : 'mb-4'} ${containerWidth} ${className}`}>
@@ -95,7 +96,7 @@ export default function StatusUpdateButton({
         {/* Dropdown Trigger */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className={`${isSmall ? 'px-2 py-2' : 'px-3 py-3'} text-white transition-all ${getStatusButtonColor()} opacity-90 hover:opacity-100`}
+          className={`${dropdownTriggerPadding} text-white transition-all ${getStatusButtonColor()} opacity-90 hover:opacity-100`}
           data-testid={`${testIdPrefix}-dropdown-trigger`}
         >
           <ChevronDown className={iconSize} />
