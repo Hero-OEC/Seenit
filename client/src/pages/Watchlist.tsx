@@ -94,7 +94,7 @@ export default function Watchlist() {
       <h2 className="text-2xl font-bold text-retro-900 mb-6">{title}</h2>
       
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -120,7 +120,7 @@ export default function Watchlist() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid={`${title.toLowerCase().replace(/\s+/g, '-')}-grid`}>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid={`${title.toLowerCase().replace(/\s+/g, '-')}-grid`}>
           {items.map((item) => (
             item.content && (
               <ContentDisplay
@@ -132,7 +132,6 @@ export default function Watchlist() {
                 status={mapStatusToContentStatus(item.content.status)}
                 year={item.content.year || undefined}
                 season={item.content.season || undefined}
-                size="default"
                 onClick={() => handleContentClick(item.content!.id)}
               />
             )
