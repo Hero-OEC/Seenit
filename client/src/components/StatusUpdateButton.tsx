@@ -117,9 +117,7 @@ export default function StatusUpdateButton({
           {options
             .filter(option => 
               // Remove "Currently Watching" option from dropdown
-              option.value !== "watching" &&
-              // Only show remove option if item is already added to watchlist
-              (option.value !== "remove_from_watch_list" || status !== "Add to Watch List")
+              option.value !== "watching"
             )
             .map((option) => (
             <button
