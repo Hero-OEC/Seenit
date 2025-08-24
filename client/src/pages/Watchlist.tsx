@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import ContentDisplay from "@/components/ContentDisplay";
+import SidePanel, { type SidePanelItem } from "@/components/SidePanel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 
@@ -53,6 +54,22 @@ export default function Watchlist() {
   const handleContentClick = (contentId: string) => {
     navigate(`/content/${contentId}`);
   };
+
+  const handleWatchlistAction = (itemId: string, action: string) => {
+    console.log(`Watchlist action for ${itemId}: ${action}`);
+    // TODO: Implement watchlist update logic
+  };
+
+  // Transform currentlyWatching data for SidePanel
+  const currentlyWatchingSidePanelItems: SidePanelItem[] = (currentlyWatching || []).map(item => ({
+    id: item.content?.id || item.id,
+    posterUrl: item.content?.poster || "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
+    title: item.content?.title || "Unknown Title",
+    type: item.content?.type || "movie",
+    year: item.content?.year || undefined,
+    season: item.content?.season || undefined,
+    episode: undefined // You can add episode tracking if needed
+  })).filter(item => item.title !== "Unknown Title");
 
   const mapStatusToContentStatus = (status: string | null) => {
     switch (status) {
@@ -138,12 +155,24 @@ export default function Watchlist() {
         </div>
 
         {/* Currently Watching Section */}
-        {renderContentSection(
-          "Currently Watching",
-          currentlyWatching,
-          isLoadingWatching,
-          "You're not currently watching anything. Start something new!"
-        )}
+        <div className="mb-12">
+          {isLoadingWatching ? (
+            <div className="w-full max-w-md mx-auto">
+              <div className="bg-retro-200 rounded-lg h-96 animate-pulse" data-testid="currently-watching-skeleton" />
+            </div>
+          ) : (
+            <SidePanel
+              title="Currently Watching"
+              items={currentlyWatchingSidePanelItems}
+              variant="currently-watching"
+              width="w-full max-w-4xl"
+              onItemClick={(item) => navigate(`/content/${item.id}`)}
+              onWatchlistAction={handleWatchlistAction}
+              maxItems={10}
+              className="mx-auto"
+            />
+          )}
+        </div>
 
         {/* Want to Watch Section */}
         {renderContentSection(
