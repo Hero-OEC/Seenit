@@ -114,7 +114,12 @@ export default function StatusUpdateButton({
       
       {isDropdownOpen && (
         <div className={`absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-retro-300 rounded-md shadow-lg max-h-60 overflow-auto`}>
-          {options.map((option) => (
+          {options
+            .filter(option => 
+              // Only show remove option if item is already added to watchlist
+              option.value !== "remove_from_watch_list" || status !== "Add to Watch List"
+            )
+            .map((option) => (
             <button
               key={option.value}
               onClick={(e) => {
