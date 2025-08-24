@@ -1,6 +1,7 @@
 
-import { Play } from "lucide-react";
+import { Play, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 
 export interface ContentDisplayProps {
   /** Content ID for linking */
@@ -25,6 +26,12 @@ export interface ContentDisplayProps {
   onClick?: () => void;
   /** Additional CSS classes */
   className?: string;
+  /** Show watchlist dropdown for currently watching items */
+  showWatchlistDropdown?: boolean;
+  /** Watchlist action handler */
+  onWatchlistAction?: (action: string) => void;
+  /** Current watchlist status */
+  watchlistStatus?: string;
 }
 
 export default function ContentDisplay({
@@ -38,8 +45,12 @@ export default function ContentDisplay({
   year,
   size = "default",
   onClick,
-  className = ""
+  className = "",
+  showWatchlistDropdown = false,
+  onWatchlistAction,
+  watchlistStatus = "Currently Watching"
 }: ContentDisplayProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const getTypeBadgeColor = (contentType: string) => {
     switch (contentType) {
@@ -100,6 +111,30 @@ export default function ContentDisplay({
   const isSmall = size === "small";
   const isList = size === "list";
 
+  const watchlistOptions = [
+    { value: "watching", label: "Currently Watching" },
+    { value: "watched", label: "Finished" },
+    { value: "remove_from_watch_list", label: "Remove from Watch List" },
+  ];
+
+  const handleWatchlistAction = (action: string) => {
+    if (onWatchlistAction) {
+      onWatchlistAction(action);
+    }
+    setIsDropdownOpen(false);
+  };
+
+  const getWatchlistButtonColor = (status: string) => {
+    switch (status) {
+      case "Currently Watching":
+        return "bg-orange-500 hover:bg-orange-600";
+      case "Finished":
+        return "bg-gray-500 hover:bg-gray-600";
+      default:
+        return "bg-orange-500 hover:bg-orange-600";
+    }
+  };
+
   const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
     if (id) {
       return (
@@ -155,6 +190,45 @@ export default function ContentDisplay({
                 {season !== undefined && `S${season}`}
                 {season !== undefined && episode !== undefined && " • "}
                 {episode !== undefined && `E${episode}`}
+              </div>
+            )}
+            
+            {/* Watchlist Dropdown for Currently Watching */}
+            {showWatchlistDropdown && (
+              <div className="relative mt-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
+                  className={`flex items-center justify-between w-full px-2 py-1 text-xs font-medium text-white rounded transition-colors ${getWatchlistButtonColor(watchlistStatus)}`}
+                  data-testid="watchlist-dropdown-button-list"
+                >
+                  <span>{watchlistStatus}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded shadow-lg border border-retro-200 z-10">
+                    {watchlistOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleWatchlistAction(option.value);
+                        }}
+                        className={`w-full px-3 py-2 text-xs transition-colors first:rounded-t last:rounded-b border-b border-retro-100 last:border-b-0 ${
+                          option.value === "remove_from_watch_list" 
+                            ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 
+                            : "text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700"
+                        }`}
+                        data-testid={`watchlist-option-${option.value}-list`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

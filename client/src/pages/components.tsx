@@ -1120,11 +1120,12 @@ import ContentDisplay from "@/components/ContentDisplay";
           <div className="space-y-8">
             {/* Basic Side Panel Examples */}
             <div>
-              <h3 className="font-medium text-lg text-retro-900 mb-4">Basic Side Panels</h3>
+              <h3 className="font-medium text-lg text-retro-900 mb-4">SidePanel Variants</h3>
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Recommendations Panel */}
+                {/* Recommended Panel */}
                 <SidePanel
                   title="Recommended for You"
+                  variant="recommended"
                   genreTags={["Action", "Adventure", "Sci-Fi"]}
                   items={[
                     {
@@ -1166,36 +1167,47 @@ import ContentDisplay from "@/components/ContentDisplay";
                   onGenreClick={(genre) => alert(`Clicked genre: ${genre}!`)}
                 />
 
-                {/* Watchlist Panel */}
+                {/* Currently Watching Panel */}
                 <SidePanel
-                  title="Continue Watching"
+                  title="Currently Watching"
+                  variant="currently-watching"
                   items={[
                     {
                       id: "watch-1",
                       posterUrl: "https://picsum.photos/300/450?random=201",
-                      title: "Romance Heights",
-                      type: "movie",
-                      year: 2024
+                      title: "Attack on Titan",
+                      type: "anime",
+                      year: 2024,
+                      season: 4,
+                      episode: 12
                     },
                     {
                       id: "watch-2",
                       posterUrl: "https://picsum.photos/300/450?random=202",
-                      title: "Horror Nights",
-                      type: "movie",
-                      year: 2024
+                      title: "The Dragon Prince",
+                      type: "tv",
+                      year: 2024,
+                      season: 3,
+                      episode: 8
                     },
                     {
                       id: "watch-3",
                       posterUrl: "https://picsum.photos/300/450?random=203",
-                      title: "Mystery Detective",
-                      type: "tv",
-                      year: 2023,
-                      season: 2,
-                      episode: 8
+                      title: "Spirited Away",
+                      type: "movie",
+                      year: 2024
                     }
                   ]}
                   maxItems={3}
                   onItemClick={(item) => alert(`Continue watching ${item.title}!`)}
+                  onWatchlistAction={(itemId, action) => {
+                    const actionLabels: { [key: string]: string } = {
+                      watching: "Currently Watching",
+                      watched: "Finished",
+                      remove_from_watch_list: "Removed from Watch List"
+                    };
+                    alert(`${itemId}: ${actionLabels[action] || action}`);
+                  }}
                 />
               </div>
             </div>
@@ -1263,11 +1275,21 @@ import ContentDisplay from "@/components/ContentDisplay";
 {`// Import the SidePanel component
 import SidePanel from "@/components/SidePanel";
 
-// Basic side panel
+// Recommended panel
 <SidePanel
   title="Recommended for You"
+  variant="recommended"
   items={contentItems}
   onItemClick={(item) => handleItemClick(item)}
+/>
+
+// Currently watching panel with dropdown
+<SidePanel
+  title="Currently Watching"
+  variant="currently-watching"
+  items={watchingItems}
+  onItemClick={(item) => handleItemClick(item)}
+  onWatchlistAction={(itemId, action) => handleWatchlistAction(itemId, action)}
 />
 
 // With genre tags

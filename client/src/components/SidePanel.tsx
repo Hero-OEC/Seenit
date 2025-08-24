@@ -15,6 +15,8 @@ export interface SidePanelProps {
   title: string;
   /** Array of content items to display */
   items: SidePanelItem[];
+  /** Panel variant - recommended or currently watching */
+  variant?: "recommended" | "currently-watching";
   /** Optional genre tags to display at top */
   genreTags?: string[];
   /** Width of the panel */
@@ -23,6 +25,8 @@ export interface SidePanelProps {
   onItemClick?: (item: SidePanelItem) => void;
   /** Click handler for genre tags */
   onGenreClick?: (genre: string) => void;
+  /** Watchlist status change handler for currently watching items */
+  onWatchlistAction?: (itemId: string, action: string) => void;
   /** Maximum number of items to display */
   maxItems?: number;
   /** Additional CSS classes */
@@ -32,10 +36,12 @@ export interface SidePanelProps {
 export default function SidePanel({
   title,
   items,
+  variant = "recommended",
   genreTags = [],
   width = "w-64",
   onItemClick,
   onGenreClick,
+  onWatchlistAction,
   maxItems = 6,
   className = ""
 }: SidePanelProps) {
@@ -97,6 +103,8 @@ export default function SidePanel({
               season={item.season}
               episode={item.episode}
               size="list"
+              showWatchlistDropdown={variant === "currently-watching"}
+              onWatchlistAction={onWatchlistAction ? (action) => onWatchlistAction(item.id, action) : undefined}
               onClick={() => handleItemClick(item)}
             />
           ))
