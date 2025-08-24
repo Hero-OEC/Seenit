@@ -143,7 +143,7 @@ export default function Watchlist() {
 
   return (
     <div className="min-h-screen bg-retro-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-retro-900 mb-2" data-testid="watchlist-title">
@@ -154,34 +154,37 @@ export default function Watchlist() {
           </p>
         </div>
 
-        {/* Currently Watching Section */}
-        <div className="mb-12">
-          {isLoadingWatching ? (
-            <div className="w-full max-w-md mx-auto">
+        {/* Layout with Sidebar and Main Content */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <aside className="lg:w-80 flex-shrink-0">
+            {isLoadingWatching ? (
               <div className="bg-retro-200 rounded-lg h-96 animate-pulse" data-testid="currently-watching-skeleton" />
-            </div>
-          ) : (
-            <SidePanel
-              title="Currently Watching"
-              items={currentlyWatchingSidePanelItems}
-              variant="currently-watching"
-              width="w-full max-w-4xl"
-              onItemClick={(item) => navigate(`/content/${item.id}`)}
-              onWatchlistAction={handleWatchlistAction}
-              maxItems={10}
-              className="mx-auto"
-            />
-          )}
-        </div>
+            ) : (
+              <SidePanel
+                title="Currently Watching"
+                items={currentlyWatchingSidePanelItems}
+                variant="currently-watching"
+                width="w-full"
+                onItemClick={(item) => navigate(`/content/${item.id}`)}
+                onWatchlistAction={handleWatchlistAction}
+                maxItems={10}
+              />
+            )}
+          </aside>
 
-        {/* Want to Watch Section */}
-        {renderContentSection(
-          "Want to Watch",
-          wantToWatch,
-          isLoadingWantToWatch,
-          "Your watchlist is empty. Add some content to get started!"
-        )}
-      </main>
+          {/* Main Content */}
+          <main className="flex-1">
+            {/* Want to Watch Section */}
+            {renderContentSection(
+              "Want to Watch",
+              wantToWatch,
+              isLoadingWantToWatch,
+              "Your watchlist is empty. Add some content to get started!"
+            )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
