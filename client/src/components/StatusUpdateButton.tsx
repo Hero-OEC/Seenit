@@ -114,12 +114,7 @@ export default function StatusUpdateButton({
       
       {isDropdownOpen && (
         <div className={`absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-retro-300 rounded-md shadow-lg max-h-60 overflow-auto`}>
-          {options
-            .filter(option => 
-              // Remove "Currently Watching" option from dropdown
-              option.value !== "watching"
-            )
-            .map((option) => (
+          {options.map((option) => (
             <button
               key={option.value}
               onClick={(e) => {
