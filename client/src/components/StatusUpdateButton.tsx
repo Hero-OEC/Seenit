@@ -72,15 +72,16 @@ export default function StatusUpdateButton({
 
   const isSmall = size === "small";
   const containerWidth = isSmall ? "w-full" : "w-64 mx-auto";
-  const buttonPadding = isSmall ? "px-3 py-1.5" : "px-6 py-3";
+  const buttonHeight = isSmall ? "h-9" : "h-10";
+  const buttonPadding = isSmall ? "px-3" : "px-4 py-2";
   const dropdownPadding = isSmall ? "px-3 py-1.5" : "px-6 py-3";
-  const fontSize = isSmall ? "text-xs" : "text-base";
+  const fontSize = isSmall ? "text-sm" : "text-base";
   const iconSize = isSmall ? "w-3 h-3" : "w-4 h-4";
-  const dropdownTriggerPadding = isSmall ? "px-2 py-1.5" : "px-3 py-3";
+  const dropdownTriggerPadding = isSmall ? "px-2" : "px-3";
 
   return (
     <div className={`relative ${size === 'small' ? 'mb-0' : 'mb-4'} ${containerWidth} ${className}`}>
-      <div className={`flex rounded-lg overflow-hidden ${isSmall ? 'shadow-sm' : 'shadow-md'}`}>
+      <div className={`flex ${buttonHeight} rounded-lg overflow-hidden ${isSmall ? 'shadow-sm' : 'shadow-md'}`}>
         {/* Main Action Button */}
         <button
           onClick={(e) => {
@@ -88,7 +89,7 @@ export default function StatusUpdateButton({
             e.stopPropagation();
             handleMainClick();
           }}
-          className={`flex-1 ${buttonPadding} text-white font-medium transition-colors ${fontSize} ${getStatusButtonColor()}`}
+          className={`flex-1 ${buttonPadding} text-white font-medium transition-colors ${fontSize} items-center justify-center ${getStatusButtonColor()}`}
           data-testid={`${testIdPrefix}-main-button`}
         >
           {status}
@@ -104,7 +105,7 @@ export default function StatusUpdateButton({
             e.stopPropagation();
             setIsDropdownOpen(!isDropdownOpen);
           }}
-          className={`${dropdownTriggerPadding} text-white transition-all ${getStatusButtonColor()} opacity-90 hover:opacity-100`}
+          className={`${dropdownTriggerPadding} text-white transition-all ${getStatusButtonColor()} opacity-90 hover:opacity-100 items-center justify-center`}
           data-testid={`${testIdPrefix}-dropdown-trigger`}
         >
           <ChevronDown className={iconSize} />
