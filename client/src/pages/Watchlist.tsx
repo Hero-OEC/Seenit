@@ -94,7 +94,7 @@ export default function Watchlist() {
       <h2 className="text-2xl font-bold text-retro-900 mb-6">{title}</h2>
       
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
@@ -120,7 +120,7 @@ export default function Watchlist() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid={`${title.toLowerCase().replace(/\s+/g, '-')}-grid`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid={`${title.toLowerCase().replace(/\s+/g, '-')}-grid`}>
           {items.map((item) => (
             item.content && (
               <ContentDisplay
@@ -132,6 +132,7 @@ export default function Watchlist() {
                 status={mapStatusToContentStatus(item.content.status)}
                 year={item.content.year || undefined}
                 season={item.content.season || undefined}
+                size="default"
                 onClick={() => handleContentClick(item.content!.id)}
               />
             )
@@ -144,16 +145,6 @@ export default function Watchlist() {
   return (
     <div className="min-h-screen bg-retro-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-retro-900 mb-2" data-testid="watchlist-title">
-            My Watchlist
-          </h1>
-          <p className="text-retro-700" data-testid="watchlist-description">
-            Track your entertainment journey and never miss what's next
-          </p>
-        </div>
-
         {/* Layout with Sidebar and Main Content */}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
