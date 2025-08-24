@@ -4,13 +4,13 @@ import { Star, Play, ExternalLink, ChevronDown, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Content } from "@shared/schema";
 import ContentDisplay from "@/components/ContentDisplay";
+import StatusUpdateButton from "@/components/StatusUpdateButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
   const [, navigate] = useLocation();
   const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watch List");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
@@ -175,21 +175,8 @@ export default function ContentDetails() {
         console.log(`Watchlist updated: ${option.label}`);
       }
     }
-    setIsDropdownOpen(false);
   };
 
-  const getWatchlistButtonColor = () => {
-    switch (selectedWatchlistStatus) {
-      case "Want to Watch":
-        return "bg-green-500 hover:bg-green-600";
-      case "Currently Watching":
-        return "bg-orange-500 hover:bg-orange-600";
-      case "Watched":
-        return "bg-gray-500 hover:bg-gray-600";
-      default:
-        return "bg-retro-500 hover:bg-retro-600";
-    }
-  };
 
   const handleRatingClick = (rating: number) => {
     setUserRating(rating);
@@ -368,76 +355,13 @@ export default function ContentDetails() {
               </div>
 
               {/* Watchlist Button with Dropdown */}
-              <div className="relative mb-4 w-64 mx-auto">
-                <div className="flex rounded-lg overflow-hidden shadow-md">
-                  {/* Main Action Button */}
-                  <button
-                    onClick={() => {
-                      // Only add to watch list if not already added
-                      if (selectedWatchlistStatus === "Add to Watch List") {
-                        handleWatchlistAction("added_to_watch_list");
-                      }
-                      // For other states, do nothing - user must use dropdown
-                    }}
-                    className={`flex-1 px-6 py-3 text-white font-medium transition-colors ${getWatchlistButtonColor()}`}
-                    data-testid="watchlist-main-button"
-                  >
-                    {selectedWatchlistStatus}
-                  </button>
-                  
-                  {/* Separator Line */}
-                  <div className={`w-px ${
-                    selectedWatchlistStatus === "Want to Watch"
-                      ? "bg-green-600"
-                      : selectedWatchlistStatus === "Currently Watching" 
-                      ? "bg-orange-600" 
-                      : selectedWatchlistStatus === "Watched"
-                      ? "bg-gray-600"
-                      : "bg-retro-600"
-                  }`}></div>
-                  
-                  {/* Dropdown Trigger */}
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`px-3 py-3 text-white transition-all ${
-                      selectedWatchlistStatus === "Want to Watch"
-                        ? "bg-green-500 hover:bg-green-600"
-                        : selectedWatchlistStatus === "Currently Watching" 
-                        ? "bg-orange-500 hover:bg-orange-600" 
-                        : selectedWatchlistStatus === "Watched"
-                        ? "bg-gray-500 hover:bg-gray-600"
-                        : "bg-retro-500 hover:bg-retro-600"
-                    } opacity-90 hover:opacity-100`}
-                    data-testid="watchlist-dropdown-trigger"
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                </div>
-                
-                {isDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-retro-200 z-10">
-                    {watchlistOptions
-                      .filter(option => 
-                        // Only show remove option if item is already added to watchlist
-                        option.value !== "remove_from_watch_list" || selectedWatchlistStatus !== "Add to Watch List"
-                      )
-                      .map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => handleWatchlistAction(option.value)}
-                        className={`w-full px-6 py-3 transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0 ${
-                          option.value === "remove_from_watch_list" 
-                            ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 
-                            : "text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700"
-                        }`}
-                        data-testid={`watchlist-option-${option.value}`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <StatusUpdateButton
+                status={selectedWatchlistStatus}
+                options={watchlistOptions}
+                onStatusChange={handleWatchlistAction}
+                onMainAction={() => handleWatchlistAction("added_to_watch_list")}
+                testIdPrefix="watchlist"
+              />
 
               {/* Streaming Platforms */}
               {content.streamingPlatforms && content.streamingPlatforms.length > 0 && (
