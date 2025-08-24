@@ -154,7 +154,7 @@ export default function ContentDisplay({
       <ContentWrapper>
         <div className="cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid="content-display-list">
           <div className="flex gap-3">
-            <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
+            <div className="flex-shrink-0 w-12 bg-retro-200 rounded overflow-hidden self-stretch">
               <img 
                 src={posterUrl}
                 alt={`${title} poster`}
