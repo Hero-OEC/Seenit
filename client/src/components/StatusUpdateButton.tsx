@@ -112,11 +112,13 @@ export default function StatusUpdateButton({
       </div>
       
       {isDropdownOpen && (
-        <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded-lg ${isSmall ? 'shadow-md' : 'shadow-lg'} border border-retro-200 z-10`}>
+        <div className={`absolute top-full left-0 right-0 mt-2 bg-white rounded ${isSmall ? 'shadow-md' : 'shadow-lg'} border border-retro-200 z-10`}>
           {options
             .filter(option => 
+              // Remove "Currently Watching" option from dropdown
+              option.value !== "watching" &&
               // Only show remove option if item is already added to watchlist
-              option.value !== "remove_from_watch_list" || status !== "Add to Watch List"
+              (option.value !== "remove_from_watch_list" || status !== "Add to Watch List")
             )
             .map((option) => (
             <button
@@ -126,7 +128,7 @@ export default function StatusUpdateButton({
                 e.stopPropagation();
                 handleOptionClick(option.value);
               }}
-              className={`w-full ${dropdownPadding} transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b border-retro-100 last:border-b-0 ${fontSize} ${
+              className={`w-full ${dropdownPadding} transition-all duration-200 first:rounded-t last:rounded-b border-b border-retro-100 last:border-b-0 ${fontSize} ${
                 option.value === "remove_from_watch_list" 
                   ? "text-red-600 hover:bg-red-50 hover:text-red-700 text-center font-medium" 
                   : "text-left text-retro-900 hover:bg-retro-100 hover:text-retro-700"
