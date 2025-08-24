@@ -162,7 +162,7 @@ export default function ContentDisplay({
                 data-testid="content-poster-list"
               />
             </div>
-            <div className="flex-1 min-w-0 max-w-[180px]">
+            <div className="flex-1 min-w-0 max-w-[140px]">
               <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1" data-testid="content-title-list">
                 {title}
               </h4>
