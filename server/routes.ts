@@ -38,6 +38,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/content/recommended", async (_req, res) => {
+    try {
+      // Get a random selection of content for recommendations
+      const allContent = await storage.getAllContent();
+      const shuffled = allContent.sort(() => 0.5 - Math.random());
+      const recommended = shuffled.slice(0, 8); // Return 8 recommended items
+      res.json(recommended);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recommended content" });
+    }
+  });
+
   app.get("/api/content/:id", async (req, res) => {
     try {
       const { id } = req.params;

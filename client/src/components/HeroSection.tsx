@@ -34,7 +34,10 @@ export function HeroSection({
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = true;
-      videoRef.current.play();
+      videoRef.current.play().catch((error) => {
+        // Silently handle play() interruptions during hot reloading
+        console.log('Video play interrupted:', error);
+      });
     }
   }, []);
 
