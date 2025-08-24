@@ -153,8 +153,8 @@ export default function ContentDisplay({
     return (
       <ContentWrapper>
         <div className="cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid="content-display-list">
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-12 aspect-[2/3] bg-retro-200 rounded overflow-hidden">
+          <div className="flex gap-2">
+            <div className="flex-shrink-0 w-10 aspect-[2/3] bg-retro-200 rounded overflow-hidden">
               <img 
                 src={posterUrl}
                 alt={`${title} poster`}
@@ -162,7 +162,7 @@ export default function ContentDisplay({
                 data-testid="content-poster-list"
               />
             </div>
-            <div className="flex-1 min-w-0 max-w-[140px]">
+            <div className="flex-1 min-w-0 max-w-[120px]">
               <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1" data-testid="content-title-list">
                 {title}
               </h4>
