@@ -36,7 +36,6 @@ export default function StatusUpdateButton({
       case "Currently Watching":
         return "bg-orange-500 hover:bg-orange-600";
       case "Watched":
-      case "Finished":
         return "bg-gray-500 hover:bg-gray-600";
       default:
         return "bg-retro-500 hover:bg-retro-600";
@@ -50,7 +49,6 @@ export default function StatusUpdateButton({
       case "Currently Watching":
         return "bg-orange-600";
       case "Watched":
-      case "Finished":
         return "bg-gray-600";
       default:
         return "bg-retro-600";
