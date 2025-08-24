@@ -205,12 +205,12 @@ export default function ContentDisplay({
         </h3>
 
         {/* Year for Movies */}
-        {type === "movie" && year && (
+        {type === "movie" && (
           <p 
             className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
             data-testid="content-year"
           >
-            {year}
+            {year || 'Year not available'}
           </p>
         )}
 
