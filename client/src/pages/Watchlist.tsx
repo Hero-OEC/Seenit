@@ -132,6 +132,7 @@ export default function Watchlist() {
                 status={mapStatusToContentStatus(item.content.status)}
                 year={item.content.year || undefined}
                 season={item.content.season || undefined}
+                size="default"
                 onClick={() => handleContentClick(item.content!.id)}
               />
             )
