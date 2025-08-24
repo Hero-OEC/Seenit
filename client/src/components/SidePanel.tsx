@@ -85,28 +85,33 @@ export default function SidePanel({
       )}
 
       {/* Content List */}
-      <div className="space-y-3" data-testid="side-panel-content">
+      <div className="space-y-0" data-testid="side-panel-content">
         {displayItems.length === 0 ? (
           <div className="text-center py-8 text-retro-500" data-testid="side-panel-empty">
             <p className="text-sm">No content available</p>
           </div>
         ) : (
-          displayItems.map((item) => (
-            <ContentDisplay
-              key={item.id}
-              id={item.id}
-              posterUrl={item.posterUrl}
-              title={item.title}
-              type={item.type}
-              status="finished" // Default status for side panel items
-              year={item.year}
-              season={item.season}
-              episode={item.episode}
-              size="list"
-              showWatchlistDropdown={variant === "currently-watching"}
-              onWatchlistAction={onWatchlistAction ? (action) => onWatchlistAction(item.id, action) : undefined}
-              onClick={() => handleItemClick(item)}
-            />
+          displayItems.map((item, index) => (
+            <div key={item.id}>
+              <ContentDisplay
+                id={item.id}
+                posterUrl={item.posterUrl}
+                title={item.title}
+                type={item.type}
+                status="finished" // Default status for side panel items
+                year={item.year}
+                season={item.season}
+                episode={item.episode}
+                size="list"
+                showWatchlistDropdown={variant === "currently-watching"}
+                onWatchlistAction={onWatchlistAction ? (action) => onWatchlistAction(item.id, action) : undefined}
+                onClick={() => handleItemClick(item)}
+              />
+              {/* Separation line between items */}
+              {index < displayItems.length - 1 && (
+                <hr className="border-retro-200 my-2" />
+              )}
+            </div>
           ))
         )}
       </div>

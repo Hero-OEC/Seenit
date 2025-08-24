@@ -165,9 +165,40 @@ export default function ContentDisplay({
     return (
       <ContentWrapper>
         <div className="cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid="content-display-list">
-          {/* Watchlist Dropdown for Currently Watching - Above poster, full width */}
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
+              <img 
+                src={posterUrl}
+                alt={`${title} poster`}
+                className="w-full h-full object-cover"
+                data-testid="content-poster-list"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1" data-testid="content-title-list">
+                {title}
+              </h4>
+              <div className="flex items-center gap-2 text-xs text-retro-600 mb-1">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getTypeBadgeColor(type)}`} data-testid="content-type-badge-list">
+                  {getTypeLabel(type)}
+                </span>
+                {year && <span data-testid="content-year-list">{year}</span>}
+              </div>
+              {/* Season/Episode Info for TV Shows and Anime */}
+              {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1" data-testid="content-episode-info-list">
+                  <Play className="w-2.5 h-2.5 fill-white" />
+                  {season !== undefined && `S${season}`}
+                  {season !== undefined && episode !== undefined && " • "}
+                  {episode !== undefined && `E${episode}`}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Watchlist Dropdown for Currently Watching - Below content, full width */}
           {showWatchlistDropdown && (
-            <div className="relative mb-2">
+            <div className="relative mt-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -203,37 +234,6 @@ export default function ContentDisplay({
               )}
             </div>
           )}
-          
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
-              <img 
-                src={posterUrl}
-                alt={`${title} poster`}
-                className="w-full h-full object-cover"
-                data-testid="content-poster-list"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-retro-900 text-sm line-clamp-2 mb-1" data-testid="content-title-list">
-                {title}
-              </h4>
-              <div className="flex items-center gap-2 text-xs text-retro-600 mb-1">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getTypeBadgeColor(type)}`} data-testid="content-type-badge-list">
-                  {getTypeLabel(type)}
-                </span>
-                {year && <span data-testid="content-year-list">{year}</span>}
-              </div>
-              {/* Season/Episode Info for TV Shows and Anime */}
-              {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1" data-testid="content-episode-info-list">
-                  <Play className="w-2.5 h-2.5 fill-white" />
-                  {season !== undefined && `S${season}`}
-                  {season !== undefined && episode !== undefined && " • "}
-                  {episode !== undefined && `E${episode}`}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </ContentWrapper>
     );
