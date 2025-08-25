@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRoute, useLocation } from "wouter";
 import { Search, Users, UserPlus, Eye, Clock, Edit, Settings, Upload, Save, X, Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,14 +109,117 @@ const mockUserReviews = [
   }
 ];
 
+// Mock data for friend profiles
+const mockFriendProfiles = {
+  "1": {
+    id: "1",
+    name: "MovieBuff92",
+    username: "MovieBuff92",
+    joinedDate: "October 2023",
+    watchHistory: {
+      movies: [
+        {
+          id: "movie-3",
+          title: "The Batman",
+          posterUrl: "https://image.tmdb.org/t/p/w500/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg",
+          type: "movie" as const,
+          year: 2022
+        },
+        {
+          id: "movie-4",
+          title: "Top Gun: Maverick",
+          posterUrl: "https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
+          type: "movie" as const,
+          year: 2022
+        }
+      ],
+      tv: [
+        {
+          id: "tv-2",
+          title: "House of the Dragon",
+          posterUrl: "https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg",
+          type: "tv" as const,
+          season: 1,
+          episode: 10
+        }
+      ],
+      anime: []
+    },
+    reviews: [
+      {
+        id: "friend-review-1",
+        contentId: "movie-3",
+        title: "The Batman",
+        posterUrl: "https://image.tmdb.org/t/p/w500/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg",
+        type: "movie" as const,
+        year: 2022,
+        userRating: 4,
+        userComment: "Robert Pattinson delivers a fantastic performance as Batman. The noir atmosphere and detective elements make this a unique take on the Dark Knight.",
+        reviewDate: "2024-01-05"
+      }
+    ]
+  },
+  "2": {
+    id: "2",
+    name: "AnimeKing",
+    username: "AnimeKing",
+    joinedDate: "August 2023",
+    watchHistory: {
+      movies: [],
+      tv: [],
+      anime: [
+        {
+          id: "anime-2",
+          title: "Demon Slayer",
+          posterUrl: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+          type: "anime" as const,
+          season: 3,
+          episode: 11
+        },
+        {
+          id: "anime-3",
+          title: "Jujutsu Kaisen",
+          posterUrl: "https://image.tmdb.org/t/p/w500/qCBJOg3rI1BUFptL4wJjY7YRy98.jpg",
+          type: "anime" as const,
+          season: 2,
+          episode: 23
+        }
+      ]
+    },
+    reviews: [
+      {
+        id: "friend-review-2",
+        contentId: "anime-2",
+        title: "Demon Slayer",
+        posterUrl: "https://image.tmdb.org/t/p/w500/xUfRZu2mi8jH6SzQEJGP6tjBuYj.jpg",
+        type: "anime" as const,
+        season: 3,
+        episode: 11,
+        userRating: 5,
+        userComment: "The animation in Season 3 is absolutely incredible. Every fight scene is a work of art and the character development continues to impress.",
+        reviewDate: "2024-01-11"
+      }
+    ]
+  }
+};
+
 export default function Profile() {
   const { user } = useAuth();
+  const [, params] = useRoute("/profile/:userId");
+  const [, navigate] = useLocation();
+  
+  // Determine if viewing own profile or friend's profile
+  const isOwnProfile = !params?.userId;
+  const friendProfile = params?.userId ? mockFriendProfiles[params.userId as keyof typeof mockFriendProfiles] : null;
+  const profileUser = isOwnProfile ? user : friendProfile;
+  const currentWatchHistory = isOwnProfile ? mockWatchHistory : friendProfile?.watchHistory;
+  const currentReviews = isOwnProfile ? mockUserReviews : friendProfile?.reviews || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("friends");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({
-    name: user?.name || '',
-    email: user?.email || ''
+    name: profileUser?.name || '',
+    email: profileUser?.email || ''
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -145,6 +249,10 @@ export default function Profile() {
 
   const handleDeclineFriendRequest = (userId: string) => {
     console.log("Declining friend request from:", userId);
+  };
+
+  const handleVisitFriendProfile = (friendId: string) => {
+    navigate(`/profile/${friendId}`);
   };
 
   const getUserInitials = (username: string) => {
@@ -181,8 +289,8 @@ export default function Profile() {
     setIsEditingProfile(false);
     // Reset form
     setEditForm({
-      name: user?.name || '',
-      email: user?.email || ''
+      name: profileUser?.name || '',
+      email: profileUser?.email || ''
     });
     setProfileImage(null);
     setImagePreview(null);
@@ -190,7 +298,7 @@ export default function Profile() {
 
   const handlePasswordReset = () => {
     // TODO: Add API call to send password reset email
-    console.log('Sending password reset email to:', user?.email);
+    console.log('Sending password reset email to:', profileUser?.email);
     // Show success message or notification
     alert('Password reset email sent! Check your inbox.');
   };
@@ -198,17 +306,17 @@ export default function Profile() {
   const handleCancelEdit = () => {
     setIsEditingProfile(false);
     setEditForm({
-      name: user?.name || '',
-      email: user?.email || ''
+      name: profileUser?.name || '',
+      email: profileUser?.email || ''
     });
     setProfileImage(null);
     setImagePreview(null);
   };
 
-  if (!user) {
+  if (!profileUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-retro-50">
-        <p className="text-retro-600">Please sign in to view your profile.</p>
+        <p className="text-retro-600">{isOwnProfile ? "Please sign in to view your profile." : "Profile not found."}</p>
       </div>
     );
   }
@@ -221,7 +329,7 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="w-24 h-24 rounded-full bg-retro-100 flex items-center justify-center" data-testid="profile-avatar">
               <span className="text-2xl font-bold text-retro-700">
-                {getUserInitials(user.name)}
+                {getUserInitials(profileUser.name)}
               </span>
             </div>
             
@@ -229,20 +337,29 @@ export default function Profile() {
               <div className="flex items-start justify-between">
                 <div>
                   <h1 className="text-3xl font-bold text-retro-900 mb-2" data-testid="profile-username">
-                    {user.name}
+                    {profileUser.name}
                   </h1>
-                  <p className="text-retro-600 mb-4" data-testid="profile-email">{user.email}</p>
+                  {isOwnProfile && (
+                    <p className="text-retro-600 mb-4" data-testid="profile-email">{profileUser.email}</p>
+                  )}
+                  {!isOwnProfile && (
+                    <p className="text-retro-600 mb-4" data-testid="profile-joined">
+                      Joined {friendProfile?.joinedDate || 'recently'}
+                    </p>
+                  )}
                 </div>
-                <Button
-                  onClick={() => setIsEditingProfile(true)}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  data-testid="edit-profile-button"
-                >
-                  <Edit size={16} />
-                  Edit Profile
-                </Button>
+                {isOwnProfile && (
+                  <Button
+                    onClick={() => setIsEditingProfile(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    data-testid="edit-profile-button"
+                  >
+                    <Edit size={16} />
+                    Edit Profile
+                  </Button>
+                )}
               </div>
               
               <div className="flex flex-wrap gap-4 text-sm text-retro-600">
@@ -290,7 +407,7 @@ export default function Profile() {
                         <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-2xl font-bold text-retro-700">
-                          {getUserInitials(editForm.name || user?.name || '')}
+                          {getUserInitials(editForm.name || profileUser?.name || '')}
                         </span>
                       )}
                     </div>
@@ -379,8 +496,9 @@ export default function Profile() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Friends & Social */}
-          <div className="lg:col-span-1">
+          {/* Left Column - Friends & Social (only show for own profile) */}
+          {isOwnProfile && (
+            <div className="lg:col-span-1">
             <div className="bg-white rounded-lg p-6 shadow-md" data-testid="friends-section">
               <div className="flex items-center gap-2 mb-6">
                 <Users size={20} />
@@ -424,7 +542,12 @@ export default function Profile() {
               {activeTab === "friends" && (
                 <div className="space-y-4" data-testid="friends-list">
                   {mockFriends.map((friend) => (
-                    <div key={friend.id} className="flex items-center justify-between p-3 bg-retro-50 rounded-lg" data-testid={`friend-${friend.id}`}>
+                    <div 
+                      key={friend.id} 
+                      className="flex items-center justify-between p-3 bg-retro-50 rounded-lg hover:bg-retro-100 cursor-pointer transition-colors" 
+                      data-testid={`friend-${friend.id}`}
+                      onClick={() => handleVisitFriendProfile(friend.id)}
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-retro-100 flex items-center justify-center">
                           <span className="text-sm font-bold text-retro-700">
@@ -538,14 +661,15 @@ export default function Profile() {
                 </div>
               )}
             </div>
-          </div>
+            </div>
+          )}
 
           {/* Right Column - Viewing History */}
-          <div className="lg:col-span-2">
+          <div className={isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}>
             <div className="bg-white rounded-lg p-6 shadow-md" data-testid="watch-history-section">
               <div className="flex items-center gap-2 mb-6">
                 <Eye size={20} />
-                <h2 className="text-xl font-bold text-retro-900">Viewing History</h2>
+                <h2 className="text-xl font-bold text-retro-900">{isOwnProfile ? 'Viewing History' : `${profileUser.name}'s Viewing History`}</h2>
               </div>
               
               {/* Content Type Tabs */}
@@ -556,7 +680,7 @@ export default function Profile() {
                   size="sm"
                   data-testid="tab-movies"
                 >
-                  Movies ({mockWatchHistory.movies.length})
+                  Movies ({currentWatchHistory?.movies?.length || 0})
                 </Button>
                 <Button
                   onClick={() => setActiveContentTab("tv")}
@@ -564,7 +688,7 @@ export default function Profile() {
                   size="sm"
                   data-testid="tab-tv"
                 >
-                  TV Shows ({mockWatchHistory.tv.length})
+                  TV Shows ({currentWatchHistory?.tv?.length || 0})
                 </Button>
                 <Button
                   onClick={() => setActiveContentTab("anime")}
@@ -572,18 +696,18 @@ export default function Profile() {
                   size="sm"
                   data-testid="tab-anime"
                 >
-                  Anime ({mockWatchHistory.anime.length})
+                  Anime ({currentWatchHistory?.anime?.length || 0})
                 </Button>
               </div>
 
               {/* Movies History */}
               {activeContentTab === "movies" && (
                 <div className="space-y-4" data-testid="movies-history">
-                  {mockWatchHistory.movies.length === 0 ? (
+                  {(currentWatchHistory?.movies?.length || 0) === 0 ? (
                     <p className="text-center text-retro-600 py-8">No movies watched yet</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      {mockWatchHistory.movies.map((movie) => (
+                      {(currentWatchHistory?.movies || []).map((movie) => (
                         <ContentDisplay
                           key={movie.id}
                           id={movie.id}
@@ -605,11 +729,11 @@ export default function Profile() {
               {/* TV Shows History */}
               {activeContentTab === "tv" && (
                 <div className="space-y-4" data-testid="tv-history">
-                  {mockWatchHistory.tv.length === 0 ? (
+                  {(currentWatchHistory?.tv?.length || 0) === 0 ? (
                     <p className="text-center text-retro-600 py-8">No TV shows watched yet</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      {mockWatchHistory.tv.map((show) => (
+                      {(currentWatchHistory?.tv || []).map((show) => (
                         <ContentDisplay
                           key={show.id}
                           id={show.id}
@@ -632,11 +756,11 @@ export default function Profile() {
               {/* Anime History */}
               {activeContentTab === "anime" && (
                 <div className="space-y-4" data-testid="anime-history">
-                  {mockWatchHistory.anime.length === 0 ? (
+                  {(currentWatchHistory?.anime?.length || 0) === 0 ? (
                     <p className="text-center text-retro-600 py-8">No anime watched yet</p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      {mockWatchHistory.anime.map((anime) => (
+                      {(currentWatchHistory?.anime || []).map((anime) => (
                         <ContentDisplay
                           key={anime.id}
                           id={anime.id}
@@ -664,15 +788,15 @@ export default function Profile() {
           <div className="bg-white rounded-lg p-6 shadow-md" data-testid="reviews-section">
             <div className="flex items-center gap-2 mb-6">
               <MessageSquare size={20} />
-              <h2 className="text-xl font-bold text-retro-900">Your Reviews</h2>
-              <span className="text-sm text-retro-600">({mockUserReviews.length})</span>
+              <h2 className="text-xl font-bold text-retro-900">{isOwnProfile ? 'Your Reviews' : `${profileUser.name}'s Reviews`}</h2>
+              <span className="text-sm text-retro-600">({currentReviews.length})</span>
             </div>
 
-            {mockUserReviews.length === 0 ? (
+            {currentReviews.length === 0 ? (
               <p className="text-center text-retro-600 py-8">No reviews yet</p>
             ) : (
               <div className="space-y-6">
-                {mockUserReviews.map((review) => (
+                {currentReviews.map((review) => (
                   <div key={review.id} className="border-b border-retro-200 pb-6 last:border-b-0 last:pb-0" data-testid={`review-${review.id}`}>
                     <div className="flex gap-4">
                       {/* Content Display - Horizontal */}

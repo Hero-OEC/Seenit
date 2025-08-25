@@ -54,6 +54,7 @@ function AppContent() {
           <Route path="/schedule" component={Schedule} />
           <Route path="/watchlist" component={Watchlist} />
           <Route path="/profile" component={Profile} />
+          <Route path="/profile/:userId" component={Profile} />
           <Route path="/content/:id" component={ContentDetails} />
           <Route path="/signin" component={SignIn} />
           <Route path="/components" component={ComponentsPage} />
