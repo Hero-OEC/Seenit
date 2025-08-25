@@ -162,7 +162,7 @@ export default function Profile() {
               <div className="flex gap-2 mb-6" data-testid="social-tabs">
                 <Button
                   onClick={() => setActiveTab("friends")}
-                  variant={activeTab === "friends" ? "accent" : "cream"}
+                  variant={activeTab === "friends" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-friends"
                 >
@@ -170,7 +170,7 @@ export default function Profile() {
                 </Button>
                 <Button
                   onClick={() => setActiveTab("requests")}
-                  variant={activeTab === "requests" ? "accent" : "cream"}
+                  variant={activeTab === "requests" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-requests"
                 >
@@ -183,7 +183,7 @@ export default function Profile() {
                 </Button>
                 <Button
                   onClick={() => setActiveTab("search")}
-                  variant={activeTab === "search" ? "accent" : "cream"}
+                  variant={activeTab === "search" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-search"
                 >
@@ -323,7 +323,7 @@ export default function Profile() {
               <div className="flex gap-2 mb-6" data-testid="content-type-tabs">
                 <Button
                   onClick={() => setActiveContentTab("movies")}
-                  variant={activeContentTab === "movies" ? "accent" : "cream"}
+                  variant={activeContentTab === "movies" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-movies"
                 >
@@ -331,7 +331,7 @@ export default function Profile() {
                 </Button>
                 <Button
                   onClick={() => setActiveContentTab("tv")}
-                  variant={activeContentTab === "tv" ? "accent" : "cream"}
+                  variant={activeContentTab === "tv" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-tv"
                 >
@@ -339,7 +339,7 @@ export default function Profile() {
                 </Button>
                 <Button
                   onClick={() => setActiveContentTab("anime")}
-                  variant={activeContentTab === "anime" ? "accent" : "cream"}
+                  variant={activeContentTab === "anime" ? "accent" : "ghost"}
                   size="sm"
                   data-testid="tab-anime"
                 >
