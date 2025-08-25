@@ -590,32 +590,18 @@ export default function Profile() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.movies.map((movie) => (
-                        <div key={movie.id} className="space-y-2" data-testid={`movie-history-${movie.id}`}>
-                          <ContentDisplay
-                            id={movie.id}
-                            posterUrl={movie.posterUrl}
-                            title={movie.title}
-                            type={movie.type}
-                            year={movie.year}
-                            status="finished"
-                            size="small"
-                            onClick={() => console.log(`View ${movie.title}`)}
-                          />
-                          <div className="text-sm text-retro-600 space-y-1">
-                            <p>Watched: {new Date(movie.watchedDate).toLocaleDateString()}</p>
-                            <div className="flex items-center gap-2">
-                              <span>Rating:</span>
-                              <div className="flex">
-                                {Array.from({ length: 10 }, (_, i) => (
-                                  <span key={i} className={i < movie.rating ? "text-yellow-400" : "text-retro-300"}>
-                                    ★
-                                  </span>
-                                ))}
-                              </div>
-                              <span className="ml-1">({movie.rating}/10)</span>
-                            </div>
-                          </div>
-                        </div>
+                        <ContentDisplay
+                          key={movie.id}
+                          id={movie.id}
+                          posterUrl={movie.posterUrl}
+                          title={movie.title}
+                          type={movie.type}
+                          year={movie.year}
+                          status="finished"
+                          size="small"
+                          onClick={() => console.log(`View ${movie.title}`)}
+                          data-testid={`movie-history-${movie.id}`}
+                        />
                       ))}
                     </div>
                   )}
@@ -630,33 +616,19 @@ export default function Profile() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.tv.map((show) => (
-                        <div key={show.id} className="space-y-2" data-testid={`tv-history-${show.id}`}>
-                          <ContentDisplay
-                            id={show.id}
-                            posterUrl={show.posterUrl}
-                            title={show.title}
-                            type={show.type}
-                            season={show.season}
-                            episode={show.episode}
-                            status="finished"
-                            size="small"
-                            onClick={() => console.log(`View ${show.title}`)}
-                          />
-                          <div className="text-sm text-retro-600 space-y-1">
-                            <p>Watched: {new Date(show.watchedDate).toLocaleDateString()}</p>
-                            <div className="flex items-center gap-2">
-                              <span>Rating:</span>
-                              <div className="flex">
-                                {Array.from({ length: 10 }, (_, i) => (
-                                  <span key={i} className={i < show.rating ? "text-yellow-400" : "text-retro-300"}>
-                                    ★
-                                  </span>
-                                ))}
-                              </div>
-                              <span className="ml-1">({show.rating}/10)</span>
-                            </div>
-                          </div>
-                        </div>
+                        <ContentDisplay
+                          key={show.id}
+                          id={show.id}
+                          posterUrl={show.posterUrl}
+                          title={show.title}
+                          type={show.type}
+                          season={show.season}
+                          episode={show.episode}
+                          status="finished"
+                          size="small"
+                          onClick={() => console.log(`View ${show.title}`)}
+                          data-testid={`tv-history-${show.id}`}
+                        />
                       ))}
                     </div>
                   )}
@@ -671,33 +643,19 @@ export default function Profile() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.anime.map((anime) => (
-                        <div key={anime.id} className="space-y-2" data-testid={`anime-history-${anime.id}`}>
-                          <ContentDisplay
-                            id={anime.id}
-                            posterUrl={anime.posterUrl}
-                            title={anime.title}
-                            type={anime.type}
-                            season={anime.season}
-                            episode={anime.episode}
-                            status="finished"
-                            size="small"
-                            onClick={() => console.log(`View ${anime.title}`)}
-                          />
-                          <div className="text-sm text-retro-600 space-y-1">
-                            <p>Watched: {new Date(anime.watchedDate).toLocaleDateString()}</p>
-                            <div className="flex items-center gap-2">
-                              <span>Rating:</span>
-                              <div className="flex">
-                                {Array.from({ length: 10 }, (_, i) => (
-                                  <span key={i} className={i < anime.rating ? "text-yellow-400" : "text-retro-300"}>
-                                    ★
-                                  </span>
-                                ))}
-                              </div>
-                              <span className="ml-1">({anime.rating}/10)</span>
-                            </div>
-                          </div>
-                        </div>
+                        <ContentDisplay
+                          key={anime.id}
+                          id={anime.id}
+                          posterUrl={anime.posterUrl}
+                          title={anime.title}
+                          type={anime.type}
+                          season={anime.season}
+                          episode={anime.episode}
+                          status="finished"
+                          size="small"
+                          onClick={() => console.log(`View ${anime.title}`)}
+                          data-testid={`anime-history-${anime.id}`}
+                        />
                       ))}
                     </div>
                   )}
