@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Users, UserPlus, Eye, Clock } from "lucide-react";
+import { Search, Users, UserPlus, Eye, Clock, Edit, Settings, Upload, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ContentDisplay from "@/components/ContentDisplay";
@@ -73,6 +73,16 @@ export default function Profile() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("friends");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [activeContentTab, setActiveContentTab] = useState("movies");
   const [searchResults, setSearchResults] = useState(mockSearchResults);
 
@@ -105,6 +115,59 @@ export default function Profile() {
     return username.slice(0, 2).toUpperCase();
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveProfile = () => {
+    // TODO: Add validation and API call to save profile
+    console.log('Saving profile:', editForm);
+    if (profileImage) {
+      console.log('Profile image:', profileImage);
+    }
+    
+    // For now, just close the modal
+    setIsEditingProfile(false);
+    // Reset form
+    setEditForm({
+      name: user?.name || '',
+      email: user?.email || '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setProfileImage(null);
+    setImagePreview(null);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
+    setEditForm({
+      name: user?.name || '',
+      email: user?.email || '',
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setProfileImage(null);
+    setImagePreview(null);
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-retro-50">
@@ -126,10 +189,24 @@ export default function Profile() {
             </div>
             
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-retro-900 mb-2" data-testid="profile-username">
-                {user.name}
-              </h1>
-              <p className="text-retro-600 mb-4" data-testid="profile-email">{user.email}</p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-retro-900 mb-2" data-testid="profile-username">
+                    {user.name}
+                  </h1>
+                  <p className="text-retro-600 mb-4" data-testid="profile-email">{user.email}</p>
+                </div>
+                <Button
+                  onClick={() => setIsEditingProfile(true)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  data-testid="edit-profile-button"
+                >
+                  <Edit size={16} />
+                  Edit Profile
+                </Button>
+              </div>
               
               <div className="flex flex-wrap gap-4 text-sm text-retro-600">
                 <div className="flex items-center gap-2" data-testid="profile-stats-friends">
@@ -148,6 +225,164 @@ export default function Profile() {
             </div>
           </div>
         </div>
+
+        {/* Edit Profile Modal */}
+        {isEditingProfile && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="edit-profile-modal">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-retro-900">Edit Profile</h2>
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="ghost"
+                  size="sm"
+                  className="text-retro-600 hover:text-retro-900"
+                  data-testid="close-edit-modal"
+                >
+                  <X size={20} />
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Profile Image Upload */}
+                <div className="text-center">
+                  <div className="w-24 h-24 rounded-full bg-retro-100 flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-2xl font-bold text-retro-700">
+                        {getUserInitials(editForm.name || user?.name || '')}
+                      </span>
+                    )}
+                  </div>
+                  <label htmlFor="profile-image" className="cursor-pointer">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      onClick={() => document.getElementById('profile-image')?.click()}
+                      data-testid="upload-image-button"
+                    >
+                      <Upload size={16} />
+                      Change Photo
+                    </Button>
+                  </label>
+                  <input
+                    id="profile-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    data-testid="profile-image-input"
+                  />
+                </div>
+
+                {/* Name Field */}
+                <div>
+                  <label htmlFor="edit-name" className="block text-sm font-medium text-retro-900 mb-2">
+                    Name
+                  </label>
+                  <input
+                    id="edit-name"
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => handleEditFormChange('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
+                    data-testid="edit-name-input"
+                  />
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="edit-email" className="block text-sm font-medium text-retro-900 mb-2">
+                    Email
+                  </label>
+                  <input
+                    id="edit-email"
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => handleEditFormChange('email', e.target.value)}
+                    className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
+                    data-testid="edit-email-input"
+                  />
+                </div>
+
+                {/* Password Change Section */}
+                <div className="pt-4 border-t border-retro-200">
+                  <h3 className="text-lg font-medium text-retro-900 mb-4">Change Password</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="current-password" className="block text-sm font-medium text-retro-900 mb-2">
+                        Current Password
+                      </label>
+                      <input
+                        id="current-password"
+                        type="password"
+                        value={editForm.currentPassword}
+                        onChange={(e) => handleEditFormChange('currentPassword', e.target.value)}
+                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
+                        data-testid="current-password-input"
+                        placeholder="Leave blank to keep current password"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="new-password" className="block text-sm font-medium text-retro-900 mb-2">
+                        New Password
+                      </label>
+                      <input
+                        id="new-password"
+                        type="password"
+                        value={editForm.newPassword}
+                        onChange={(e) => handleEditFormChange('newPassword', e.target.value)}
+                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
+                        data-testid="new-password-input"
+                        placeholder="Enter new password"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="confirm-password" className="block text-sm font-medium text-retro-900 mb-2">
+                        Confirm New Password
+                      </label>
+                      <input
+                        id="confirm-password"
+                        type="password"
+                        value={editForm.confirmPassword}
+                        onChange={(e) => handleEditFormChange('confirmPassword', e.target.value)}
+                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
+                        data-testid="confirm-password-input"
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-6">
+                  <Button
+                    onClick={handleSaveProfile}
+                    className="flex-1 flex items-center justify-center gap-2"
+                    data-testid="save-profile-button"
+                  >
+                    <Save size={16} />
+                    Save Changes
+                  </Button>
+                  <Button
+                    onClick={handleCancelEdit}
+                    variant="outline"
+                    className="flex-1"
+                    data-testid="cancel-edit-button"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Friends & Social */}
