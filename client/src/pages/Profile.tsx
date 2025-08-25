@@ -115,10 +115,7 @@ export default function Profile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({
     name: user?.name || '',
-    email: user?.email || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    email: user?.email || ''
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -185,23 +182,24 @@ export default function Profile() {
     // Reset form
     setEditForm({
       name: user?.name || '',
-      email: user?.email || '',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+      email: user?.email || ''
     });
     setProfileImage(null);
     setImagePreview(null);
+  };
+
+  const handlePasswordReset = () => {
+    // TODO: Add API call to send password reset email
+    console.log('Sending password reset email to:', user?.email);
+    // Show success message or notification
+    alert('Password reset email sent! Check your inbox.');
   };
 
   const handleCancelEdit = () => {
     setIsEditingProfile(false);
     setEditForm({
       name: user?.name || '',
-      email: user?.email || '',
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+      email: user?.email || ''
     });
     setProfileImage(null);
     setImagePreview(null);
@@ -336,36 +334,24 @@ export default function Profile() {
                   />
                 </div>
 
-                {/* Right Column - Password Change */}
+                {/* Right Column - Password Reset */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-retro-900 pb-2 border-b border-retro-200">Change Password</h3>
                   
-                  <Input
-                    label="Current Password"
-                    type="password"
-                    value={editForm.currentPassword}
-                    onChange={(e) => handleEditFormChange('currentPassword', e.target.value)}
-                    placeholder="Leave blank to keep current password"
-                    data-testid="current-password-input"
-                  />
-
-                  <Input
-                    label="New Password"
-                    type="password"
-                    value={editForm.newPassword}
-                    onChange={(e) => handleEditFormChange('newPassword', e.target.value)}
-                    placeholder="Enter new password"
-                    data-testid="new-password-input"
-                  />
-
-                  <Input
-                    label="Confirm New Password"
-                    type="password"
-                    value={editForm.confirmPassword}
-                    onChange={(e) => handleEditFormChange('confirmPassword', e.target.value)}
-                    placeholder="Confirm new password"
-                    data-testid="confirm-password-input"
-                  />
+                  <div className="bg-retro-50 p-4 rounded-lg">
+                    <p className="text-sm text-retro-700 mb-4">
+                      For security, we'll send a password reset link to your email address.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePasswordReset}
+                      className="w-full flex items-center justify-center gap-2"
+                      data-testid="password-reset-button"
+                    >
+                      Send Password Reset Email
+                    </Button>
+                  </div>
                 </div>
               </div>
 
