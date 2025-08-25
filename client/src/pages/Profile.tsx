@@ -588,7 +588,7 @@ export default function Profile() {
                   {mockWatchHistory.movies.length === 0 ? (
                     <p className="text-center text-retro-600 py-8">No movies watched yet</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.movies.map((movie) => (
                         <div key={movie.id} className="space-y-2" data-testid={`movie-history-${movie.id}`}>
                           <ContentDisplay
@@ -628,7 +628,7 @@ export default function Profile() {
                   {mockWatchHistory.tv.length === 0 ? (
                     <p className="text-center text-retro-600 py-8">No TV shows watched yet</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.tv.map((show) => (
                         <div key={show.id} className="space-y-2" data-testid={`tv-history-${show.id}`}>
                           <ContentDisplay
@@ -669,7 +669,7 @@ export default function Profile() {
                   {mockWatchHistory.anime.length === 0 ? (
                     <p className="text-center text-retro-600 py-8">No anime watched yet</p>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       {mockWatchHistory.anime.map((anime) => (
                         <div key={anime.id} className="space-y-2" data-testid={`anime-history-${anime.id}`}>
                           <ContentDisplay
