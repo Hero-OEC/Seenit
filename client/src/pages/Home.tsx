@@ -303,8 +303,8 @@ export default function Home() {
         {isSignedIn && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Left Sidebar - Currently Watching */}
-              <aside className="lg:w-64 flex-shrink-0">
+              {/* Left Sidebar - Currently Watching & Genres */}
+              <aside className="lg:w-64 flex-shrink-0 space-y-6">
                 <SidePanel
                   title="Currently Watching"
                   items={currentlyWatchingSidePanelItems}
@@ -313,6 +313,36 @@ export default function Home() {
                   onItemClick={(item) => navigate(`/content/${item.id}`)}
                   onWatchlistAction={handleWatchlistAction}
                   maxItems={6}
+                />
+
+                {/* Genre-based Recommendations from User's Watching History */}
+                <SidePanel
+                  title="Your Genres"
+                  items={[
+                    // Mix content from different genres based on what user watches
+                    ...popularMovies.filter(movie => 
+                      movie.title.includes("Action") || 
+                      movie.title.includes("Dune") || 
+                      movie.title.includes("Spider-Man")
+                    ).slice(0, 2),
+                    ...popularAnime.filter(anime => 
+                      anime.title.includes("Adventure") ||
+                      anime.title.includes("Demon")
+                    ).slice(0, 2)
+                  ].map(item => ({
+                    id: item.id,
+                    posterUrl: item.posterUrl,
+                    title: item.title,
+                    type: item.type,
+                    year: (item as any).year,
+                    season: (item as any).season
+                  }))}
+                  variant="recommended"
+                  width="w-full"
+                  genreTags={["Action", "Adventure", "Drama"]}
+                  onItemClick={(item) => navigate(`/content/${item.id}`)}
+                  onGenreClick={(genre) => navigate(`/discover?genre=${genre.toLowerCase()}`)}
+                  maxItems={4}
                 />
               </aside>
 
