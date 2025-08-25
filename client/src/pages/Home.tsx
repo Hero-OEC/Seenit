@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/HeroSection";
 import ContentDisplay from "@/components/ContentDisplay";
 import EpisodeDisplay from "@/components/EpisodeDisplay";
 import SidePanel, { type SidePanelItem } from "@/components/SidePanel";
+import HomeContent from "@/components/HomeContent";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 
@@ -318,32 +319,15 @@ export default function Home() {
               {/* Main Content */}
               <main className="flex-1 space-y-12">
                 {/* New Movies Section */}
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-retro-900">New Movies</h2>
-                    <button 
-                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
-                      onClick={() => handleBrowse("Movies")}
-                    >
-                      View All →
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {popularMovies.slice(0, 4).map((movie) => (
-                      <ContentDisplay
-                        key={movie.id}
-                        id={movie.id}
-                        posterUrl={movie.posterUrl}
-                        title={movie.title}
-                        type={movie.type}
-                        status={movie.status}
-                        year={movie.year}
-                        size="small"
-                        onClick={() => console.log(`Clicked movie: ${movie.title}`)}
-                      />
-                    ))}
-                  </div>
-                </section>
+                <HomeContent
+                  title="New Movies"
+                  items={popularMovies}
+                  contentType="movie"
+                  onViewAll={() => handleBrowse("Movies")}
+                  onItemClick={(movie) => console.log(`Clicked movie: ${movie.title}`)}
+                  maxItems={4}
+                  variant="compact"
+                />
 
                 {/* New TV Episodes Section */}
                 <section>
@@ -453,88 +437,37 @@ export default function Home() {
         {!isSignedIn && (
         <div className="bg-retro-50">
           {/* Popular Movies Section */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-retro-900">Popular Movies</h2>
-              <button 
-                className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
-                data-testid="view-all-movies"
-              >
-                View All →
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-movies-grid">
-              {popularMovies.map((movie) => (
-                <ContentDisplay
-                  key={movie.id}
-                  id={movie.id}
-                  posterUrl={movie.posterUrl}
-                  title={movie.title}
-                  type={movie.type}
-                  status={movie.status}
-                  year={movie.year}
-                  size="small"
-                  onClick={() => console.log(`Clicked movie: ${movie.title}`)}
-                />
-              ))}
-            </div>
-          </section>
+          <HomeContent
+            title="Popular Movies"
+            items={popularMovies}
+            contentType="movie"
+            onViewAll={() => console.log("View all movies clicked")}
+            onItemClick={(movie) => console.log(`Clicked movie: ${movie.title}`)}
+            variant="expanded"
+            testId="popular-movies-section"
+          />
 
           {/* Popular TV Shows Section */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-retro-200">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-retro-900">Popular TV Shows</h2>
-              <button 
-                className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
-                data-testid="view-all-tv"
-              >
-                View All →
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-tv-grid">
-              {popularTVShows.map((show) => (
-                <ContentDisplay
-                  key={show.id}
-                  id={show.id}
-                  posterUrl={show.posterUrl}
-                  title={show.title}
-                  type={show.type}
-                  status={show.status}
-                  season={show.season}
-                  size="small"
-                  onClick={() => console.log(`Clicked TV show: ${show.title}`)}
-                />
-              ))}
-            </div>
-          </section>
+          <HomeContent
+            title="Popular TV Shows"
+            items={popularTVShows}
+            contentType="tv"
+            onViewAll={() => console.log("View all TV shows clicked")}
+            onItemClick={(show) => console.log(`Clicked TV show: ${show.title}`)}
+            variant="expanded"
+            testId="popular-tv-section"
+          />
 
           {/* Popular Anime Section */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-retro-200">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-retro-900">Popular Anime</h2>
-              <button 
-                className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
-                data-testid="view-all-anime"
-              >
-                View All →
-              </button>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" data-testid="popular-anime-grid">
-              {popularAnime.map((anime) => (
-                <ContentDisplay
-                  key={anime.id}
-                  id={anime.id}
-                  posterUrl={anime.posterUrl}
-                  title={anime.title}
-                  type={anime.type}
-                  status={anime.status}
-                  season={anime.season}
-                  size="small"
-                  onClick={() => console.log(`Clicked anime: ${anime.title}`)}
-                />
-              ))}
-            </div>
-          </section>
+          <HomeContent
+            title="Popular Anime"
+            items={popularAnime}
+            contentType="anime"
+            onViewAll={() => console.log("View all anime clicked")}
+            onItemClick={(anime) => console.log(`Clicked anime: ${anime.title}`)}
+            variant="expanded"
+            testId="popular-anime-section"
+          />
 
           {/* New Episodes Section */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-retro-200">
