@@ -338,6 +338,7 @@ export default function Home() {
                         type={movie.type}
                         status={movie.status}
                         year={movie.year}
+                        size="small"
                         onClick={() => console.log(`Clicked movie: ${movie.title}`)}
                       />
                     ))}
@@ -472,6 +473,7 @@ export default function Home() {
                   type={movie.type}
                   status={movie.status}
                   year={movie.year}
+                  size="small"
                   onClick={() => console.log(`Clicked movie: ${movie.title}`)}
                 />
               ))}
@@ -499,6 +501,7 @@ export default function Home() {
                   type={show.type}
                   status={show.status}
                   season={show.season}
+                  size="small"
                   onClick={() => console.log(`Clicked TV show: ${show.title}`)}
                 />
               ))}
@@ -526,6 +529,7 @@ export default function Home() {
                   type={anime.type}
                   status={anime.status}
                   season={anime.season}
+                  size="small"
                   onClick={() => console.log(`Clicked anime: ${anime.title}`)}
                 />
               ))}
