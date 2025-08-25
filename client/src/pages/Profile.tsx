@@ -4,6 +4,7 @@ import { Search, Users, UserPlus, Eye, Clock, Edit, Settings, Upload, Save, X, S
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ContentDisplay from "@/components/ContentDisplay";
+import Input from "@/components/Input";
 
 // Mock data for development - will be replaced with real API data
 const mockFriends = [
@@ -267,7 +268,7 @@ export default function Profile() {
         {/* Edit Profile Modal */}
         {isEditingProfile && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="edit-profile-modal">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-retro-900">Edit Profile</h2>
                 <Button
@@ -281,142 +282,111 @@ export default function Profile() {
                 </Button>
               </div>
 
-              <div className="space-y-6">
-                {/* Profile Image Upload */}
-                <div className="text-center">
-                  <div className="w-24 h-24 rounded-full bg-retro-100 flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl font-bold text-retro-700">
-                        {getUserInitials(editForm.name || user?.name || '')}
-                      </span>
-                    )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  {/* Profile Image Upload */}
+                  <div className="text-center">
+                    <div className="w-24 h-24 rounded-full bg-retro-100 flex items-center justify-center mx-auto mb-4 overflow-hidden">
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-2xl font-bold text-retro-700">
+                          {getUserInitials(editForm.name || user?.name || '')}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={() => document.getElementById('profile-image')?.click()}
+                        data-testid="upload-image-button"
+                      >
+                        <Upload size={16} />
+                        Change Photo
+                      </Button>
+                    </div>
+                    <input
+                      id="profile-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      data-testid="profile-image-input"
+                    />
                   </div>
-                  <label htmlFor="profile-image" className="cursor-pointer">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                      onClick={() => document.getElementById('profile-image')?.click()}
-                      data-testid="upload-image-button"
-                    >
-                      <Upload size={16} />
-                      Change Photo
-                    </Button>
-                  </label>
-                  <input
-                    id="profile-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    data-testid="profile-image-input"
-                  />
-                </div>
 
-                {/* Name Field */}
-                <div>
-                  <label htmlFor="edit-name" className="block text-sm font-medium text-retro-900 mb-2">
-                    Name
-                  </label>
-                  <input
-                    id="edit-name"
-                    type="text"
+                  {/* Name and Email */}
+                  <Input
+                    label="Name"
                     value={editForm.name}
                     onChange={(e) => handleEditFormChange('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
                     data-testid="edit-name-input"
                   />
-                </div>
 
-                {/* Email Field */}
-                <div>
-                  <label htmlFor="edit-email" className="block text-sm font-medium text-retro-900 mb-2">
-                    Email
-                  </label>
-                  <input
-                    id="edit-email"
+                  <Input
+                    label="Email"
                     type="email"
                     value={editForm.email}
                     onChange={(e) => handleEditFormChange('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
                     data-testid="edit-email-input"
                   />
                 </div>
 
-                {/* Password Change Section */}
-                <div className="pt-4 border-t border-retro-200">
-                  <h3 className="text-lg font-medium text-retro-900 mb-4">Change Password</h3>
+                {/* Right Column - Password Change */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-retro-900 pb-2 border-b border-retro-200">Change Password</h3>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="current-password" className="block text-sm font-medium text-retro-900 mb-2">
-                        Current Password
-                      </label>
-                      <input
-                        id="current-password"
-                        type="password"
-                        value={editForm.currentPassword}
-                        onChange={(e) => handleEditFormChange('currentPassword', e.target.value)}
-                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
-                        data-testid="current-password-input"
-                        placeholder="Leave blank to keep current password"
-                      />
-                    </div>
+                  <Input
+                    label="Current Password"
+                    type="password"
+                    value={editForm.currentPassword}
+                    onChange={(e) => handleEditFormChange('currentPassword', e.target.value)}
+                    placeholder="Leave blank to keep current password"
+                    data-testid="current-password-input"
+                  />
 
-                    <div>
-                      <label htmlFor="new-password" className="block text-sm font-medium text-retro-900 mb-2">
-                        New Password
-                      </label>
-                      <input
-                        id="new-password"
-                        type="password"
-                        value={editForm.newPassword}
-                        onChange={(e) => handleEditFormChange('newPassword', e.target.value)}
-                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
-                        data-testid="new-password-input"
-                        placeholder="Enter new password"
-                      />
-                    </div>
+                  <Input
+                    label="New Password"
+                    type="password"
+                    value={editForm.newPassword}
+                    onChange={(e) => handleEditFormChange('newPassword', e.target.value)}
+                    placeholder="Enter new password"
+                    data-testid="new-password-input"
+                  />
 
-                    <div>
-                      <label htmlFor="confirm-password" className="block text-sm font-medium text-retro-900 mb-2">
-                        Confirm New Password
-                      </label>
-                      <input
-                        id="confirm-password"
-                        type="password"
-                        value={editForm.confirmPassword}
-                        onChange={(e) => handleEditFormChange('confirmPassword', e.target.value)}
-                        className="w-full px-3 py-2 border border-retro-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-retro-500 focus:border-retro-500"
-                        data-testid="confirm-password-input"
-                        placeholder="Confirm new password"
-                      />
-                    </div>
-                  </div>
+                  <Input
+                    label="Confirm New Password"
+                    type="password"
+                    value={editForm.confirmPassword}
+                    onChange={(e) => handleEditFormChange('confirmPassword', e.target.value)}
+                    placeholder="Confirm new password"
+                    data-testid="confirm-password-input"
+                  />
                 </div>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-6">
-                  <Button
-                    onClick={handleSaveProfile}
-                    className="flex-1 flex items-center justify-center gap-2"
-                    data-testid="save-profile-button"
-                  >
-                    <Save size={16} />
-                    Save Changes
-                  </Button>
-                  <Button
-                    onClick={handleCancelEdit}
-                    variant="outline"
-                    className="flex-1"
-                    data-testid="cancel-edit-button"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-6 mt-6 border-t border-retro-200">
+                <Button
+                  onClick={handleSaveProfile}
+                  className="flex-1 flex items-center justify-center gap-2"
+                  data-testid="save-profile-button"
+                >
+                  <Save size={16} />
+                  Save Changes
+                </Button>
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="outline"
+                  className="flex-1"
+                  data-testid="cancel-edit-button"
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           </div>
