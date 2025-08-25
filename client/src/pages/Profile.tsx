@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Search, Users, UserPlus, Eye, Clock, Edit, Settings, Upload, Save, X } from "lucide-react";
+import { Search, Users, UserPlus, Eye, Clock, Edit, Settings, Upload, Save, X, Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ContentDisplay from "@/components/ContentDisplay";
@@ -68,6 +68,44 @@ const mockWatchHistory = {
     }
   ]
 };
+
+const mockUserReviews = [
+  {
+    id: "review-1",
+    contentId: "movie-1",
+    title: "Dune: Part Two",
+    posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    type: "movie" as const,
+    year: 2024,
+    userRating: 5,
+    userComment: "An absolutely stunning continuation of the Dune saga. The cinematography is breathtaking and the performances are top-notch. Denis Villeneuve has created a masterpiece that honors the source material while being visually spectacular.",
+    reviewDate: "2024-01-16"
+  },
+  {
+    id: "review-2",
+    contentId: "tv-1",
+    title: "Breaking Bad",
+    posterUrl: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+    type: "tv" as const,
+    season: 5,
+    episode: 16,
+    userRating: 5,
+    userComment: "One of the greatest TV series ever made. The character development of Walter White is incredible, and every episode keeps you on the edge of your seat. The finale was perfect.",
+    reviewDate: "2024-01-13"
+  },
+  {
+    id: "review-3",
+    contentId: "anime-1",
+    title: "Attack on Titan",
+    posterUrl: "https://image.tmdb.org/t/p/w500/hTP1DtLGFamjfu8WqjnuQdP1n4i.jpg",
+    type: "anime" as const,
+    season: 4,
+    episode: 28,
+    userRating: 4,
+    userComment: "An epic conclusion to an amazing series. The animation quality is outstanding and the story reaches a satisfying climax. Some pacing issues in the middle, but overall a fantastic experience.",
+    reviewDate: "2024-01-09"
+  }
+];
 
 export default function Profile() {
   const { user } = useAuth();
@@ -662,6 +700,76 @@ export default function Profile() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-8">
+          <div className="bg-white rounded-lg p-6 shadow-md" data-testid="reviews-section">
+            <div className="flex items-center gap-2 mb-6">
+              <MessageSquare size={20} />
+              <h2 className="text-xl font-bold text-retro-900">Your Reviews</h2>
+              <span className="text-sm text-retro-600">({mockUserReviews.length})</span>
+            </div>
+
+            {mockUserReviews.length === 0 ? (
+              <p className="text-center text-retro-600 py-8">No reviews yet</p>
+            ) : (
+              <div className="space-y-6">
+                {mockUserReviews.map((review) => (
+                  <div key={review.id} className="border-b border-retro-200 pb-6 last:border-b-0 last:pb-0" data-testid={`review-${review.id}`}>
+                    <div className="flex gap-4">
+                      {/* Content Display - Horizontal */}
+                      <div className="flex-shrink-0">
+                        <ContentDisplay
+                          id={review.contentId}
+                          posterUrl={review.posterUrl}
+                          title={review.title}
+                          type={review.type}
+                          year={review.year}
+                          season={review.season}
+                          episode={review.episode}
+                          status="finished"
+                          size="list"
+                          onClick={() => console.log(`View ${review.title}`)}
+                        />
+                      </div>
+
+                      {/* Review Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center" data-testid={`review-rating-${review.id}`}>
+                              {Array.from({ length: 5 }, (_, i) => (
+                                <Star
+                                  key={i}
+                                  size={16}
+                                  className={`${
+                                    i < review.userRating
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'fill-gray-200 text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm font-medium text-retro-700">
+                              {review.userRating} out of 5 stars
+                            </span>
+                          </div>
+                          <span className="text-sm text-retro-500" data-testid={`review-date-${review.id}`}>
+                            {new Date(review.reviewDate).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <p className="text-retro-800 leading-relaxed" data-testid={`review-comment-${review.id}`}>
+                          {review.userComment}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
