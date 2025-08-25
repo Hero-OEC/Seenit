@@ -15,8 +15,8 @@ export interface HomeContentProps {
   title: string;
   /** Array of content items to display */
   items: ContentItem[];
-  /** Content type for consistent styling */
-  contentType: "movie" | "tv" | "anime";
+  /** Content type for consistent styling - optional for mixed genre content */
+  contentType?: "movie" | "tv" | "anime" | "genre";
   /** Click handler for "View All" button */
   onViewAll: () => void;
   /** Click handler for individual content items */
@@ -34,7 +34,7 @@ export interface HomeContentProps {
 export default function HomeContent({
   title,
   items,
-  contentType,
+  contentType = "genre",
   onViewAll,
   onItemClick,
   maxItems = 4,
@@ -59,6 +59,15 @@ export default function HomeContent({
     ? "border-t border-retro-200"
     : "";
 
+  // Generate test ID based on content type or title
+  const gridTestId = contentType === "genre" 
+    ? `${title.toLowerCase().replace(/\s+/g, '-')}-grid`
+    : `${contentType}-grid`;
+
+  const buttonTestId = contentType === "genre"
+    ? `view-all-${title.toLowerCase().replace(/\s+/g, '-')}`
+    : `view-all-${contentType}`;
+
   return (
     <section className={`${containerClasses} ${borderClasses} ${className}`} data-testid={testId}>
       <div className="flex items-center justify-between mb-6">
@@ -68,13 +77,13 @@ export default function HomeContent({
         <button 
           className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
           onClick={onViewAll}
-          data-testid={`view-all-${contentType}`}
+          data-testid={buttonTestId}
         >
           View All →
         </button>
       </div>
       
-      <div className={gridClasses} data-testid={`${contentType}-grid`}>
+      <div className={gridClasses} data-testid={gridTestId}>
         {displayItems.map((item) => (
           <ContentDisplay
             key={item.id}

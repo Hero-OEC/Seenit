@@ -388,32 +388,16 @@ export default function Home() {
                 </section>
 
                 {/* Genre-based Recommendations */}
-                <section>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-retro-900">Sci-Fi Recommendations</h2>
-                    <button 
-                      className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
-                      onClick={() => navigate("/discover?genre=sci-fi")}
-                    >
-                      View All →
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {[...popularMovies.slice(0, 2), ...popularAnime.slice(0, 2)].map((item) => (
-                      <ContentDisplay
-                        key={item.id}
-                        id={item.id}
-                        posterUrl={item.posterUrl}
-                        title={item.title}
-                        type={item.type}
-                        status={item.status}
-                        year={(item as any).year || undefined}
-                        season={(item as any).season || undefined}
-                        onClick={() => console.log(`Clicked: ${item.title}`)}
-                      />
-                    ))}
-                  </div>
-                </section>
+                <HomeContent
+                  title="Sci-Fi Recommendations"
+                  items={[...popularMovies.slice(0, 2), ...popularAnime.slice(0, 2)]}
+                  contentType="genre"
+                  onViewAll={() => navigate("/discover?genre=sci-fi")}
+                  onItemClick={(item) => console.log(`Clicked: ${item.title}`)}
+                  maxItems={4}
+                  variant="compact"
+                  testId="sci-fi-recommendations-section"
+                />
               </main>
 
               {/* Right Sidebar - Recommended for You */}
