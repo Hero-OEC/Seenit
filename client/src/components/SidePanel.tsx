@@ -38,7 +38,7 @@ export default function SidePanel({
   items,
   variant = "recommended",
   genreTags = [],
-  width = "w-64",
+  width = "w-52",
   onItemClick,
   onGenreClick,
   onWatchlistAction,
