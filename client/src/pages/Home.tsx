@@ -339,9 +339,7 @@ export default function Home() {
                   }))}
                   variant="recommended"
                   width="w-full"
-                  genreTags={["Action", "Adventure", "Sci-Fi"]}
                   onItemClick={(item) => navigate(`/content/${item.id.replace('genre-', '').split('-')[0]}`)}
-                  onGenreClick={(genre) => navigate(`/discover?genre=${genre.toLowerCase()}`)}
                   maxItems={4}
                 />
               </aside>
