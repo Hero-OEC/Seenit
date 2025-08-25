@@ -317,7 +317,7 @@ export default function Home() {
 
                 {/* Genre-based Recommendations from User's Watching History */}
                 <SidePanel
-                  title="Your Genres"
+                  title="Action Picks"
                   items={[
                     // Mix content from different genres based on what user watches
                     ...popularMovies.filter(movie => 
@@ -329,8 +329,8 @@ export default function Home() {
                       anime.title.includes("Adventure") ||
                       anime.title.includes("Demon")
                     ).slice(0, 2)
-                  ].map(item => ({
-                    id: item.id,
+                  ].map((item, index) => ({
+                    id: `genre-${item.id}-${index}`,
                     posterUrl: item.posterUrl,
                     title: item.title,
                     type: item.type,
@@ -339,8 +339,8 @@ export default function Home() {
                   }))}
                   variant="recommended"
                   width="w-full"
-                  genreTags={["Action", "Adventure", "Drama"]}
-                  onItemClick={(item) => navigate(`/content/${item.id}`)}
+                  genreTags={["Action", "Adventure", "Sci-Fi"]}
+                  onItemClick={(item) => navigate(`/content/${item.id.replace('genre-', '').split('-')[0]}`)}
                   onGenreClick={(genre) => navigate(`/discover?genre=${genre.toLowerCase()}`)}
                   maxItems={4}
                 />
