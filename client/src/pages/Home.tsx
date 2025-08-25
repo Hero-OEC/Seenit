@@ -303,7 +303,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Left Sidebar - Currently Watching */}
-              <aside className="lg:w-80 flex-shrink-0">
+              <aside className="lg:w-64 flex-shrink-0">
                 <SidePanel
                   title="Currently Watching"
                   items={currentlyWatchingSidePanelItems}
@@ -432,7 +432,7 @@ export default function Home() {
               </main>
 
               {/* Right Sidebar - Recommended for You */}
-              <aside className="lg:w-80 flex-shrink-0">
+              <aside className="lg:w-64 flex-shrink-0">
                 <SidePanel
                   title="Recommended for You"
                   items={recommendedSidePanelItems}

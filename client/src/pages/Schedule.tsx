@@ -294,7 +294,7 @@ export default function Schedule() {
           </div>
 
           {/* Sidebar Filters */}
-          <div className="lg:w-80">
+          <div className="lg:w-64">
             <div className="bg-white rounded-lg shadow-sm border border-retro-200 p-6 sticky top-24">
               <h3 className="text-lg font-semibold text-retro-900 mb-4">Filters & Sort</h3>
               

@@ -148,7 +148,7 @@ export default function Watchlist() {
         {/* Layout with Sidebar and Main Content */}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <aside className="lg:w-80 flex-shrink-0">
+          <aside className="lg:w-64 flex-shrink-0">
             {isLoadingWatching ? (
               <div className="bg-retro-200 rounded-lg h-96 animate-pulse" data-testid="currently-watching-skeleton" />
             ) : (
