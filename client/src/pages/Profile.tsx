@@ -160,24 +160,18 @@ export default function Profile() {
               
               {/* Tab Navigation */}
               <div className="flex gap-2 mb-6" data-testid="social-tabs">
-                <button
+                <Button
                   onClick={() => setActiveTab("friends")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === "friends" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeTab === "friends" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-friends"
                 >
                   Friends
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setActiveTab("requests")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
-                    activeTab === "requests" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeTab === "requests" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-requests"
                 >
                   Requests
@@ -186,18 +180,15 @@ export default function Profile() {
                       {mockFriendRequests.length}
                     </span>
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setActiveTab("search")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === "search" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeTab === "search" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-search"
                 >
                   Search
-                </button>
+                </Button>
               </div>
 
               {/* Friends List */}
@@ -330,39 +321,30 @@ export default function Profile() {
               
               {/* Content Type Tabs */}
               <div className="flex gap-2 mb-6" data-testid="content-type-tabs">
-                <button
+                <Button
                   onClick={() => setActiveContentTab("movies")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeContentTab === "movies" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeContentTab === "movies" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-movies"
                 >
                   Movies ({mockWatchHistory.movies.length})
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setActiveContentTab("tv")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeContentTab === "tv" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeContentTab === "tv" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-tv"
                 >
                   TV Shows ({mockWatchHistory.tv.length})
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setActiveContentTab("anime")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeContentTab === "anime" 
-                      ? "bg-retro-600 text-white shadow-sm" 
-                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
-                  }`}
+                  variant={activeContentTab === "anime" ? "accent" : "cream"}
+                  size="sm"
                   data-testid="tab-anime"
                 >
                   Anime ({mockWatchHistory.anime.length})
-                </button>
+                </Button>
               </div>
 
               {/* Movies History */}
