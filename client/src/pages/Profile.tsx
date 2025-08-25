@@ -160,36 +160,44 @@ export default function Profile() {
               
               {/* Tab Navigation */}
               <div className="flex gap-2 mb-6" data-testid="social-tabs">
-                <Button 
-                  variant={activeTab === "friends" ? "default" : "outline"} 
-                  size="sm"
+                <button
                   onClick={() => setActiveTab("friends")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === "friends" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-friends"
                 >
                   Friends
-                </Button>
-                <Button 
-                  variant={activeTab === "requests" ? "default" : "outline"} 
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setActiveTab("requests")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors relative ${
+                    activeTab === "requests" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-requests"
-                  className="relative"
                 >
                   Requests
                   {mockFriendRequests.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
+                    <span className="ml-2 px-2 py-0.5 bg-retro-200 text-retro-800 rounded-full text-xs font-semibold">
                       {mockFriendRequests.length}
-                    </Badge>
+                    </span>
                   )}
-                </Button>
-                <Button 
-                  variant={activeTab === "search" ? "default" : "outline"} 
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setActiveTab("search")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === "search" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-search"
                 >
                   Search
-                </Button>
+                </button>
               </div>
 
               {/* Friends List */}
@@ -322,30 +330,39 @@ export default function Profile() {
               
               {/* Content Type Tabs */}
               <div className="flex gap-2 mb-6" data-testid="content-type-tabs">
-                <Button 
-                  variant={activeContentTab === "movies" ? "default" : "outline"} 
-                  size="sm"
+                <button
                   onClick={() => setActiveContentTab("movies")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeContentTab === "movies" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-movies"
                 >
                   Movies ({mockWatchHistory.movies.length})
-                </Button>
-                <Button 
-                  variant={activeContentTab === "tv" ? "default" : "outline"} 
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setActiveContentTab("tv")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeContentTab === "tv" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-tv"
                 >
                   TV Shows ({mockWatchHistory.tv.length})
-                </Button>
-                <Button 
-                  variant={activeContentTab === "anime" ? "default" : "outline"} 
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setActiveContentTab("anime")}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeContentTab === "anime" 
+                      ? "bg-retro-600 text-white shadow-sm" 
+                      : "bg-retro-50 text-retro-700 hover:bg-retro-100"
+                  }`}
                   data-testid="tab-anime"
                 >
                   Anime ({mockWatchHistory.anime.length})
-                </Button>
+                </button>
               </div>
 
               {/* Movies History */}
