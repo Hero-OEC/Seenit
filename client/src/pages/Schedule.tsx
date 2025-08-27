@@ -102,7 +102,21 @@ export default function Schedule() {
         isToday: i === 0
       });
     }
-    return days;
+    
+    // Reorder so Tomorrow comes before Today, but keep Today as the main focus
+    const reorderedDays = [];
+    if (days.length > 1) {
+      reorderedDays.push(days[1]); // Tomorrow first
+      reorderedDays.push(days[0]); // Today second
+      // Add the rest of the days
+      for (let i = 2; i < days.length; i++) {
+        reorderedDays.push(days[i]);
+      }
+    } else {
+      return days; // Fallback if there's only one day
+    }
+    
+    return reorderedDays;
   };
 
   const weekDays = generateWeekDays();
