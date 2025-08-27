@@ -631,6 +631,51 @@ export default function ContentDetails() {
               </div>
             )}
 
+            {/* Trailer Section */}
+            <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+              <h2 className="text-2xl font-bold text-retro-900 mb-6">
+                {content.type === 'movie' ? 'Movie' : content.type === 'tv' ? 'TV Show' : 'Anime'} Trailer
+              </h2>
+              
+              {/* Trailer will be fetched from API - for now showing placeholder */}
+              <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-retro-900 to-retro-700">
+                  <div className="text-center text-white">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30">
+                      <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">Official Trailer</h3>
+                    <p className="text-retro-200 text-sm">
+                      Trailer will be loaded from API
+                    </p>
+                  </div>
+                </div>
+                
+                {/* When API is connected, this will be replaced with actual video embed */}
+                <div 
+                  className="absolute inset-0 cursor-pointer hover:bg-black/10 transition-colors"
+                  onClick={() => {
+                    console.log(`Loading trailer for ${content.title}`);
+                    // This will be replaced with actual API call to fetch trailer URL
+                  }}
+                  data-testid="trailer-play-button"
+                />
+              </div>
+              
+              {/* Trailer Info */}
+              <div className="mt-4 flex items-center justify-between text-sm text-retro-600">
+                <div className="flex items-center gap-4">
+                  <span>Official Trailer</span>
+                  <span>•</span>
+                  <span>HD Quality</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Watch on YouTube</span>
+                </div>
+              </div>
+            </div>
+
             {/* User Reviews Section */}
             <div className="bg-white rounded-lg p-6 shadow-md mb-8">
               <h2 className="text-2xl font-bold text-retro-900 mb-6">User Reviews</h2>
