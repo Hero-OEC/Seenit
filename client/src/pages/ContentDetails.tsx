@@ -661,19 +661,6 @@ export default function ContentDetails() {
                   data-testid="trailer-play-button"
                 />
               </div>
-              
-              {/* Trailer Info */}
-              <div className="mt-4 flex items-center justify-between text-sm text-retro-600">
-                <div className="flex items-center gap-4">
-                  <span>Official Trailer</span>
-                  <span>•</span>
-                  <span>HD Quality</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Watch on YouTube</span>
-                </div>
-              </div>
             </div>
 
             {/* User Reviews Section */}
