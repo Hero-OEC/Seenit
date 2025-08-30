@@ -270,14 +270,12 @@ export class TVMazeService {
     }
 
     try {
-      // Skip Phase 1 for now - focus on importing new shows first
-      // Phase 1: Update existing airing/upcoming shows first
-      // if (page === 0 || page === (importStatusRecord.currentPage || 0)) {
-      //   console.log('Phase 1: Updating existing airing/upcoming shows...');
-      //   await this.updateExistingActiveShows();
-      //   console.log('Phase 1 complete: Existing active shows updated');
-      // }
-      console.log('Skipping Phase 1 - focusing on importing new shows first');
+      // Phase 1: Update existing airing/upcoming shows first (for new episodes/seasons)
+      if (page === 0 || page === (importStatusRecord.currentPage || 0)) {
+        console.log('Phase 1: Updating existing airing/upcoming shows for new episodes/seasons...');
+        await this.updateExistingActiveShows();
+        console.log('Phase 1 complete: Existing active shows updated');
+      }
 
       // Phase 2: Continue importing from where we left off
       while (true) {
