@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { content, importStatus, type Content, type InsertContent, type ImportStatus } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 
 interface TVMazeShow {
   id: number;
@@ -270,6 +270,14 @@ export class TVMazeService {
     }
 
     try {
+      // Phase 1: Update existing airing/upcoming shows first
+      if (page === 0 || page === (importStatusRecord.currentPage || 0)) {
+        console.log('Phase 1: Updating existing airing/upcoming shows...');
+        await this.updateExistingActiveShows();
+        console.log('Phase 1 complete: Existing active shows updated');
+      }
+
+      // Phase 2: Continue importing from where we left off
       while (true) {
         // Check if sync is still active (might be paused)
         const [currentStatus] = await db
@@ -390,6 +398,67 @@ export class TVMazeService {
       .where(eq(importStatus.source, 'tvmaze'));
     
     return status || null;
+  }
+
+  private async updateExistingActiveShows(): Promise<void> {
+    console.log('Checking existing shows for updates...');
+    
+    // Get all existing shows that are airing or upcoming
+    const existingActiveShows = await db
+      .select()
+      .from(content)
+      .where(
+        and(
+          eq(content.source, 'tvmaze'),
+          or(
+            eq(content.status, 'airing'),
+            eq(content.status, 'upcoming')
+          )
+        )
+      );
+
+    console.log(`Found ${existingActiveShows.length} existing airing/upcoming shows to update`);
+
+    let updated = 0;
+    for (const show of existingActiveShows) {
+      try {
+        // Check if sync is still active (might be paused)
+        const [currentStatus] = await db
+          .select()
+          .from(importStatus)
+          .where(eq(importStatus.source, 'tvmaze'));
+        
+        if (!currentStatus?.isActive) {
+          console.log('TVMaze sync paused during existing show updates');
+          break;
+        }
+
+        // Fetch latest data for this show
+        const tvmazeId = parseInt(show.sourceId);
+        const detailedShow = await this.getShowWithEpisodes(tvmazeId);
+        const mappedContent = this.mapTVMazeToContent(detailedShow);
+
+        // Update existing show with latest data
+        await db
+          .update(content)
+          .set({
+            ...mappedContent,
+            lastUpdated: new Date()
+          })
+          .where(eq(content.id, show.id));
+        
+        updated++;
+        
+        if (updated % 10 === 0) {
+          console.log(`Updated ${updated}/${existingActiveShows.length} existing shows`);
+        }
+        
+      } catch (error) {
+        console.error(`Error updating existing show ${show.title} (ID: ${show.sourceId}):`, error);
+      }
+    }
+    
+    console.log(`Completed updating ${updated} existing airing/upcoming shows`);
   }
 
   async pauseSync(): Promise<void> {
