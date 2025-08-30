@@ -23,22 +23,12 @@ export default function ContentDetails() {
     enabled: !!params?.id,
   });
 
-  // Initialize watched episodes from the generated sample data
+  // Initialize empty watched episodes state - all start unwatched
   useEffect(() => {
     if (!content || (content.type !== "tv" && content.type !== "anime")) return;
-    
-    const episodes = generateSampleEpisodes(content);
-    const initialWatchedState: {[key: string]: boolean} = {};
-    
-    episodes.forEach(episode => {
-      if (episode.watched) {
-        const episodeKey = `s${selectedSeason}e${episode.number}`;
-        initialWatchedState[episodeKey] = true;
-      }
-    });
-    
-    setWatchedEpisodes(prev => ({ ...prev, ...initialWatchedState }));
-  }, [content, selectedSeason]);
+    // Start with empty state - all episodes unwatched
+    setWatchedEpisodes({});
+  }, [content]);
 
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);
@@ -625,20 +615,19 @@ export default function ContentDetails() {
                                 <span>{episode.duration} min</span>
                                 {episode.rating && <span>★ {episode.rating}</span>}
                               </div>
-                              {isSignedIn && (
-                                <button 
-                                  onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
-                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                    isEpisodeWatched(selectedSeason, episode.number)
-                                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                                      : 'bg-retro-500 hover:bg-retro-600 text-white'
-                                  }`}
-                                  title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
-                                >
-                                  <Check className="w-4 h-4" />
-                                  {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
-                                </button>
-                              )}
+                              <button 
+                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  isEpisodeWatched(selectedSeason, episode.number)
+                                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                                    : 'bg-retro-500 hover:bg-retro-600 text-white'
+                                }`}
+                                title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
+                                data-testid={`episode-${episode.number}-watch-button`}
+                              >
+                                <Check className="w-4 h-4" />
+                                {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
+                              </button>
                             </div>
                           </div>
                         </div>
