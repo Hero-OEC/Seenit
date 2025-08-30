@@ -1,174 +1,67 @@
-import { type User, type InsertUser, type Content, type InsertContent, type UserContent, type InsertUserContent, type ImportStatus, type InsertImportStatus } from "@shared/schema";
+import { Content, User, UserContent, ImportStatus, InsertContent, InsertUser, InsertUserContent, InsertImportStatus } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { db } from "./db";
-import { users, content, userContent, importStatus } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
 
+// Interface for content storage operations
 export interface IStorage {
-  // User methods
+  // Content management
+  getAllContent(): Promise<Content[]>;
+  getContent(id: string): Promise<Content | undefined>;
+  createContent(insertContent: InsertContent): Promise<Content>;
+  updateContent(id: string, updates: Partial<Content>): Promise<Content>;
+  deleteContent(id: string): Promise<boolean>;
+  
+  // Content filtering and search
+  getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number}): Promise<Content[]>;
+  getContentCountByType(type: string, options?: {genre?: string}): Promise<number>;
+  getContentByScheduleDate(date: string, type: string): Promise<Content[]>;
+  searchContent(query: string): Promise<Content[]>;
+  getContentBySource(source: string): Promise<Content[]>;
+  
+  // User management
+  getAllUsers(): Promise<User[]>;
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-
-  // Content methods
-  getContent(id: string): Promise<Content | undefined>;
-  getAllContent(): Promise<Content[]>;
-  getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]>;
-  getContentCountByType(type: string, options?: {genre?: string}): Promise<number>;
-  getContentByScheduleDate(date: string, type: string): Promise<Content[]>;
-  getContentBySource(source: string): Promise<Content[]>;
-  searchContent(query: string): Promise<Content[]>;
-  createContent(content: InsertContent): Promise<Content>;
-  updateContent(id: string, updates: Partial<Content>): Promise<Content>;
-  deleteContentBySource(source: string): Promise<number>;
-
-  // User content tracking methods
-  getUserContent(userId: string): Promise<UserContent[]>;
-  getUserContentByStatus(userId: string, status: string): Promise<UserContent[]>;
-  addUserContent(userContent: InsertUserContent): Promise<UserContent>;
+  createUser(insertUser: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User>;
+  deleteUser(id: string): Promise<boolean>;
+  
+  // User-Content relationship management
+  getAllUserContent(): Promise<UserContent[]>;
+  getUserContent(id: string): Promise<UserContent | undefined>;
+  getUserContentByUserId(userId: string): Promise<UserContent[]>;
+  getUserContentByContentId(contentId: string): Promise<UserContent[]>;
+  createUserContent(insertUserContent: InsertUserContent): Promise<UserContent>;
   updateUserContent(id: string, updates: Partial<UserContent>): Promise<UserContent>;
-  removeUserContent(id: string): Promise<void>;
-  getUserContentByContentId(userId: string, contentId: string): Promise<UserContent | undefined>;
-
-  // Import status methods
-  getImportStatus(source: string): Promise<ImportStatus | undefined>;
-  createImportStatus(importStatus: InsertImportStatus): Promise<ImportStatus>;
+  deleteUserContent(id: string): Promise<boolean>;
+  
+  // Import status management
+  getAllImportStatus(): Promise<ImportStatus[]>;
+  getImportStatus(id: string): Promise<ImportStatus | undefined>;
+  createImportStatus(insertImportStatus: InsertImportStatus): Promise<ImportStatus>;
   updateImportStatus(id: string, updates: Partial<ImportStatus>): Promise<ImportStatus>;
+  deleteImportStatus(id: string): Promise<boolean>;
 }
 
+// Memory storage implementation (no longer using static content)
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private content: Map<string, Content>;
-  private userContent: Map<string, UserContent>;
-  private importStatus: Map<string, ImportStatus>;
+  private content = new Map<string, Content>();
+  private users = new Map<string, User>();
+  private userContent = new Map<string, UserContent>();
+  private importStatus = new Map<string, ImportStatus>();
 
   constructor() {
-    this.users = new Map();
-    this.content = new Map();
-    this.userContent = new Map();
-    this.importStatus = new Map();
-    this.initializeSampleContent();
+    // No static content initialization - using database only
+    console.log('MemStorage initialized without static content');
   }
 
-  // User methods
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  // Content methods
-  async getContent(id: string): Promise<Content | undefined> {
-    return this.content.get(id);
-  }
-
+  // Content management methods
   async getAllContent(): Promise<Content[]> {
     return Array.from(this.content.values());
   }
 
-  async getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]> {
-    let filtered = Array.from(this.content.values()).filter(
-      (content) => content.type === type
-    );
-
-    // Apply genre filtering
-    if (options?.genre && options.genre !== 'all') {
-      filtered = filtered.filter(content => 
-        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
-      );
-    }
-
-    // Apply sorting
-    if (options?.sort) {
-      filtered.sort((a, b) => {
-        switch (options.sort) {
-          case 'new':
-          case 'release_date':
-            return (b.year || 0) - (a.year || 0);
-          case 'reviews':
-          case 'popular':
-            return (b.rating || 0) - (a.rating || 0);
-          default:
-            return 0;
-        }
-      });
-    }
-
-    // Apply pagination
-    const offset = options?.offset || 0;
-    const limit = options?.limit;
-    
-    if (limit !== undefined) {
-      return filtered.slice(offset, offset + limit);
-    }
-
-    return filtered.slice(offset);
-  }
-
-  async getContentCountByType(type: string, options?: {genre?: string}): Promise<number> {
-    let filtered = Array.from(this.content.values()).filter(
-      (content) => content.type === type
-    );
-
-    // Apply genre filtering
-    if (options?.genre && options.genre !== 'all') {
-      filtered = filtered.filter(content => 
-        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
-      );
-    }
-
-    return filtered.length;
-  }
-
-  async getContentByScheduleDate(date: string, type: string): Promise<Content[]> {
-    const targetDate = new Date(date);
-    
-    return Array.from(this.content.values()).filter((content) => {
-      if (content.type !== type) return false;
-      
-      // For demo purposes, randomly assign content to different days
-      // In a real app, this would check the actual air date/schedule
-      const contentDate = new Date(content.createdAt || new Date());
-      return contentDate.toDateString() === targetDate.toDateString();
-    });
-  }
-
-  async searchContent(query: string): Promise<Content[]> {
-    const lowerQuery = query.toLowerCase();
-    return Array.from(this.content.values()).filter(
-      (content) => 
-        content.title.toLowerCase().includes(lowerQuery) ||
-        content.overview?.toLowerCase().includes(lowerQuery) ||
-        content.genres?.some(g => g.toLowerCase().includes(lowerQuery))
-    );
-  }
-
-  async getContentBySource(source: string): Promise<Content[]> {
-    return Array.from(this.content.values()).filter(
-      (content) => content.source === source
-    );
+  async getContent(id: string): Promise<Content | undefined> {
+    return this.content.get(id);
   }
 
   async createContent(insertContent: InsertContent): Promise<Content> {
@@ -176,7 +69,6 @@ export class MemStorage implements IStorage {
     const content: Content = { 
       ...insertContent, 
       id,
-      // Ensure nullable fields are properly set with new schema
       createdAt: new Date(),
       lastUpdated: new Date(),
       year: insertContent.year ?? null,
@@ -189,7 +81,7 @@ export class MemStorage implements IStorage {
       poster: insertContent.poster ?? null,
       backdrop: insertContent.backdrop ?? null,
       overview: insertContent.overview ?? null,
-      status: insertContent.status ?? null,
+      status: insertContent.status ?? "completed",
       episodes: insertContent.episodes ?? null,
       season: insertContent.season ?? null,
       totalSeasons: insertContent.totalSeasons ?? null,
@@ -215,10 +107,10 @@ export class MemStorage implements IStorage {
   async updateContent(id: string, updates: Partial<Content>): Promise<Content> {
     const existing = this.content.get(id);
     if (!existing) {
-      throw new Error('Content not found');
+      throw new Error(`Content with id ${id} not found`);
     }
-    const updated: Content = {
-      ...existing,
+    const updated = { 
+      ...existing, 
       ...updates,
       lastUpdated: new Date()
     };
@@ -226,41 +118,151 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteContentBySource(source: string): Promise<number> {
-    const toDelete = Array.from(this.content.entries()).filter(
-      ([_, content]) => content.source === source
+  async deleteContent(id: string): Promise<boolean> {
+    return this.content.delete(id);
+  }
+
+  async getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number}): Promise<Content[]> {
+    let filtered = Array.from(this.content.values()).filter(
+      (content) => content.type === type
     );
+
+    if (options?.genre && options.genre !== 'all') {
+      filtered = filtered.filter(content => 
+        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
+      );
+    }
+
+    const offset = options?.offset || 0;
+    const limit = options?.limit;
     
-    toDelete.forEach(([id, _]) => {
-      this.content.delete(id);
+    if (limit !== undefined) {
+      return filtered.slice(offset, offset + limit);
+    }
+
+    return filtered.slice(offset);
+  }
+
+  async getContentCountByType(type: string, options?: {genre?: string}): Promise<number> {
+    let filtered = Array.from(this.content.values()).filter(
+      (content) => content.type === type
+    );
+
+    if (options?.genre && options.genre !== 'all') {
+      filtered = filtered.filter(content => 
+        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
+      );
+    }
+
+    return filtered.length;
+  }
+
+  async getContentByScheduleDate(date: string, type: string): Promise<Content[]> {
+    return Array.from(this.content.values()).filter((content) => {
+      if (content.type !== type) return false;
+      
+      if (content.episodeData) {
+        try {
+          const episodeData = typeof content.episodeData === 'string' 
+            ? JSON.parse(content.episodeData) 
+            : content.episodeData;
+          
+          if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
+            return episodeData.episodes.some((ep: any) => ep.airdate === date);
+          }
+        } catch (error) {
+          console.error('Error parsing episode data for schedule:', error);
+        }
+      }
+      
+      return false;
     });
-    
-    return toDelete.length;
   }
 
-  // User content tracking methods
-  async getUserContent(userId: string): Promise<UserContent[]> {
-    return Array.from(this.userContent.values()).filter(
-      (uc) => uc.userId === userId
+  async searchContent(query: string): Promise<Content[]> {
+    const lowerQuery = query.toLowerCase();
+    return Array.from(this.content.values()).filter(
+      (content) => 
+        content.title.toLowerCase().includes(lowerQuery) ||
+        content.overview?.toLowerCase().includes(lowerQuery) ||
+        content.genres?.some(g => g.toLowerCase().includes(lowerQuery))
     );
   }
 
-  async getUserContentByStatus(userId: string, status: string): Promise<UserContent[]> {
-    return Array.from(this.userContent.values()).filter(
-      (uc) => uc.userId === userId && uc.status === status
+  async getContentBySource(source: string): Promise<Content[]> {
+    return Array.from(this.content.values()).filter(
+      (content) => content.source === source
     );
   }
 
-  async addUserContent(insertUserContent: InsertUserContent): Promise<UserContent> {
+  // User management methods
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const now = new Date();
-    const userContent: UserContent = {
-      ...insertUserContent,
+    const user: User = { 
+      ...insertUser, 
+      id,
+      createdAt: new Date()
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const existing = this.users.get(id);
+    if (!existing) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    return this.users.delete(id);
+  }
+
+  // User-Content relationship methods
+  async getAllUserContent(): Promise<UserContent[]> {
+    return Array.from(this.userContent.values());
+  }
+
+  async getUserContent(id: string): Promise<UserContent | undefined> {
+    return this.userContent.get(id);
+  }
+
+  async getUserContentByUserId(userId: string): Promise<UserContent[]> {
+    return Array.from(this.userContent.values()).filter(uc => uc.userId === userId);
+  }
+
+  async getUserContentByContentId(contentId: string): Promise<UserContent[]> {
+    return Array.from(this.userContent.values()).filter(uc => uc.contentId === contentId);
+  }
+
+  async createUserContent(insertUserContent: InsertUserContent): Promise<UserContent> {
+    const id = randomUUID();
+    const userContent: UserContent = { 
+      ...insertUserContent, 
       id,
       progress: insertUserContent.progress ?? null,
       userRating: insertUserContent.userRating ?? null,
-      addedAt: now,
-      updatedAt: now
+      addedAt: new Date(),
+      updatedAt: new Date()
     };
     this.userContent.set(id, userContent);
     return userContent;
@@ -269,10 +271,10 @@ export class MemStorage implements IStorage {
   async updateUserContent(id: string, updates: Partial<UserContent>): Promise<UserContent> {
     const existing = this.userContent.get(id);
     if (!existing) {
-      throw new Error('User content not found');
+      throw new Error(`UserContent with id ${id} not found`);
     }
-    const updated: UserContent = {
-      ...existing,
+    const updated = { 
+      ...existing, 
       ...updates,
       updatedAt: new Date()
     };
@@ -280,34 +282,30 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async removeUserContent(id: string): Promise<void> {
-    this.userContent.delete(id);
+  async deleteUserContent(id: string): Promise<boolean> {
+    return this.userContent.delete(id);
   }
 
-  async getUserContentByContentId(userId: string, contentId: string): Promise<UserContent | undefined> {
-    return Array.from(this.userContent.values()).find(
-      (uc) => uc.userId === userId && uc.contentId === contentId
-    );
+  // Import status management methods
+  async getAllImportStatus(): Promise<ImportStatus[]> {
+    return Array.from(this.importStatus.values());
   }
 
-  // Import status methods
-  async getImportStatus(source: string): Promise<ImportStatus | undefined> {
-    return Array.from(this.importStatus.values()).find(
-      status => status.source === source
-    );
+  async getImportStatus(id: string): Promise<ImportStatus | undefined> {
+    return this.importStatus.get(id);
   }
 
-  async createImportStatus(importStatus: InsertImportStatus): Promise<ImportStatus> {
+  async createImportStatus(insertImportStatus: InsertImportStatus): Promise<ImportStatus> {
     const id = randomUUID();
     const status: ImportStatus = {
       id,
-      source: importStatus.source,
-      isActive: importStatus.isActive ?? null,
-      lastSyncAt: importStatus.lastSyncAt ?? null,
-      totalImported: importStatus.totalImported ?? null,
-      totalAvailable: importStatus.totalAvailable ?? null,
-      currentPage: importStatus.currentPage ?? null,
-      errors: importStatus.errors ?? null,
+      source: insertImportStatus.source,
+      isActive: insertImportStatus.isActive ?? null,
+      lastSyncAt: insertImportStatus.lastSyncAt ?? null,
+      totalImported: insertImportStatus.totalImported ?? null,
+      totalAvailable: insertImportStatus.totalAvailable ?? null,
+      currentPage: insertImportStatus.currentPage ?? null,
+      errors: insertImportStatus.errors ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -329,297 +327,11 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  private initializeSampleContent() {
-    // Initialize with sample content for demonstration
-    const sampleContent: Content[] = [
-      {
-        id: "1",
-        title: "Action Hero",
-        type: "movie",
-        source: "manual",
-        sourceId: "action-hero-1",
-        year: 2024,
-        endYear: null,
-        rating: 8.5,
-        imdbRating: 8.2,
-        rottenTomatoesRating: 85,
-        malRating: null,
-        genres: ["Action", "Adventure"],
-        poster: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
-        backdrop: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "An epic action adventure that keeps you on the edge of your seat with non-stop thrills and spectacular visual effects.",
-        status: "completed",
-        episodes: null,
-        season: null,
-        totalSeasons: null,
-        totalEpisodes: null,
-        runtime: 125,
-        releaseDate: null,
-        network: null,
-        airTime: null,
-        airDays: null,
-        studio: null,
-        sourceMaterial: null,
-        tags: ["blockbuster", "visual-effects"],
-        popularity: 8.5,
-        voteCount: 12500,
-        streamingPlatforms: ["Netflix", "Prime Video"],
-        affiliateLinks: ["https://netflix.com/affiliate/action-hero", "https://primevideo.com/affiliate/action-hero"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      },
-      {
-        id: "2",
-        title: "Mystery Series",
-        type: "tv",
-        source: "manual",
-        sourceId: "mystery-series-2",
-        year: 2021,
-        endYear: null,
-        rating: 9.2,
-        imdbRating: 9.1,
-        rottenTomatoesRating: 94,
-        malRating: null,
-        genres: ["Drama", "Mystery"],
-        poster: "https://pixabay.com/get/g5aa14888be9881f298958bc87eb9d20ce20bf5b70f7db91250c3cc1ce2b44d784134ea678494d856af6689923de2d1819e646131e74afe5787eab63692955f55_1280.jpg",
-        backdrop: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "A gripping mystery that unfolds across multiple seasons, weaving together complex storylines and memorable characters in a masterfully crafted narrative.",
-        status: "airing",
-        episodes: 30,
-        season: 3,
-        totalSeasons: 4,
-        totalEpisodes: 120,
-        runtime: null,
-        releaseDate: null,
-        network: "HBO",
-        airTime: "21:00",
-        airDays: ["Sunday"],
-        studio: null,
-        sourceMaterial: null,
-        tags: ["psychological", "crime"],
-        popularity: 9.2,
-        voteCount: 8750,
-        streamingPlatforms: ["HBO Max", "Hulu"],
-        affiliateLinks: ["https://hbomax.com/affiliate/mystery-series", "https://hulu.com/affiliate/mystery-series"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      },
-      {
-        id: "3",
-        title: "Adventure Quest",
-        type: "anime",
-        source: "manual",
-        sourceId: "adventure-quest-3",
-        year: 2022,
-        endYear: null,
-        rating: 8.8,
-        imdbRating: 8.6,
-        rottenTomatoesRating: 92,
-        malRating: 8.9,
-        genres: ["Adventure", "Fantasy"],
-        poster: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
-        backdrop: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "An exciting anime adventure with stunning visuals and an engaging storyline that follows heroes on their epic quest.",
-        status: "airing",
-        episodes: 24,
-        season: 2,
-        totalSeasons: 3,
-        totalEpisodes: 72,
-        runtime: null,
-        releaseDate: null,
-        network: null,
-        airTime: null,
-        airDays: null,
-        studio: "Studio Animate",
-        sourceMaterial: "manga",
-        tags: ["shonen", "fantasy-adventure"],
-        popularity: 8.8,
-        voteCount: 15200,
-        streamingPlatforms: ["Crunchyroll", "Funimation"],
-        affiliateLinks: ["https://crunchyroll.com/affiliate/adventure-quest"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      },
-      {
-        id: "4",
-        title: "Love Story",
-        type: "movie",
-        source: "manual",
-        sourceId: "love-story-4",
-        year: 2024,
-        endYear: null,
-        rating: 7.9,
-        imdbRating: 7.8,
-        rottenTomatoesRating: 82,
-        malRating: null,
-        genres: ["Romance", "Drama"],
-        poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
-        backdrop: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "A heartwarming romantic drama that touches the soul with its beautiful portrayal of love and human connection.",
-        status: "completed",
-        episodes: null,
-        season: null,
-        totalSeasons: null,
-        totalEpisodes: null,
-        runtime: 118,
-        releaseDate: null,
-        network: null,
-        airTime: null,
-        airDays: null,
-        studio: null,
-        sourceMaterial: null,
-        tags: ["heartwarming", "relationship"],
-        popularity: 7.9,
-        voteCount: 9800,
-        streamingPlatforms: ["Netflix", "Disney+"],
-        affiliateLinks: ["https://netflix.com/affiliate/love-story", "https://disneyplus.com/affiliate/love-story"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      },
-      {
-        id: "5",
-        title: "Space Odyssey",
-        type: "movie",
-        source: "manual",
-        sourceId: "space-odyssey-5",
-        year: 2024,
-        endYear: null,
-        rating: 8.3,
-        imdbRating: 8.1,
-        rottenTomatoesRating: 88,
-        malRating: null,
-        genres: ["Sci-Fi", "Adventure"],
-        poster: "https://pixabay.com/get/g4cc27b6044dd966154c5b348cf840614c26fe4166b45d112896f3373793000b47875a5be403dc59b78477c28b22d917948c568afb7f490b823998cdd8951b556_1280.jpg",
-        backdrop: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "A thrilling space adventure with stunning visual effects that takes viewers on an unforgettable journey through the cosmos.",
-        status: "completed",
-        episodes: null,
-        season: null,
-        totalSeasons: null,
-        totalEpisodes: null,
-        runtime: 142,
-        releaseDate: null,
-        network: null,
-        airTime: null,
-        airDays: null,
-        studio: null,
-        sourceMaterial: null,
-        tags: ["space", "exploration"],
-        popularity: 8.3,
-        voteCount: 11200,
-        streamingPlatforms: ["Prime Video", "HBO Max"],
-        affiliateLinks: ["https://primevideo.com/affiliate/space-odyssey"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      },
-      {
-        id: "6",
-        title: "Night Terror",
-        type: "movie",
-        source: "manual",
-        sourceId: "night-terror-6",
-        year: 2024,
-        endYear: null,
-        rating: 7.6,
-        imdbRating: 7.4,
-        rottenTomatoesRating: 78,
-        malRating: null,
-        genres: ["Horror", "Thriller"],
-        poster: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=450",
-        backdrop: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675",
-        overview: "A spine-chilling horror that will keep you awake at night with its masterful suspense and terrifying atmosphere.",
-        status: "completed",
-        episodes: null,
-        season: null,
-        totalSeasons: null,
-        totalEpisodes: null,
-        runtime: 98,
-        releaseDate: null,
-        network: null,
-        airTime: null,
-        airDays: null,
-        studio: null,
-        sourceMaterial: null,
-        tags: ["psychological-horror", "suspense"],
-        popularity: 7.6,
-        voteCount: 7400,
-        streamingPlatforms: ["Netflix", "Hulu"],
-        affiliateLinks: ["https://netflix.com/affiliate/night-terror"],
-        episodeData: null,
-        createdAt: new Date(),
-        lastUpdated: new Date()
-      }
-    ];
-
-    sampleContent.forEach(content => {
-      this.content.set(content.id, content);
-    });
-
-    // Initialize sample user content for demo user (id: '1')
-    const sampleUserContent: UserContent[] = [
-      {
-        id: randomUUID(),
-        userId: '1',
-        contentId: '2', // Mystery Series
-        status: 'watching',
-        progress: 15,
-        userRating: 4,
-        addedAt: new Date('2024-08-20'),
-        updatedAt: new Date('2024-08-22')
-      },
-      {
-        id: randomUUID(),
-        userId: '1',
-        contentId: '3', // Adventure Quest
-        status: 'watching',
-        progress: 8,
-        userRating: null,
-        addedAt: new Date('2024-08-18'),
-        updatedAt: new Date('2024-08-21')
-      },
-      {
-        id: randomUUID(),
-        userId: '1',
-        contentId: '1', // Action Hero
-        status: 'want_to_watch',
-        progress: 0,
-        userRating: null,
-        addedAt: new Date('2024-08-15'),
-        updatedAt: new Date('2024-08-15')
-      },
-      {
-        id: randomUUID(),
-        userId: '1',
-        contentId: '4', // Love Story
-        status: 'want_to_watch',
-        progress: 0,
-        userRating: null,
-        addedAt: new Date('2024-08-19'),
-        updatedAt: new Date('2024-08-19')
-      },
-      {
-        id: randomUUID(),
-        userId: '1',
-        contentId: '5', // Space Odyssey
-        status: 'want_to_watch',
-        progress: 0,
-        userRating: null,
-        addedAt: new Date('2024-08-16'),
-        updatedAt: new Date('2024-08-16')
-      }
-    ];
-
-    sampleUserContent.forEach(userContent => {
-      this.userContent.set(userContent.id, userContent);
-    });
+  async deleteImportStatus(id: string): Promise<boolean> {
+    return this.importStatus.delete(id);
   }
 }
 
-// Switch to database storage
+// Use database storage exclusively
 import { databaseStorage } from "./storage/database";
 export const storage = databaseStorage;
