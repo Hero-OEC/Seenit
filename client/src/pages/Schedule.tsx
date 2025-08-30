@@ -100,23 +100,65 @@ export default function Schedule() {
     setOpenDays(newOpenDays);
   };
 
+  // Load all episodes for all days at once
+  const { data: allWeekEpisodes = [], isLoading: isLoadingAllEpisodes } = useQuery<any[]>({
+    queryKey: ["/api/content/schedule/week", activeContentType],
+    queryFn: async () => {
+      const allEpisodes: any[] = [];
+      
+      // Fetch episodes for all 7 days
+      for (const day of weekDays) {
+        try {
+          const response = await fetch(`/api/content/schedule/${day.fullDate.toISOString().split('T')[0]}?type=${activeContentType}`);
+          if (response.ok) {
+            const dayEpisodes = await response.json();
+            // Add day info to each episode
+            const episodesWithDay = dayEpisodes.map((episode: any) => ({
+              ...episode,
+              dayInfo: {
+                dayName: day.dayName,
+                fullDayName: day.fullDayName,
+                date: day.date,
+                month: day.month,
+                isToday: day.isToday,
+                fullDate: day.fullDate
+              }
+            }));
+            allEpisodes.push(...episodesWithDay);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch episodes for ${day.dayName}:`, error);
+        }
+      }
+      
+      return allEpisodes;
+    },
+  });
+
+  // Group episodes by day for display
+  const episodesByDay = allWeekEpisodes.reduce((acc: Record<string, { day: any, episodes: any[] }>, episode: any) => {
+    const dayKey = episode.dayInfo.dayName;
+    if (!acc[dayKey]) {
+      acc[dayKey] = {
+        day: episode.dayInfo,
+        episodes: []
+      };
+    }
+    acc[dayKey].episodes.push(episode);
+    return acc;
+  }, {} as Record<string, { day: any, episodes: any[] }>);
+
   // Component for each day's content
   function DayContent({ day, isOpen }: { day: any, isOpen: boolean }) {
-    const { data: dayContent = [], isLoading } = useQuery<any[]>({
-      queryKey: ["/api/content/schedule", day.fullDate.toISOString().split('T')[0], activeContentType],
-      queryFn: async () => {
-        const response = await fetch(`/api/content/schedule/${day.fullDate.toISOString().split('T')[0]}?type=${activeContentType}`);
-        if (!response.ok) throw new Error('Failed to fetch schedule content');
-        return response.json();
-      },
-      enabled: isOpen, // Only fetch when the day is expanded
-    });
+    const dayKey = day.dayName;
+    const dayData = episodesByDay[dayKey];
+    const dayContent = dayData?.episodes || [];
 
     if (!isOpen) return null;
 
     return (
       <div className="p-6 border-t border-retro-200">
-        {isLoading && (
+        {isLoadingAllEpisodes && dayContent.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="animate-pulse">
@@ -128,16 +170,16 @@ export default function Schedule() {
           </div>
         )}
 
-        {!isLoading && dayContent.length === 0 && (
+        {!isLoadingAllEpisodes && dayContent.length === 0 && (
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 mx-auto text-retro-400 mb-3" />
-            <p className="text-retro-600">No {activeContentType === 'tv' ? 'TV shows' : 'anime'} scheduled for this day</p>
+            <p className="text-retro-600">No {activeContentType === 'tv' ? 'TV shows' : 'anime'} scheduled for {day.dayName}</p>
           </div>
         )}
 
-        {!isLoading && dayContent.length > 0 && (
+        {!isLoadingAllEpisodes && dayContent.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {dayContent.map((episode) => {
+            {dayContent.map((episode: any) => {
               const getContentStatus = () => {
                 if (episode.status === "airing") return "ongoing";
                 if (episode.status === "upcoming") return "coming-soon";
