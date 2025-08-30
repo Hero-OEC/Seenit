@@ -565,23 +565,6 @@ export default function ContentDetails() {
                       </div>
                     </div>
                   )}
-                  
-                  {content.tags && content.tags.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-retro-900 mb-3">Tags</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {content.tags.map((tag, index) => (
-                          <span 
-                            key={index}
-                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200"
-                            data-testid={`synopsis-tag-${tag.toLowerCase().replace(/\s+/g, '-')}`}
-                          >
-                            {tag.replace(/[-_]/g, ' ')}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
