@@ -48,9 +48,12 @@ export default function Discover() {
         ...(sortBy && { sort: sortBy }),
       });
       
+      console.log(`Fetching page ${pageParam} for ${activeContentType}`);
       const response = await fetch(`/api/content/type/${activeContentType}?${params}`);
       if (!response.ok) throw new Error('Failed to fetch content');
-      return response.json();
+      const data = await response.json();
+      console.log(`Received page ${pageParam}:`, data.pagination);
+      return data;
     },
     getNextPageParam: (lastPage) => {
       return lastPage.pagination.hasMore ? lastPage.pagination.page + 1 : undefined;
@@ -171,7 +174,7 @@ export default function Discover() {
 
                     return (
                       <div
-                        key={item.id}
+                        key={`${item.id}-${index}`}
                         ref={isLast ? lastElementRef : null}
                       >
                         <ContentDisplay

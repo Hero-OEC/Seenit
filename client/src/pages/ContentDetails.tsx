@@ -470,25 +470,6 @@ export default function ContentDetails() {
               )}
             </div>
 
-            {/* Source and Metadata */}
-            <div className="flex flex-wrap gap-4 mb-6">
-              <div className="flex items-center gap-2" data-testid="content-source">
-                <span className="text-sm text-retro-600">Source:</span>
-                <span className="font-medium text-retro-900 uppercase">{content.source}</span>
-              </div>
-              {content.popularity && (
-                <div className="flex items-center gap-2" data-testid="content-popularity">
-                  <span className="text-sm text-retro-600">Popularity:</span>
-                  <span className="font-medium text-retro-900">{content.popularity.toFixed(1)}</span>
-                </div>
-              )}
-              {content.voteCount && (
-                <div className="flex items-center gap-2" data-testid="content-votes">
-                  <span className="text-sm text-retro-600">Votes:</span>
-                  <span className="font-medium text-retro-900">{content.voteCount.toLocaleString()}</span>
-                </div>
-              )}
-            </div>
 
             {/* Ratings */}
             {(content.imdbRating || content.rottenTomatoesRating || content.malRating || content.rating) && (
