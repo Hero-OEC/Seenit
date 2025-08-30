@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, real, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,20 +15,53 @@ export const content = pgTable("content", {
   id: varchar("id").primaryKey(),
   title: text("title").notNull(),
   type: text("type").notNull(), // 'movie', 'tv', 'anime'
+  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anilist', 'manual'
+  sourceId: text("source_id").notNull(), // Original API ID
+  
+  // Common fields
+  overview: text("overview"), // Description/synopsis
+  genres: text("genres").array(), // Updated from 'genre' to 'genres'
   year: integer("year"),
   endYear: integer("end_year"), // for TV shows that have ended
-  rating: text("rating"), // e.g. "8.5"
-  imdbRating: text("imdb_rating"), // IMDb rating
-  rottenTomatoesRating: text("rotten_tomatoes_rating"), // Rotten Tomatoes rating
-  genre: text("genre").array(),
+  rating: real("rating"), // Average rating as decimal
   poster: text("poster"),
-  overview: text("overview"),
-  status: text("status"), // 'airing', 'completed', 'upcoming'
-  episodes: integer("episodes"),
-  season: integer("season"), // current season for tv/anime
-  totalSeasons: integer("total_seasons"), // total number of seasons
+  backdrop: text("backdrop"), // Background image for detail pages
+  status: text("status"), // 'finished', 'ongoing', 'upcoming', 'airing', 'completed', 'canceled'
+  
+  // Multiple rating sources
+  imdbRating: real("imdb_rating"), // IMDb rating as decimal
+  rottenTomatoesRating: integer("rotten_tomatoes_rating"), // RT rating as percentage
+  malRating: real("mal_rating"), // MyAnimeList rating for anime
+  
+  // Movie-specific (TMDB)
+  runtime: integer("runtime"), // Duration in minutes
+  releaseDate: date("release_date"), // Movie release date
+  
+  // TV-specific (TVmaze)
+  totalSeasons: integer("total_seasons"),
+  totalEpisodes: integer("total_episodes"),
+  network: text("network"), // Broadcasting network
+  airTime: text("air_time"), // Time when show airs
+  airDays: text("air_days").array(), // Days of week show airs
+  
+  // Anime-specific (AniList)
+  episodes: integer("episodes"), // Total episodes planned
+  season: integer("season"), // Current season for ongoing shows
+  studio: text("studio"), // Animation studio
+  sourceMaterial: text("source_material"), // 'manga', 'light_novel', 'original', etc.
+  
+  // Content availability
   streamingPlatforms: text("streaming_platforms").array(),
   affiliateLinks: text("affiliate_links").array(),
+  
+  // Additional metadata
+  tags: text("tags").array(), // Additional descriptive tags
+  popularity: real("popularity"), // Popularity score from APIs
+  voteCount: integer("vote_count"), // Number of votes/ratings
+  
+  // Timestamps
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const userContent = pgTable("user_content", {

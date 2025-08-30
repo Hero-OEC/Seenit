@@ -319,7 +319,7 @@ export default function ContentDetails() {
     ];
 
     // Filter and sort recommendations based on shared genres
-    const currentGenres = currentContent.genre || [];
+    const currentGenres = currentContent.genres || [];
     const scored = allRecommendations
       .filter(item => item.id !== currentContent.id)
       .map(item => {
@@ -388,7 +388,7 @@ export default function ContentDetails() {
                 
                 {/* Genre Tags */}
                 <div className="flex flex-wrap gap-1 mb-4">
-                  {content.genre?.slice(0, 3).map((genre, index) => (
+                  {content.genres?.slice(0, 3).map((genre, index) => (
                     <span 
                       key={index}
                       className="px-2 py-1 bg-retro-100 text-retro-700 rounded-full text-xs font-medium hover:bg-retro-200 transition-colors cursor-pointer"
@@ -470,8 +470,28 @@ export default function ContentDetails() {
               )}
             </div>
 
+            {/* Source and Metadata */}
+            <div className="flex flex-wrap gap-4 mb-6">
+              <div className="flex items-center gap-2" data-testid="content-source">
+                <span className="text-sm text-retro-600">Source:</span>
+                <span className="font-medium text-retro-900 uppercase">{content.source}</span>
+              </div>
+              {content.popularity && (
+                <div className="flex items-center gap-2" data-testid="content-popularity">
+                  <span className="text-sm text-retro-600">Popularity:</span>
+                  <span className="font-medium text-retro-900">{content.popularity.toFixed(1)}</span>
+                </div>
+              )}
+              {content.voteCount && (
+                <div className="flex items-center gap-2" data-testid="content-votes">
+                  <span className="text-sm text-retro-600">Votes:</span>
+                  <span className="font-medium text-retro-900">{content.voteCount.toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+
             {/* Ratings */}
-            {(content.imdbRating || content.rottenTomatoesRating || content.rating) && (
+            {(content.imdbRating || content.rottenTomatoesRating || content.malRating || content.rating) && (
               <div className="flex flex-wrap gap-6 mb-6">
                 {content.imdbRating && (
                   <div className="flex items-center gap-3" data-testid="imdb-rating">
@@ -510,7 +530,19 @@ export default function ContentDetails() {
                     <span className="font-medium text-lg">{content.rottenTomatoesRating}%</span>
                   </div>
                 )}
-                {content.rating && !content.imdbRating && (
+                {content.malRating && content.type === "anime" && (
+                  <div className="flex items-center gap-3" data-testid="mal-rating">
+                    {/* MyAnimeList Logo */}
+                    <div className="w-12 h-6 bg-blue-600 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">MAL</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium text-lg">{content.malRating}/10</span>
+                    </div>
+                  </div>
+                )}
+                {content.rating && !content.imdbRating && !content.malRating && (
                   <div className="flex items-center gap-2" data-testid="general-rating">
                     <span className="font-semibold text-retro-900">Rating:</span>
                     <div className="flex items-center gap-1">
@@ -519,6 +551,64 @@ export default function ContentDetails() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Content-specific details */}
+            {(content.runtime || content.network || content.studio || content.sourceMaterial) && (
+              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
+                <h2 className="text-xl font-bold text-retro-900 mb-4">Details</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Movie-specific fields */}
+                  {content.type === "movie" && content.runtime && (
+                    <div data-testid="movie-runtime">
+                      <span className="font-medium text-retro-900">Runtime:</span>
+                      <span className="ml-2 text-retro-700">{content.runtime} minutes</span>
+                    </div>
+                  )}
+                  
+                  {/* TV-specific fields */}
+                  {content.type === "tv" && content.network && (
+                    <div data-testid="tv-network">
+                      <span className="font-medium text-retro-900">Network:</span>
+                      <span className="ml-2 text-retro-700">{content.network}</span>
+                    </div>
+                  )}
+                  {content.type === "tv" && content.airTime && (
+                    <div data-testid="tv-airtime">
+                      <span className="font-medium text-retro-900">Air Time:</span>
+                      <span className="ml-2 text-retro-700">{content.airTime}</span>
+                    </div>
+                  )}
+                  {content.type === "tv" && content.airDays && content.airDays.length > 0 && (
+                    <div data-testid="tv-airdays">
+                      <span className="font-medium text-retro-900">Air Days:</span>
+                      <span className="ml-2 text-retro-700">{content.airDays.join(", ")}</span>
+                    </div>
+                  )}
+                  
+                  {/* Anime-specific fields */}
+                  {content.type === "anime" && content.studio && (
+                    <div data-testid="anime-studio">
+                      <span className="font-medium text-retro-900">Studio:</span>
+                      <span className="ml-2 text-retro-700">{content.studio}</span>
+                    </div>
+                  )}
+                  {content.type === "anime" && content.sourceMaterial && (
+                    <div data-testid="anime-source">
+                      <span className="font-medium text-retro-900">Source:</span>
+                      <span className="ml-2 text-retro-700 capitalize">{content.sourceMaterial.replace('_', ' ')}</span>
+                    </div>
+                  )}
+                  
+                  {/* Common episode information */}
+                  {content.totalEpisodes && (
+                    <div data-testid="total-episodes">
+                      <span className="font-medium text-retro-900">Total Episodes:</span>
+                      <span className="ml-2 text-retro-700">{content.totalEpisodes}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -531,23 +621,42 @@ export default function ContentDetails() {
                   {content.overview}
                 </p>
                 
-                {/* Genre Tags */}
-                {content.genre && content.genre.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {content.genre.map((genre, index) => (
-                        <span 
-                          key={index}
-                          className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
-                          data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          {genre}
-                        </span>
-                      ))}
+                {/* Genre and Tags */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {content.genres && content.genres.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {content.genres.map((genre, index) => (
+                          <span 
+                            key={index}
+                            className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
+                            data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            {genre}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  
+                  {content.tags && content.tags.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-retro-900 mb-3">Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {content.tags.map((tag, index) => (
+                          <span 
+                            key={index}
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200"
+                            data-testid={`synopsis-tag-${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
+                            {tag.replace(/[-_]/g, ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
