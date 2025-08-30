@@ -48,7 +48,7 @@ export default function Discover() {
   const filteredAndSortedContent = content
     .filter((item) => {
       if (selectedGenre === "all") return true;
-      return item.genre?.some(g => g.toLowerCase() === selectedGenre.toLowerCase());
+      return item.genres?.some((g: string) => g.toLowerCase() === selectedGenre.toLowerCase());
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -57,10 +57,10 @@ export default function Discover() {
         case "release_date":
           return (b.year || 0) - (a.year || 0);
         case "reviews":
-          return parseFloat(b.rating || "0") - parseFloat(a.rating || "0");
+          return (b.rating || 0) - (a.rating || 0);
         case "popular":
         default:
-          return parseFloat(b.rating || "0") - parseFloat(a.rating || "0");
+          return (b.rating || 0) - (a.rating || 0);
       }
     });
 
@@ -155,6 +155,7 @@ export default function Discover() {
                         status={getContentStatus()}
                         year={item.year || undefined}
                         season={activeContentType === "tv" || activeContentType === "anime" ? item.season || undefined : undefined}
+                        totalSeasons={activeContentType === "tv" ? item.totalSeasons || undefined : undefined}
                         size="small"
                         onClick={() => console.log(`Clicked on ${item.title}`)}
                         data-testid={`content-display-${item.id}`}

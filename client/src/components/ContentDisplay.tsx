@@ -18,6 +18,8 @@ export interface ContentDisplayProps {
   season?: number;
   /** Optional episode number for TV shows and anime */
   episode?: number;
+  /** Optional total seasons for TV shows */
+  totalSeasons?: number;
   /** Optional year of release */
   year?: number;
   /** Size variant - default, small, or list */
@@ -42,6 +44,7 @@ export default function ContentDisplay({
   status,
   season,
   episode,
+  totalSeasons,
   year,
   size = "default",
   onClick,
@@ -248,20 +251,43 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-        {/* Year for Movies */}
-        {type === "movie" && (
-          <p 
-            className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
-            data-testid="content-year"
-          >
-            {year || 'Year not available'}
-          </p>
+        {/* Year - Show for all content types */}
+        <p 
+          className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
+          data-testid="content-year"
+        >
+          {year || 'Year not available'}
+        </p>
+
+        {/* TV Shows: Show season count and current episode if available */}
+        {type === "tv" && (
+          <div className="space-y-1">
+            {/* Total seasons for TV shows */}
+            {(totalSeasons || season) && (
+              <div 
+                className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-blue-500 text-white font-semibold shadow-md border border-blue-600`} 
+                data-testid="content-season-info"
+              >
+                <span>{totalSeasons ? `${totalSeasons} Season${totalSeasons > 1 ? 's' : ''}` : `Season ${season}`}</span>
+              </div>
+            )}
+            {/* Current episode if available */}
+            {episode !== undefined && (
+              <div 
+                className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
+                data-testid="content-episode-info"
+              >
+                <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
+                {season !== undefined && `S${season} • `}E{episode}
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Season/Episode Info for TV Shows and Anime */}
-        {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
+        {/* Anime: Show season and episode info */}
+        {type === "anime" && (season !== undefined || episode !== undefined) && (
           <div 
-            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
+            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-purple-500 text-white font-semibold shadow-md border border-purple-600`} 
             data-testid="content-episode-info"
           >
             <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
