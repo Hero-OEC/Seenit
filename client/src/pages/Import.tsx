@@ -49,7 +49,7 @@ function Import() {
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
-    refetchInterval: (data) => tvmazeStatus?.isActive ? 8000 : 30000, // 8s when importing, 30s when idle
+    refetchInterval: tvmazeStatus?.isActive ? 8000 : 30000, // 8s when importing, 30s when idle
   });
 
   // Mutation to start TVmaze import
@@ -96,19 +96,28 @@ function Import() {
     },
   });
 
-  // Auto-start import only once when first loading and no content exists
+  // Auto-start import only once on initial page load, not after deletions
   const [hasAutoStarted, setHasAutoStarted] = useState(false);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  
+  useEffect(() => {
+    if (tvmazeContent !== undefined) {
+      setIsFirstLoad(false);
+    }
+  }, [tvmazeContent]);
+  
   useEffect(() => {
     if (!hasAutoStarted && 
+        isFirstLoad &&
         tvmazeContent?.count === 0 && 
         !tvmazeStatus?.isActive && 
         !statusLoading &&
         !startImport.isPending) {
-      console.log('No TVmaze content found, auto-starting import...');
+      console.log('Initial page load with no TVmaze content, auto-starting import...');
       setHasAutoStarted(true);
       startImport.mutate();
     }
-  }, [tvmazeContent?.count, tvmazeStatus?.isActive, statusLoading, hasAutoStarted, startImport.isPending]);
+  }, [tvmazeContent?.count, tvmazeStatus?.isActive, statusLoading, hasAutoStarted, startImport.isPending, isFirstLoad]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
@@ -317,7 +326,7 @@ function Import() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <div className="flex gap-2">
-                {tvmazeStatus?.isActive ? (
+                {(tvmazeStatus?.isActive || startImport.isPending) ? (
                   <Button
                     variant="outline"
                     onClick={() => pauseImport.mutate()}
