@@ -441,41 +441,39 @@ function Import() {
         </Card>
 
         {/* Import Statistics */}
-        {tvmazeStatus && (
-          <Card className="mt-6" data-testid="card-statistics">
-            <CardHeader>
-              <CardTitle>Import Statistics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-blue-600" data-testid="stat-imported">
-                    {tvmazeStatus.totalImported}
-                  </div>
-                  <div className="text-sm text-gray-500">Shows Imported</div>
+        <Card className="mt-6" data-testid="card-statistics">
+          <CardHeader>
+            <CardTitle>Import Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-blue-600" data-testid="stat-tvmaze">
+                  {tvmazeContent?.count || 0}
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-600" data-testid="stat-page">
-                    {tvmazeStatus.currentPage}
-                  </div>
-                  <div className="text-sm text-gray-500">Current Page</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-purple-600" data-testid="stat-errors">
-                    {tvmazeStatus.errors?.length || 0}
-                  </div>
-                  <div className="text-sm text-gray-500">Recent Errors</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-orange-600" data-testid="stat-progress">
-                    {calculateProgress().toFixed(1)}%
-                  </div>
-                  <div className="text-sm text-gray-500">Progress</div>
-                </div>
+                <div className="text-sm text-gray-500">TVmaze TV Shows</div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div>
+                <div className="text-2xl font-bold text-green-600" data-testid="stat-tmdb">
+                  0
+                </div>
+                <div className="text-sm text-gray-500">TMDB Movies</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-600" data-testid="stat-anilist">
+                  0
+                </div>
+                <div className="text-sm text-gray-500">AniList Anime</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600" data-testid="stat-total">
+                  {tvmazeContent?.count || 0}
+                </div>
+                <div className="text-sm text-gray-500">Total Content</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
