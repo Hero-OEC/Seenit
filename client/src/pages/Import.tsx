@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, RefreshCw, Database, Calendar, Clock } from "lucide-react";
+import { Play, Pause, RefreshCw, Database, Calendar, Clock, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ImportStatus {
@@ -70,6 +70,32 @@ function Import() {
     },
   });
 
+  // Delete mutations for each API source
+  const deleteTVmazeData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/tvmaze/data'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/content'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content/type/tv'] });
+      setRefreshKey(prev => prev + 1);
+    },
+  });
+
+  const deleteTMDBData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/tmdb/data'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/content/type/movie'] });
+      setRefreshKey(prev => prev + 1);
+    },
+  });
+
+  const deleteAniListData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/anilist/data'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
+      setRefreshKey(prev => prev + 1);
+    },
+  });
+
   // Auto-start import if no content exists yet
   useEffect(() => {
     if (tvmazeContent?.count === 0 && !tvmazeStatus?.isActive && !statusLoading) {
@@ -96,6 +122,12 @@ function Import() {
   const calculateProgress = () => {
     if (!tvmazeStatus || tvmazeStatus.totalAvailable === 0) return 0;
     return Math.min((tvmazeStatus.totalImported / Math.max(tvmazeStatus.totalAvailable, tvmazeStatus.totalImported)) * 100, 100);
+  };
+
+  const confirmDelete = (source: string, action: () => void) => {
+    if (window.confirm(`Are you sure you want to delete ALL ${source} data? This action cannot be undone.`)) {
+      action();
+    }
   };
 
   return (
@@ -139,6 +171,19 @@ function Import() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Content:</span>
                 <span className="text-gray-400" data-testid="text-tmdb-count">0</span>
+              </div>
+              <div className="pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('TMDB', () => deleteTMDBData.mutate())}
+                  disabled={deleteTMDBData.isPending}
+                  className="w-full flex items-center gap-2"
+                  data-testid="button-delete-tmdb"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deleteTMDBData.isPending ? 'Deleting...' : 'Delete All TMDB Data'}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -198,6 +243,19 @@ function Import() {
                   </details>
                 </div>
               )}
+              <div className="pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('TVmaze', () => deleteTVmazeData.mutate())}
+                  disabled={deleteTVmazeData.isPending || tvmazeStatus?.isActive}
+                  className="w-full flex items-center gap-2"
+                  data-testid="button-delete-tvmaze"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deleteTVmazeData.isPending ? 'Deleting...' : 'Delete All TVmaze Data'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -221,6 +279,19 @@ function Import() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Content:</span>
                 <span className="text-gray-400" data-testid="text-anilist-count">0</span>
+              </div>
+              <div className="pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('AniList', () => deleteAniListData.mutate())}
+                  disabled={deleteAniListData.isPending}
+                  className="w-full flex items-center gap-2"
+                  data-testid="button-delete-anilist"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deleteAniListData.isPending ? 'Deleting...' : 'Delete All AniList Data'}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -268,6 +268,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete all content from specific API sources
+  app.delete("/api/import/tvmaze/data", async (_req, res) => {
+    try {
+      const deletedCount = await storage.deleteContentBySource('tvmaze');
+      res.json({ 
+        message: `Deleted ${deletedCount} TVmaze records`,
+        deletedCount 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete TVmaze data" });
+    }
+  });
+
+  app.delete("/api/import/tmdb/data", async (_req, res) => {
+    try {
+      const deletedCount = await storage.deleteContentBySource('tmdb');
+      res.json({ 
+        message: `Deleted ${deletedCount} TMDB records`,
+        deletedCount 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete TMDB data" });
+    }
+  });
+
+  app.delete("/api/import/anilist/data", async (_req, res) => {
+    try {
+      const deletedCount = await storage.deleteContentBySource('anilist');
+      res.json({ 
+        message: `Deleted ${deletedCount} AniList records`,
+        deletedCount 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete AniList data" });
+    }
+  });
+
+  app.delete("/api/import/:source/data", async (req, res) => {
+    try {
+      const { source } = req.params;
+      const validSources = ['tvmaze', 'tmdb', 'anilist', 'manual'];
+      
+      if (!validSources.includes(source)) {
+        return res.status(400).json({ message: "Invalid source. Must be one of: tvmaze, tmdb, anilist, manual" });
+      }
+      
+      const deletedCount = await storage.deleteContentBySource(source);
+      res.json({ 
+        message: `Deleted ${deletedCount} ${source} records`,
+        deletedCount,
+        source
+      });
+    } catch (error) {
+      res.status(500).json({ message: `Failed to delete ${req.params.source} data` });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

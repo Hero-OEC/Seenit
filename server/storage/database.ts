@@ -162,6 +162,15 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updated;
   }
+
+  async deleteContentBySource(source: string): Promise<number> {
+    const result = await db
+      .delete(content)
+      .where(eq(content.source, source))
+      .returning({ id: content.id });
+    
+    return result.length;
+  }
 }
 
 export const databaseStorage = new DatabaseStorage();

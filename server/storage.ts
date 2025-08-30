@@ -19,6 +19,7 @@ export interface IStorage {
   searchContent(query: string): Promise<Content[]>;
   createContent(content: InsertContent): Promise<Content>;
   updateContent(id: string, updates: Partial<Content>): Promise<Content>;
+  deleteContentBySource(source: string): Promise<number>;
 
   // User content tracking methods
   getUserContent(userId: string): Promise<UserContent[]>;
@@ -99,6 +100,12 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getContentBySource(source: string): Promise<Content[]> {
+    return Array.from(this.content.values()).filter(
+      (content) => content.source === source
+    );
+  }
+
   async createContent(insertContent: InsertContent): Promise<Content> {
     const id = randomUUID();
     const content: Content = { 
@@ -133,10 +140,37 @@ export class MemStorage implements IStorage {
       popularity: insertContent.popularity ?? null,
       voteCount: insertContent.voteCount ?? null,
       streamingPlatforms: insertContent.streamingPlatforms ?? null,
-      affiliateLinks: insertContent.affiliateLinks ?? null
+      affiliateLinks: insertContent.affiliateLinks ?? null,
+      episodeData: insertContent.episodeData ?? null
     };
     this.content.set(id, content);
     return content;
+  }
+
+  async updateContent(id: string, updates: Partial<Content>): Promise<Content> {
+    const existing = this.content.get(id);
+    if (!existing) {
+      throw new Error('Content not found');
+    }
+    const updated: Content = {
+      ...existing,
+      ...updates,
+      lastUpdated: new Date()
+    };
+    this.content.set(id, updated);
+    return updated;
+  }
+
+  async deleteContentBySource(source: string): Promise<number> {
+    const toDelete = Array.from(this.content.entries()).filter(
+      ([_, content]) => content.source === source
+    );
+    
+    toDelete.forEach(([id, _]) => {
+      this.content.delete(id);
+    });
+    
+    return toDelete.length;
   }
 
   // User content tracking methods
