@@ -50,23 +50,26 @@ export default function Home() {
     console.log(`Search: ${query}`);
   };
 
-  // Fetch popular movies from database
-  const { data: popularMovies = [] } = useQuery<any[]>({
-    queryKey: ["/api/content/type/movie", { limit: 6 }],
+  // Fetch popular movies from database  
+  const { data: movieData } = useQuery<any>({
+    queryKey: ["/api/content/type/movie?limit=6"],
     enabled: true,
   });
+  const popularMovies = movieData?.content || [];
 
   // Fetch popular TV shows from database
-  const { data: popularTVShows = [] } = useQuery<any[]>({
-    queryKey: ["/api/content/type/tv", { limit: 6 }],
+  const { data: tvData } = useQuery<any>({
+    queryKey: ["/api/content/type/tv?limit=6"],
     enabled: true,
   });
+  const popularTVShows = tvData?.content || [];
 
   // Fetch popular anime from database
-  const { data: popularAnime = [] } = useQuery<any[]>({
-    queryKey: ["/api/content/type/anime", { limit: 6 }],
+  const { data: animeData } = useQuery<any>({
+    queryKey: ["/api/content/type/anime?limit=6"],
     enabled: true,
   });
+  const popularAnime = animeData?.content || [];
 
   // Fetch recent episodes from database
   const { data: newEpisodes = [] } = useQuery<any[]>({
@@ -299,24 +302,6 @@ export default function Home() {
         {/* Content sections below hero - only show for non-signed-in users */}
         {!isSignedIn && (
         <div className="bg-retro-50">
-          {/* Popular Movies Section */}
-          <HomeContent
-            title="Popular Movies"
-            items={popularMovies.map(movie => ({
-              id: movie.id,
-              posterUrl: movie.poster,
-              title: movie.title,
-              type: movie.type,
-              status: movie.status,
-              year: movie.year
-            }))}
-            contentType="movie"
-            onViewAll={() => handleBrowse("Movies")}
-            onItemClick={(movie) => navigate(`/content/${movie.id}`)}
-            variant="expanded"
-            testId="popular-movies-section"
-          />
-
           {/* Popular TV Shows Section */}
           <HomeContent
             title="Popular TV Shows"
@@ -336,25 +321,51 @@ export default function Home() {
             testId="popular-tv-section"
           />
 
-          {/* Popular Anime Section */}
-          <HomeContent
-            title="Popular Anime"
-            items={popularAnime.map(anime => ({
-              id: anime.id,
-              posterUrl: anime.poster,
-              title: anime.title,
-              type: anime.type,
-              status: anime.status,
-              year: anime.year,
-              season: anime.season,
-              episode: anime.episode
-            }))}
-            contentType="anime"
-            onViewAll={() => handleBrowse("Anime")}
-            onItemClick={(anime) => navigate(`/content/${anime.id}`)}
-            variant="expanded"
-            testId="popular-anime-section"
-          />
+          {/* Featured Drama Section */}
+          {popularTVShows.filter(show => show.genres?.some((g: string) => g.toLowerCase().includes("drama"))).length > 0 && (
+            <HomeContent
+              title="Popular Drama"
+              items={popularTVShows.filter(show => 
+                show.genres?.some((g: string) => g.toLowerCase().includes("drama"))
+              ).slice(0, 6).map(show => ({
+                id: show.id,
+                posterUrl: show.poster,
+                title: show.title,
+                type: show.type,
+                status: show.status,
+                year: show.year,
+                season: show.season
+              }))}
+              contentType="tv"
+              onViewAll={() => handleBrowse("Drama")}
+              onItemClick={(show) => navigate(`/content/${show.id}`)}
+              variant="expanded"
+              testId="popular-drama-section"
+            />
+          )}
+
+          {/* Featured Comedy Section */}
+          {popularTVShows.filter(show => show.genres?.some((g: string) => g.toLowerCase().includes("comedy"))).length > 0 && (
+            <HomeContent
+              title="Popular Comedy"
+              items={popularTVShows.filter(show => 
+                show.genres?.some((g: string) => g.toLowerCase().includes("comedy"))
+              ).slice(0, 6).map(show => ({
+                id: show.id,
+                posterUrl: show.poster,
+                title: show.title,
+                type: show.type,
+                status: show.status,
+                year: show.year,
+                season: show.season
+              }))}
+              contentType="tv"
+              onViewAll={() => handleBrowse("Comedy")}
+              onItemClick={(show) => navigate(`/content/${show.id}`)}
+              variant="expanded"
+              testId="popular-comedy-section"
+            />
+          )}
 
           {/* New Episodes Section */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-retro-200">

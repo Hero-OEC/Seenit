@@ -279,21 +279,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? JSON.parse(content.episodeData) 
               : content.episodeData;
             
-            // Get the most recent episodes
-            const recentEpisodes = episodeData
-              .filter((ep: any) => ep.airdate && new Date(ep.airdate) <= new Date())
-              .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
-              .slice(0, 2)
-              .map((ep: any) => ({
-                ...ep,
-                contentId: content.id,
-                showTitle: content.title,
-                type: content.type,
-                status: content.status,
-                image: content.poster ? { medium: content.poster } : null
-              }));
-            
-            episodes.push(...recentEpisodes);
+            if (Array.isArray(episodeData) && episodeData.length > 0) {
+              // Get the most recent episodes
+              const recentEpisodes = episodeData
+                .filter((ep: any) => ep.airdate && new Date(ep.airdate) <= new Date())
+                .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
+                .slice(0, 2)
+                .map((ep: any) => ({
+                  ...ep,
+                  contentId: content.id,
+                  showTitle: content.title,
+                  type: content.type,
+                  status: content.status,
+                  image: content.poster ? { medium: content.poster } : null
+                }));
+              
+              episodes.push(...recentEpisodes);
+            }
           } catch (error) {
             console.error('Error parsing episode data for content:', content.id, error);
           }
@@ -305,8 +307,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .sort((a, b) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
         .slice(0, 10);
       
+      // Return episodes or empty array if none found
       res.json(sortedEpisodes);
     } catch (error) {
+      console.error('Recent episodes error:', error);
       res.status(500).json({ message: "Failed to fetch recent episodes" });
     }
   });
@@ -316,12 +320,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allContent = await storage.getAllContent();
       
-      // Get a highly-rated movie or TV show for the hero section
+      // Get a highly-rated content for the hero section (any type)
       const featured = allContent
-        .filter((content: any) => content.type === 'movie' || content.type === 'tv')
         .filter((content: any) => content.imdbRating && parseFloat(content.imdbRating) > 8.0)
         .sort((a: any, b: any) => (parseFloat(b.imdbRating) || 0) - (parseFloat(a.imdbRating) || 0))[0] ||
-        allContent.filter((content: any) => content.type === 'movie')[0];
+        allContent[0]; // Fallback to first content if none are highly rated
       
       if (!featured) {
         return res.status(404).json({ message: "No featured content available" });
