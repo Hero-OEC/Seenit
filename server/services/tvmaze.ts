@@ -56,6 +56,7 @@ export class TVMazeService {
   private windowStart = Date.now();
   private readonly maxRequests = 15; // 15 requests per 10 seconds
   private readonly windowMs = 10000; // 10 seconds
+  private isSyncing = false; // Instance-level lock to prevent multiple sync processes
 
   private async makeRequest<T>(url: string): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -222,6 +223,15 @@ export class TVMazeService {
   }
 
   async syncAllShows(): Promise<{ imported: number; updated: number; errors: string[] }> {
+    // Prevent multiple concurrent sync processes
+    if (this.isSyncing) {
+      console.log('TVmaze sync already in progress, ignoring duplicate request');
+      return { imported: 0, updated: 0, errors: ['Sync already in progress'] };
+    }
+
+    this.isSyncing = true;
+    console.log('TVmaze sync started - instance lock acquired');
+
     const errors: string[] = [];
     let imported = 0;
     let updated = 0;
@@ -364,6 +374,10 @@ export class TVMazeService {
           errors: errors.slice(-10)
         })
         .where(eq(importStatus.id, importStatusRecord.id));
+    } finally {
+      // Always release the instance lock
+      this.isSyncing = false;
+      console.log('TVmaze sync completed - instance lock released');
     }
 
     return { imported, updated, errors };
@@ -386,17 +400,26 @@ export class TVMazeService {
         updatedAt: new Date()
       })
       .where(eq(importStatus.source, 'tvmaze'));
+    
+    // Note: We don't reset this.isSyncing here because the sync process
+    // should handle its own cleanup in the finally block
   }
 
   async resumeSync(): Promise<void> {
-    // Check if sync is already active
+    // Check instance-level lock first (faster check)
+    if (this.isSyncing) {
+      console.log('TVmaze sync already running in this instance, ignoring start request');
+      return;
+    }
+
+    // Check if sync is already active in database
     const [currentStatus] = await db
       .select()
       .from(importStatus)
       .where(eq(importStatus.source, 'tvmaze'));
 
     if (currentStatus?.isActive) {
-      console.log('TVmaze sync already active, ignoring start request');
+      console.log('TVmaze sync already active in database, ignoring start request');
       return;
     }
 
