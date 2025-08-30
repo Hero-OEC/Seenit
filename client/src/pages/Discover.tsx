@@ -215,7 +215,7 @@ export default function Discover() {
 
           {/* Sidebar Filters */}
           <div className="lg:w-64">
-            <div className="bg-white rounded-lg shadow-lg border border-retro-200 p-6 sticky top-4 z-10 backdrop-blur-sm bg-white/95">
+            <div className="bg-white rounded-lg shadow-sm border border-retro-200 p-6 sticky top-24">
               <h3 className="text-lg font-semibold text-retro-900 mb-4">Filters & Sort</h3>
               
               {/* Sort Options */}
