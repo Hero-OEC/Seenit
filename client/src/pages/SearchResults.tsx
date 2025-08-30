@@ -65,7 +65,7 @@ export default function SearchResults() {
   
   // Search results query
   const { data: searchResults = [], isLoading, error } = useQuery<any[]>({
-    queryKey: ["/api/content/search", searchQuery],
+    queryKey: [`/api/content/search?q=${encodeURIComponent(searchQuery)}`],
     enabled: searchQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

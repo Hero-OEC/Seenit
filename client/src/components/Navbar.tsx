@@ -44,11 +44,18 @@ export default function Navbar({
   }, [searchQuery]);
 
   // Search suggestions query (lighter than full search)
-  const { data: searchSuggestions, isLoading: isSearching } = useQuery<any[]>({
-    queryKey: ["/api/content/search/suggestions", debouncedSearchQuery],
+  const { data: searchSuggestions = [], isLoading: isSearching } = useQuery<any[]>({
+    queryKey: [`/api/content/search/suggestions?q=${encodeURIComponent(debouncedSearchQuery)}`],
     enabled: debouncedSearchQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Debug logging
+  useEffect(() => {
+    if (searchSuggestions && searchSuggestions.length > 0) {
+      console.log(`Found ${searchSuggestions.length} suggestions for "${debouncedSearchQuery}"`, searchSuggestions);
+    }
+  }, [searchSuggestions, debouncedSearchQuery]);
 
   // Handle clicks outside search to close dropdown
   useEffect(() => {
