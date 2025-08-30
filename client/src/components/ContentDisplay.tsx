@@ -22,6 +22,10 @@ export interface ContentDisplayProps {
   totalSeasons?: number;
   /** Optional year of release */
   year?: number;
+  /** Optional episode title for schedule view */
+  episodeTitle?: string;
+  /** Optional air date for schedule view */
+  airDate?: string;
   /** Size variant - default, small, or list */
   size?: "default" | "small" | "list";
   /** Click handler for the content card */
@@ -46,6 +50,8 @@ export default function ContentDisplay({
   episode,
   totalSeasons,
   year,
+  episodeTitle,
+  airDate,
   size = "default",
   onClick,
   className = "",
@@ -251,14 +257,14 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-        {/* Year and Season Info Row */}
+        {/* Year/Air Date and Season Info Row */}
         <div className="flex items-center justify-between gap-2">
-          {/* Year */}
+          {/* Year or Air Date */}
           <p 
             className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
             data-testid="content-year"
           >
-            {year || 'Year not available'}
+            {airDate ? new Date(airDate).toLocaleDateString() : year || 'Year not available'}
           </p>
 
           {/* Season badge for TV shows and anime */}
@@ -275,6 +281,16 @@ export default function ContentDisplay({
             </div>
           )}
         </div>
+
+        {/* Episode title for schedule view */}
+        {episodeTitle && (
+          <p 
+            className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-500 font-medium italic line-clamp-1`}
+            data-testid="content-episode-title"
+          >
+            "{episodeTitle}"
+          </p>
+        )}
 
         {/* Current episode info if available */}
         {(type === "tv" || type === "anime") && episode !== undefined && (

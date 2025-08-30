@@ -102,7 +102,7 @@ export default function Schedule() {
 
   // Component for each day's content
   function DayContent({ day, isOpen }: { day: any, isOpen: boolean }) {
-    const { data: dayContent = [], isLoading } = useQuery<Content[]>({
+    const { data: dayContent = [], isLoading } = useQuery<any[]>({
       queryKey: ["/api/content/schedule", day.fullDate.toISOString().split('T')[0], activeContentType],
       queryFn: async () => {
         const response = await fetch(`/api/content/schedule/${day.fullDate.toISOString().split('T')[0]}?type=${activeContentType}`);
@@ -137,28 +137,30 @@ export default function Schedule() {
 
         {!isLoading && dayContent.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {dayContent.map((item) => {
+            {dayContent.map((episode) => {
               const getContentStatus = () => {
-                if (item.status === "airing") return "ongoing";
-                if (item.status === "upcoming") return "coming-soon";
-                if (item.status === "completed") return "finished";
+                if (episode.status === "airing") return "ongoing";
+                if (episode.status === "upcoming") return "coming-soon";
+                if (episode.status === "completed") return "finished";
                 return "finished";
               };
 
               return (
                 <ContentDisplay
-                  key={item.id}
-                  id={item.id}
-                  posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                  title={item.title}
+                  key={`${episode.contentId}-${episode.id}`}
+                  id={episode.contentId}
+                  posterUrl={episode.image?.medium || `https://picsum.photos/300/450?random=${episode.contentId}`}
+                  title={episode.showTitle}
                   type={activeContentType}
                   status={getContentStatus()}
-                  year={item.year || undefined}
-                  season={activeContentType === "tv" || activeContentType === "anime" ? item.season || undefined : undefined}
-                  totalSeasons={activeContentType === "tv" ? item.totalSeasons || undefined : undefined}
+                  year={episode.airdate ? new Date(episode.airdate).getFullYear() : undefined}
+                  season={episode.season}
+                  episode={episode.number}
+                  episodeTitle={episode.name}
+                  airDate={episode.airdate}
                   size="small"
-                  onClick={() => console.log(`Clicked on ${item.title}`)}
-                  data-testid={`schedule-content-${item.id}`}
+                  onClick={() => console.log(`Clicked on ${episode.showTitle} S${episode.season}E${episode.number}`)}
+                  data-testid={`schedule-episode-${episode.contentId}-${episode.id}`}
                 />
               );
             })}
