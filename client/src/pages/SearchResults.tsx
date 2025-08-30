@@ -60,7 +60,7 @@ export default function SearchResults() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
   // Extract search query from URL params
-  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  const searchParams = new URLSearchParams(location.includes('?') ? location.split('?')[1] : '');
   const searchQuery = searchParams.get('q') || '';
   
   // Search results query
