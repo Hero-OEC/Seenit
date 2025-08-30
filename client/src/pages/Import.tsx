@@ -43,7 +43,7 @@ function Import() {
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tvmaze/status', refreshKey],
-    refetchInterval: (data) => data?.isActive ? 3000 : 10000, // 3s when active, 10s when idle
+    refetchInterval: (data) => data?.isActive ? 5000 : 15000, // 5s when active, 15s when idle (reduced polling)
   });
 
   // Query for TVmaze content stats

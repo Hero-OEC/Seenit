@@ -322,16 +322,18 @@ export class TVMazeService {
           }
         }
 
-        // Update progress
-        await db
-          .update(importStatus)
-          .set({
-            currentPage: page + 1,
-            totalImported: imported + updated,
-            lastSyncAt: new Date(),
-            errors: errors.slice(-10) // Keep last 10 errors
-          })
-          .where(eq(importStatus.id, importStatusRecord.id));
+        // Update progress only every 5 pages to reduce database load
+        if (page % 5 === 0 || shows.length < 250) {
+          await db
+            .update(importStatus)
+            .set({
+              currentPage: page + 1,
+              totalImported: imported + updated,
+              lastSyncAt: new Date(),
+              errors: errors.slice(-10) // Keep last 10 errors
+            })
+            .where(eq(importStatus.id, importStatusRecord.id));
+        }
 
         page++;
 
@@ -387,6 +389,17 @@ export class TVMazeService {
   }
 
   async resumeSync(): Promise<void> {
+    // Check if sync is already active
+    const [currentStatus] = await db
+      .select()
+      .from(importStatus)
+      .where(eq(importStatus.source, 'tvmaze'));
+
+    if (currentStatus?.isActive) {
+      console.log('TVmaze sync already active, ignoring start request');
+      return;
+    }
+
     await db
       .update(importStatus)
       .set({ 
