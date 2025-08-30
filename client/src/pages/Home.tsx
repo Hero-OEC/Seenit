@@ -22,6 +22,12 @@ export default function Home() {
     enabled: !!user?.id && isSignedIn,
   });
 
+  // Fetch featured content for hero section
+  const { data: featuredContent } = useQuery<any>({
+    queryKey: ["/api/content/featured"],
+    enabled: !isSignedIn,
+  });
+
   const handleGetStarted = () => {
     navigate("/signin");
   };
@@ -44,211 +50,29 @@ export default function Home() {
     console.log(`Search: ${query}`);
   };
 
-  // Sample content data with placeholder images
-  const popularMovies = [
-    {
-      id: "1",
-      posterUrl: "https://picsum.photos/300/450?random=1",
-      title: "Dune: Part Two",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2024
-    },
-    {
-      id: "2", 
-      posterUrl: "https://picsum.photos/300/450?random=2",
-      title: "Oppenheimer",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2023
-    },
-    {
-      id: "3",
-      posterUrl: "https://picsum.photos/300/450?random=3",
-      title: "Spider-Man: Across the Spider-Verse",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2023
-    },
-    {
-      id: "4",
-      posterUrl: "https://picsum.photos/300/450?random=4",
-      title: "The Menu",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2022
-    },
-    {
-      id: "5",
-      posterUrl: "https://picsum.photos/300/450?random=5",
-      title: "Black Panther: Wakanda Forever",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2022
-    },
-    {
-      id: "6",
-      posterUrl: "https://picsum.photos/300/450?random=6",
-      title: "Top Gun: Maverick",
-      type: "movie" as const,
-      status: "finished" as const,
-      year: 2022
-    }
-  ];
+  // Fetch popular movies from database
+  const { data: popularMovies = [] } = useQuery<any[]>({
+    queryKey: ["/api/content/type/movie", { limit: 6 }],
+    enabled: true,
+  });
 
-  const popularTVShows = [
-    {
-      id: "2",
-      posterUrl: "https://picsum.photos/300/450?random=7",
-      title: "Mystery Series",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 3
-    },
-    {
-      id: "tv2",
-      posterUrl: "https://picsum.photos/300/450?random=8",
-      title: "The Bear",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 3
-    },
-    {
-      id: "tv3",
-      posterUrl: "https://picsum.photos/300/450?random=9",
-      title: "Avatar: The Last Airbender",
-      type: "tv" as const,
-      status: "finished" as const,
-      season: 1
-    },
-    {
-      id: "tv4",
-      posterUrl: "https://picsum.photos/300/450?random=10",
-      title: "Stranger Things",
-      type: "tv" as const,
-      status: "finished" as const,
-      season: 4
-    },
-    {
-      id: "tv5",
-      posterUrl: "https://picsum.photos/300/450?random=11",
-      title: "Wednesday",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 1
-    },
-    {
-      id: "tv6",
-      posterUrl: "https://picsum.photos/300/450?random=12",
-      title: "The Last of Us",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 1
-    }
-  ];
+  // Fetch popular TV shows from database
+  const { data: popularTVShows = [] } = useQuery<any[]>({
+    queryKey: ["/api/content/type/tv", { limit: 6 }],
+    enabled: true,
+  });
 
-  const popularAnime = [
-    {
-      id: "3",
-      posterUrl: "https://picsum.photos/300/450?random=13",
-      title: "Adventure Quest",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 2,
-      episode: 12
-    },
-    {
-      id: "anime2",
-      posterUrl: "https://picsum.photos/300/450?random=14",
-      title: "Demon Slayer",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 4,
-      episode: 8
-    },
-    {
-      id: "anime3",
-      posterUrl: "https://picsum.photos/300/450?random=15",
-      title: "Jujutsu Kaisen",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 2,
-      episode: 23
-    },
-    {
-      id: "anime4",
-      posterUrl: "https://picsum.photos/300/450?random=16",
-      title: "My Hero Academia",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 7,
-      episode: 18
-    },
-    {
-      id: "anime5",
-      posterUrl: "https://picsum.photos/300/450?random=17",
-      title: "One Piece",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 21,
-      episode: 1090
-    },
-    {
-      id: "anime6",
-      posterUrl: "https://picsum.photos/300/450?random=18",
-      title: "Spirited Away",
-      type: "anime" as const,
-      status: "finished" as const
-    }
-  ];
+  // Fetch popular anime from database
+  const { data: popularAnime = [] } = useQuery<any[]>({
+    queryKey: ["/api/content/type/anime", { limit: 6 }],
+    enabled: true,
+  });
 
-  // Sample episode data
-  const newEpisodes = [
-    {
-      id: "ep1",
-      thumbnailUrl: "https://picsum.photos/120/180?random=19",
-      showTitle: "House of the Dragon",
-      episodeTitle: "The Red Dragon and the Gold",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 2,
-      episode: 4,
-      duration: 68
-    },
-    {
-      id: "ep2", 
-      thumbnailUrl: "https://picsum.photos/120/180?random=20",
-      showTitle: "Demon Slayer",
-      episodeTitle: "The Hashira Training Arc Begins",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 4,
-      episode: 8,
-      duration: 24
-    },
-    {
-      id: "ep3",
-      thumbnailUrl: "https://picsum.photos/120/180?random=21",
-      showTitle: "The Bear",
-      episodeTitle: "Tomorrow",
-      type: "tv" as const,
-      status: "ongoing" as const,
-      season: 3,
-      episode: 9,
-      duration: 42
-    },
-    {
-      id: "ep4",
-      thumbnailUrl: "https://picsum.photos/120/180?random=22",
-      showTitle: "Jujutsu Kaisen",
-      episodeTitle: "The Shibuya Incident - Gate Close",
-      type: "anime" as const,
-      status: "ongoing" as const,
-      season: 2,
-      episode: 23,
-      duration: 24
-    }
-  ];
+  // Fetch recent episodes from database
+  const { data: newEpisodes = [] } = useQuery<any[]>({
+    queryKey: ["/api/content/recent-episodes"],
+    enabled: true,
+  });
 
   // Transform currently watching data for SidePanel
   const currentlyWatchingSidePanelItems: SidePanelItem[] = (currentlyWatching || []).map(item => ({
@@ -264,7 +88,7 @@ export default function Home() {
   // Transform recommended content for SidePanel
   const recommendedSidePanelItems: SidePanelItem[] = (recommendedContent || popularMovies.slice(0, 4)).map(item => ({
     id: item.id,
-    posterUrl: item.posterUrl || item.poster || `https://picsum.photos/300/450?random=${item.id}`,
+    posterUrl: item.poster || "/api/placeholder/300/450",
     title: item.title,
     type: item.type,
     year: item.year || undefined,
@@ -280,22 +104,22 @@ export default function Home() {
     <div className="min-h-screen bg-retro-50 relative">
       <main>
         {/* Show hero section only when not signed in */}
-        {!isSignedIn && (
+        {!isSignedIn && featuredContent && (
           <HeroSection
             content={{
-              id: "featured-movie",
-              title: "Dune: Part Two",
-              description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
-              year: 2024,
-              rating: "PG-13",
-              duration: "2h 46m",
-              genres: ["Sci-Fi", "Adventure", "Drama"],
-              platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
+              id: featuredContent.id,
+              title: featuredContent.title,
+              description: featuredContent.overview || "An exciting entertainment experience waiting for you.",
+              year: featuredContent.year,
+              rating: featuredContent.imdbRating ? `${featuredContent.imdbRating}/10` : "Not Rated",
+              duration: featuredContent.runtime ? `${featuredContent.runtime}m` : "N/A",
+              genres: featuredContent.genres || [],
+              platforms: featuredContent.streamingPlatforms || [],
               trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-              posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
+              posterUrl: featuredContent.poster || "/api/placeholder/500/750"
             }}
-            onAddToList={() => console.log("Add to Watchlist clicked!")}
-            onViewDetails={() => console.log("View Details clicked!")}
+            onAddToList={() => navigate("/signin")}
+            onViewDetails={() => navigate(`/content/${featuredContent.id}`)}
           />
         )}
         
@@ -321,25 +145,22 @@ export default function Home() {
                   items={[
                     // Mix content from different genres based on what user watches
                     ...popularMovies.filter(movie => 
-                      movie.title.includes("Action") || 
-                      movie.title.includes("Dune") || 
-                      movie.title.includes("Spider-Man")
+                      movie.genres?.some((g: string) => g.toLowerCase().includes("action"))
                     ).slice(0, 2),
                     ...popularAnime.filter(anime => 
-                      anime.title.includes("Adventure") ||
-                      anime.title.includes("Demon")
+                      anime.genres?.some((g: string) => g.toLowerCase().includes("action") || g.toLowerCase().includes("adventure"))
                     ).slice(0, 2)
                   ].map((item, index) => ({
-                    id: `genre-${item.id}-${index}`,
-                    posterUrl: item.posterUrl,
+                    id: item.id,
+                    posterUrl: item.poster || "/api/placeholder/300/450",
                     title: item.title,
                     type: item.type,
-                    year: (item as any).year,
-                    season: (item as any).season
+                    year: item.year,
+                    season: item.season
                   }))}
                   variant="recommended"
                   width="w-full"
-                  onItemClick={(item) => navigate(`/content/${item.id.replace('genre-', '').split('-')[0]}`)}
+                  onItemClick={(item) => navigate(`/content/${item.id}`)}
                   maxItems={4}
                 />
               </aside>
@@ -349,10 +170,17 @@ export default function Home() {
                 {/* New Movies Section */}
                 <HomeContent
                   title="New Movies"
-                  items={popularMovies}
+                  items={popularMovies.map(movie => ({
+                    id: movie.id,
+                    posterUrl: movie.poster,
+                    title: movie.title,
+                    type: movie.type,
+                    status: movie.status,
+                    year: movie.year
+                  }))}
                   contentType="movie"
                   onViewAll={() => handleBrowse("Movies")}
-                  onItemClick={(movie) => console.log(`Clicked movie: ${movie.title}`)}
+                  onItemClick={(movie) => navigate(`/content/${movie.id}`)}
                   maxItems={4}
                   variant="compact"
                 />
@@ -369,18 +197,18 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="space-y-4">
-                    {newEpisodes.filter(ep => ep.type === "tv").slice(0, 3).map((episode) => (
+                    {newEpisodes.filter((ep: any) => ep.type === "tv").slice(0, 3).map((episode: any) => (
                       <EpisodeDisplay
                         key={episode.id}
-                        thumbnailUrl={episode.thumbnailUrl}
-                        showTitle={episode.showTitle}
-                        episodeTitle={episode.episodeTitle}
+                        thumbnailUrl={episode.image?.medium || "/api/placeholder/120/180"}
+                        showTitle={episode.showTitle || episode.title}
+                        episodeTitle={episode.name || episode.episodeTitle}
                         type={episode.type}
                         status={episode.status}
                         season={episode.season}
-                        episode={episode.episode}
-                        duration={episode.duration}
-                        onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                        episode={episode.number || episode.episode}
+                        duration={episode.runtime || episode.duration}
+                        onClick={() => navigate(`/content/${episode.contentId || episode.id}`)}
                       />
                     ))}
                   </div>
@@ -398,18 +226,18 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="space-y-4">
-                    {newEpisodes.filter(ep => ep.type === "anime").slice(0, 3).map((episode) => (
+                    {newEpisodes.filter((ep: any) => ep.type === "anime").slice(0, 3).map((episode: any) => (
                       <EpisodeDisplay
                         key={episode.id}
-                        thumbnailUrl={episode.thumbnailUrl}
-                        showTitle={episode.showTitle}
-                        episodeTitle={episode.episodeTitle}
+                        thumbnailUrl={episode.image?.medium || "/api/placeholder/120/180"}
+                        showTitle={episode.showTitle || episode.title}
+                        episodeTitle={episode.name || episode.episodeTitle}
                         type={episode.type}
                         status={episode.status}
                         season={episode.season}
-                        episode={episode.episode}
-                        duration={episode.duration}
-                        onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                        episode={episode.number || episode.episode}
+                        duration={episode.runtime || episode.duration}
+                        onClick={() => navigate(`/content/${episode.contentId || episode.id}`)}
                       />
                     ))}
                   </div>
@@ -418,10 +246,33 @@ export default function Home() {
                 {/* Genre-based Recommendations */}
                 <HomeContent
                   title="Sci-Fi Recommendations"
-                  items={[...popularMovies.slice(0, 2), ...popularAnime.slice(0, 2)]}
+                  items={[
+                    ...popularMovies.filter(movie => 
+                      movie.genres?.some((g: string) => g.toLowerCase().includes("sci-fi") || g.toLowerCase().includes("science"))
+                    ).slice(0, 2).map(movie => ({
+                      id: movie.id,
+                      posterUrl: movie.poster,
+                      title: movie.title,
+                      type: movie.type,
+                      status: movie.status,
+                      year: movie.year
+                    })),
+                    ...popularAnime.filter(anime => 
+                      anime.genres?.some((g: string) => g.toLowerCase().includes("sci-fi") || g.toLowerCase().includes("science"))
+                    ).slice(0, 2).map(anime => ({
+                      id: anime.id,
+                      posterUrl: anime.poster,
+                      title: anime.title,
+                      type: anime.type,
+                      status: anime.status,
+                      year: anime.year,
+                      season: anime.season,
+                      episode: anime.episode
+                    }))
+                  ]}
                   contentType="genre"
                   onViewAll={() => navigate("/discover?genre=sci-fi")}
-                  onItemClick={(item) => console.log(`Clicked: ${item.title}`)}
+                  onItemClick={(item) => navigate(`/content/${item.id}`)}
                   maxItems={4}
                   variant="compact"
                   testId="sci-fi-recommendations-section"
@@ -451,10 +302,17 @@ export default function Home() {
           {/* Popular Movies Section */}
           <HomeContent
             title="Popular Movies"
-            items={popularMovies}
+            items={popularMovies.map(movie => ({
+              id: movie.id,
+              posterUrl: movie.poster,
+              title: movie.title,
+              type: movie.type,
+              status: movie.status,
+              year: movie.year
+            }))}
             contentType="movie"
-            onViewAll={() => console.log("View all movies clicked")}
-            onItemClick={(movie) => console.log(`Clicked movie: ${movie.title}`)}
+            onViewAll={() => handleBrowse("Movies")}
+            onItemClick={(movie) => navigate(`/content/${movie.id}`)}
             variant="expanded"
             testId="popular-movies-section"
           />
@@ -462,10 +320,18 @@ export default function Home() {
           {/* Popular TV Shows Section */}
           <HomeContent
             title="Popular TV Shows"
-            items={popularTVShows}
+            items={popularTVShows.map(show => ({
+              id: show.id,
+              posterUrl: show.poster,
+              title: show.title,
+              type: show.type,
+              status: show.status,
+              year: show.year,
+              season: show.season
+            }))}
             contentType="tv"
-            onViewAll={() => console.log("View all TV shows clicked")}
-            onItemClick={(show) => console.log(`Clicked TV show: ${show.title}`)}
+            onViewAll={() => handleBrowse("TV Shows")}
+            onItemClick={(show) => navigate(`/content/${show.id}`)}
             variant="expanded"
             testId="popular-tv-section"
           />
@@ -473,10 +339,19 @@ export default function Home() {
           {/* Popular Anime Section */}
           <HomeContent
             title="Popular Anime"
-            items={popularAnime}
+            items={popularAnime.map(anime => ({
+              id: anime.id,
+              posterUrl: anime.poster,
+              title: anime.title,
+              type: anime.type,
+              status: anime.status,
+              year: anime.year,
+              season: anime.season,
+              episode: anime.episode
+            }))}
             contentType="anime"
-            onViewAll={() => console.log("View all anime clicked")}
-            onItemClick={(anime) => console.log(`Clicked anime: ${anime.title}`)}
+            onViewAll={() => handleBrowse("Anime")}
+            onItemClick={(anime) => navigate(`/content/${anime.id}`)}
             variant="expanded"
             testId="popular-anime-section"
           />
@@ -487,24 +362,25 @@ export default function Home() {
               <h2 className="text-3xl font-bold text-retro-900">New Episodes</h2>
               <button 
                 className="text-retro-700 hover:text-retro-500 font-medium transition-colors"
+                onClick={handleSchedule}
                 data-testid="view-all-episodes"
               >
                 View All →
               </button>
             </div>
             <div className="space-y-4 p-1" data-testid="new-episodes-list">
-              {newEpisodes.map((episode) => (
+              {newEpisodes.slice(0, 4).map((episode: any) => (
                 <EpisodeDisplay
-                  key={episode.id}
-                  thumbnailUrl={episode.thumbnailUrl}
+                  key={episode.id || `${episode.contentId}-${episode.season}-${episode.number}`}
+                  thumbnailUrl={episode.image?.medium || "/api/placeholder/120/180"}
                   showTitle={episode.showTitle}
-                  episodeTitle={episode.episodeTitle}
+                  episodeTitle={episode.name}
                   type={episode.type}
                   status={episode.status}
                   season={episode.season}
-                  episode={episode.episode}
-                  duration={episode.duration}
-                  onClick={() => console.log(`Clicked episode: ${episode.episodeTitle}`)}
+                  episode={episode.number}
+                  duration={episode.runtime}
+                  onClick={() => navigate(`/content/${episode.contentId}`)}
                 />
               ))}
             </div>

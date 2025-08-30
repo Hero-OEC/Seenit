@@ -41,11 +41,13 @@ export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private content: Map<string, Content>;
   private userContent: Map<string, UserContent>;
+  private importStatus: Map<string, ImportStatus>;
 
   constructor() {
     this.users = new Map();
     this.content = new Map();
     this.userContent = new Map();
+    this.importStatus = new Map();
     this.initializeSampleContent();
   }
 
@@ -148,7 +150,7 @@ export class MemStorage implements IStorage {
       
       // For demo purposes, randomly assign content to different days
       // In a real app, this would check the actual air date/schedule
-      const contentDate = new Date(content.airDate || content.createdAt);
+      const contentDate = new Date(content.createdAt || new Date());
       return contentDate.toDateString() === targetDate.toDateString();
     });
   }
@@ -288,6 +290,45 @@ export class MemStorage implements IStorage {
     );
   }
 
+  // Import status methods
+  async getImportStatus(source: string): Promise<ImportStatus | undefined> {
+    return Array.from(this.importStatus.values()).find(
+      status => status.source === source
+    );
+  }
+
+  async createImportStatus(importStatus: InsertImportStatus): Promise<ImportStatus> {
+    const id = randomUUID();
+    const status: ImportStatus = {
+      id,
+      source: importStatus.source,
+      isActive: importStatus.isActive ?? null,
+      lastSyncAt: importStatus.lastSyncAt ?? null,
+      totalImported: importStatus.totalImported ?? null,
+      totalAvailable: importStatus.totalAvailable ?? null,
+      currentPage: importStatus.currentPage ?? null,
+      errors: importStatus.errors ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.importStatus.set(id, status);
+    return status;
+  }
+
+  async updateImportStatus(id: string, updates: Partial<ImportStatus>): Promise<ImportStatus> {
+    const existing = this.importStatus.get(id);
+    if (!existing) {
+      throw new Error(`Import status with id ${id} not found`);
+    }
+    const updated = { 
+      ...existing, 
+      ...updates,
+      updatedAt: new Date()
+    };
+    this.importStatus.set(id, updated);
+    return updated;
+  }
+
   private initializeSampleContent() {
     // Initialize with sample content for demonstration
     const sampleContent: Content[] = [
@@ -324,6 +365,7 @@ export class MemStorage implements IStorage {
         voteCount: 12500,
         streamingPlatforms: ["Netflix", "Prime Video"],
         affiliateLinks: ["https://netflix.com/affiliate/action-hero", "https://primevideo.com/affiliate/action-hero"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       },
@@ -360,6 +402,7 @@ export class MemStorage implements IStorage {
         voteCount: 8750,
         streamingPlatforms: ["HBO Max", "Hulu"],
         affiliateLinks: ["https://hbomax.com/affiliate/mystery-series", "https://hulu.com/affiliate/mystery-series"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       },
@@ -396,6 +439,7 @@ export class MemStorage implements IStorage {
         voteCount: 15200,
         streamingPlatforms: ["Crunchyroll", "Funimation"],
         affiliateLinks: ["https://crunchyroll.com/affiliate/adventure-quest"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       },
@@ -432,6 +476,7 @@ export class MemStorage implements IStorage {
         voteCount: 9800,
         streamingPlatforms: ["Netflix", "Disney+"],
         affiliateLinks: ["https://netflix.com/affiliate/love-story", "https://disneyplus.com/affiliate/love-story"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       },
@@ -468,6 +513,7 @@ export class MemStorage implements IStorage {
         voteCount: 11200,
         streamingPlatforms: ["Prime Video", "HBO Max"],
         affiliateLinks: ["https://primevideo.com/affiliate/space-odyssey"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       },
@@ -504,6 +550,7 @@ export class MemStorage implements IStorage {
         voteCount: 7400,
         streamingPlatforms: ["Netflix", "Hulu"],
         affiliateLinks: ["https://netflix.com/affiliate/night-terror"],
+        episodeData: null,
         createdAt: new Date(),
         lastUpdated: new Date()
       }

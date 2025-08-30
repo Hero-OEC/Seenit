@@ -265,6 +265,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recent episodes route
+  app.get("/api/content/recent-episodes", async (req, res) => {
+    try {
+      const allContent = await storage.getAllContent();
+      const episodes: any[] = [];
+      
+      // Extract episodes from content with episode data
+      allContent.forEach((content: any) => {
+        if (content.episodeData && (content.type === 'tv' || content.type === 'anime')) {
+          try {
+            const episodeData = typeof content.episodeData === 'string' 
+              ? JSON.parse(content.episodeData) 
+              : content.episodeData;
+            
+            // Get the most recent episodes
+            const recentEpisodes = episodeData
+              .filter((ep: any) => ep.airdate && new Date(ep.airdate) <= new Date())
+              .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
+              .slice(0, 2)
+              .map((ep: any) => ({
+                ...ep,
+                contentId: content.id,
+                showTitle: content.title,
+                type: content.type,
+                status: content.status,
+                image: content.poster ? { medium: content.poster } : null
+              }));
+            
+            episodes.push(...recentEpisodes);
+          } catch (error) {
+            console.error('Error parsing episode data for content:', content.id, error);
+          }
+        }
+      });
+      
+      // Sort all episodes by air date and return top 10
+      const sortedEpisodes = episodes
+        .sort((a, b) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
+        .slice(0, 10);
+      
+      res.json(sortedEpisodes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recent episodes" });
+    }
+  });
+
+  // Featured content route for hero section
+  app.get("/api/content/featured", async (req, res) => {
+    try {
+      const allContent = await storage.getAllContent();
+      
+      // Get a highly-rated movie or TV show for the hero section
+      const featured = allContent
+        .filter((content: any) => content.type === 'movie' || content.type === 'tv')
+        .filter((content: any) => content.imdbRating && parseFloat(content.imdbRating) > 8.0)
+        .sort((a: any, b: any) => (parseFloat(b.imdbRating) || 0) - (parseFloat(a.imdbRating) || 0))[0] ||
+        allContent.filter((content: any) => content.type === 'movie')[0];
+      
+      if (!featured) {
+        return res.status(404).json({ message: "No featured content available" });
+      }
+      
+      res.json(featured);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch featured content" });
+    }
+  });
+
   // User routes
   app.post("/api/users", async (req, res) => {
     try {
