@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "@shared/schema";
 import { z } from "zod";
+import { tvmazeService } from "./services/tvmaze";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Content routes
@@ -212,6 +213,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  // Import routes for TVmaze
+  app.get("/api/import/tvmaze/status", async (_req, res) => {
+    try {
+      const status = await tvmazeService.getImportStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get import status" });
+    }
+  });
+
+  app.post("/api/import/tvmaze/start", async (_req, res) => {
+    try {
+      // Resume/start sync
+      await tvmazeService.resumeSync();
+      res.json({ message: "TVmaze import started" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to start import" });
+    }
+  });
+
+  app.post("/api/import/tvmaze/pause", async (_req, res) => {
+    try {
+      await tvmazeService.pauseSync();
+      res.json({ message: "TVmaze import paused" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to pause import" });
+    }
+  });
+
+  app.get("/api/import/tvmaze/content", async (_req, res) => {
+    try {
+      const content = await storage.getContentBySource('tvmaze');
+      res.json({
+        count: content.length,
+        content: content.slice(0, 20) // Return first 20 for preview
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get TVmaze content" });
     }
   });
 

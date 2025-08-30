@@ -1,5 +1,8 @@
-import { type User, type InsertUser, type Content, type InsertContent, type UserContent, type InsertUserContent } from "@shared/schema";
+import { type User, type InsertUser, type Content, type InsertContent, type UserContent, type InsertUserContent, type ImportStatus, type InsertImportStatus } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { users, content, userContent, importStatus } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -12,8 +15,10 @@ export interface IStorage {
   getContent(id: string): Promise<Content | undefined>;
   getAllContent(): Promise<Content[]>;
   getContentByType(type: string): Promise<Content[]>;
+  getContentBySource(source: string): Promise<Content[]>;
   searchContent(query: string): Promise<Content[]>;
   createContent(content: InsertContent): Promise<Content>;
+  updateContent(id: string, updates: Partial<Content>): Promise<Content>;
 
   // User content tracking methods
   getUserContent(userId: string): Promise<UserContent[]>;
@@ -22,6 +27,11 @@ export interface IStorage {
   updateUserContent(id: string, updates: Partial<UserContent>): Promise<UserContent>;
   removeUserContent(id: string): Promise<void>;
   getUserContentByContentId(userId: string, contentId: string): Promise<UserContent | undefined>;
+
+  // Import status methods
+  getImportStatus(source: string): Promise<ImportStatus | undefined>;
+  createImportStatus(importStatus: InsertImportStatus): Promise<ImportStatus>;
+  updateImportStatus(id: string, updates: Partial<ImportStatus>): Promise<ImportStatus>;
 }
 
 export class MemStorage implements IStorage {
@@ -466,4 +476,6 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Switch to database storage
+import { databaseStorage } from "./storage/database";
+export const storage = databaseStorage;

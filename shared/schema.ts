@@ -12,7 +12,7 @@ export const users = pgTable("users", {
 });
 
 export const content = pgTable("content", {
-  id: varchar("id").primaryKey(),
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   type: text("type").notNull(), // 'movie', 'tv', 'anime'
   source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anilist', 'manual'
@@ -75,6 +75,19 @@ export const userContent = pgTable("user_content", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const importStatus = pgTable("import_status", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anilist'
+  isActive: boolean("is_active").default(false),
+  lastSyncAt: timestamp("last_sync_at"),
+  totalImported: integer("total_imported").default(0),
+  totalAvailable: integer("total_available").default(0),
+  currentPage: integer("current_page").default(1),
+  errors: text("errors").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
@@ -91,6 +104,12 @@ export const insertUserContentSchema = createInsertSchema(userContent).omit({
   updatedAt: true,
 });
 
+export const insertImportStatusSchema = createInsertSchema(importStatus).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -99,3 +118,6 @@ export type Content = typeof content.$inferSelect;
 
 export type InsertUserContent = z.infer<typeof insertUserContentSchema>;
 export type UserContent = typeof userContent.$inferSelect;
+
+export type InsertImportStatus = z.infer<typeof insertImportStatusSchema>;
+export type ImportStatus = typeof importStatus.$inferSelect;
