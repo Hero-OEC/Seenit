@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, real, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, real, date, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -43,6 +43,7 @@ export const content = pgTable("content", {
   network: text("network"), // Broadcasting network
   airTime: text("air_time"), // Time when show airs
   airDays: text("air_days").array(), // Days of week show airs
+  episodeData: jsonb("episode_data"), // Full episode details as JSON
   
   // Anime-specific (AniList)
   episodes: integer("episodes"), // Total episodes planned

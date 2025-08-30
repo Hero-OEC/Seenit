@@ -124,6 +124,10 @@ export class TVMazeService {
     }
   }
 
+  async getShowWithEpisodes(id: number): Promise<TVMazeShow> {
+    return await this.makeRequest<TVMazeShow>(`/shows/${id}?embed=episodes`);
+  }
+
   async getShowById(id: number): Promise<TVMazeShow> {
     return await this.makeRequest<TVMazeShow>(`/shows/${id}?embed=episodes`);
   }
@@ -139,12 +143,28 @@ export class TVMazeService {
 
   private mapTVMazeToContent(show: TVMazeShow): InsertContent {
     const network = show.network?.name || show.webChannel?.name;
-    const totalEpisodes = show._embedded?.episodes?.length || 0;
+    const episodes = show._embedded?.episodes || [];
+    const totalEpisodes = episodes.length;
     
     // Calculate total seasons
-    const seasons = show._embedded?.episodes?.reduce((acc, ep) => {
+    const seasons = episodes.reduce((acc, ep) => {
       return Math.max(acc, ep.season);
     }, 0) || 0;
+
+    // Process episode data into structured format
+    const episodeData = episodes.length > 0 ? {
+      episodes: episodes.map(ep => ({
+        id: ep.id,
+        name: ep.name,
+        season: ep.season,
+        number: ep.number,
+        airdate: ep.airdate,
+        summary: ep.summary ? this.stripHtmlTags(ep.summary) : null
+      })),
+      seasonCount: seasons,
+      totalEpisodes: totalEpisodes,
+      lastUpdated: new Date().toISOString()
+    } : null;
 
     // Map TVMaze status to our schema
     let status = 'completed';
@@ -173,6 +193,7 @@ export class TVMazeService {
       network,
       airTime: show.schedule?.time || null,
       airDays: show.schedule?.days?.length ? show.schedule.days : null,
+      episodeData: episodeData as any, // Store full episode details
       
       // Not used for TV
       episodes: null,
@@ -273,7 +294,9 @@ export class TVMazeService {
                 )
               );
 
-            const mappedContent = this.mapTVMazeToContent(show);
+            // Fetch detailed show data with episodes
+            const detailedShow = await this.getShowWithEpisodes(show.id);
+            const mappedContent = this.mapTVMazeToContent(detailedShow);
 
             if (existingContent) {
               // Update existing content
