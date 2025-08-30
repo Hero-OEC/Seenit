@@ -124,12 +124,13 @@ function Import() {
     return new Date(dateString).toLocaleString();
   };
 
-  const getStatusBadge = (isActive: boolean, hasContent: boolean, isLoading: boolean) => {
-    if (isLoading) {
-      return <Badge className="bg-yellow-100 text-yellow-800" data-testid="status-loading">Loading...</Badge>;
-    }
+  const getStatusBadge = (isActive: boolean, hasContent: boolean, isInitialLoading: boolean) => {
+    // Priority: Active state always wins, then loading only if no status exists yet
     if (isActive) {
       return <Badge className="bg-green-100 text-green-800" data-testid="status-active">Importing</Badge>;
+    }
+    if (isInitialLoading && !tvmazeStatus) {
+      return <Badge className="bg-yellow-100 text-yellow-800" data-testid="status-loading">Loading...</Badge>;
     }
     if (hasContent) {
       return <Badge className="bg-blue-100 text-blue-800" data-testid="status-ready">Ready</Badge>;
@@ -220,7 +221,7 @@ function Import() {
                 {getStatusBadge(
                   tvmazeStatus?.isActive || false, 
                   (tvmazeContent?.count || 0) > 0,
-                  statusLoading || startImport.isPending || pauseImport.isPending
+                  statusLoading && !tvmazeStatus
                 )}
               </div>
               <div className="flex justify-between items-center">
@@ -326,7 +327,7 @@ function Import() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <div className="flex gap-2">
-                {(tvmazeStatus?.isActive || startImport.isPending) ? (
+                {tvmazeStatus?.isActive ? (
                   <Button
                     variant="outline"
                     onClick={() => pauseImport.mutate()}
