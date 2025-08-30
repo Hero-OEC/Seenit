@@ -257,40 +257,15 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-        {/* Year/Air Date and Season Info Row */}
+        {/* Year Info */}
         <div className="flex items-center justify-between gap-2">
-          {/* Year or Air Date */}
           <p 
             className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
             data-testid="content-year"
           >
-            {airDate ? new Date(airDate).toLocaleDateString() : year || 'Year not available'}
+            {year || 'Year not available'}
           </p>
-
-          {/* Season badge for TV shows and anime */}
-          {(type === "tv" || type === "anime") && (totalSeasons || season) && (
-            <div 
-              className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full ${
-                type === "tv" ? 'bg-blue-500 border-blue-600' : 'bg-purple-500 border-purple-600'
-              } text-white font-semibold shadow-md border`} 
-              data-testid="content-season-info"
-            >
-              <span>
-                {totalSeasons ? `${totalSeasons} Season${totalSeasons > 1 ? 's' : ''}` : `S${season}`}
-              </span>
-            </div>
-          )}
         </div>
-
-        {/* Episode title for schedule view */}
-        {episodeTitle && (
-          <p 
-            className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-500 font-medium italic line-clamp-1`}
-            data-testid="content-episode-title"
-          >
-            "{episodeTitle}"
-          </p>
-        )}
 
         {/* Current episode info if available */}
         {(type === "tv" || type === "anime") && episode !== undefined && (
