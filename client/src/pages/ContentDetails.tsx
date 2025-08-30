@@ -226,7 +226,7 @@ export default function ContentDetails() {
       duration: content.type === "anime" ? Math.floor(Math.random() * 5) + 22 : Math.floor(Math.random() * 10) + 42,
       airDate: new Date(2024, 0, 15 + (i * 7)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       rating: (8.0 + Math.random() * 1.5).toFixed(1),
-      watched: i < 3 // Mark first 3 episodes as watched for demo
+      watched: false // Episodes start unwatched
     }));
   };
 
