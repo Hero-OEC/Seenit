@@ -46,16 +46,10 @@ export default function Navbar({
   // Search suggestions query (lighter than full search)
   const { data: searchSuggestions = [], isLoading: isSearching } = useQuery<any[]>({
     queryKey: [`/api/content/search/suggestions?q=${encodeURIComponent(debouncedSearchQuery)}`],
-    enabled: debouncedSearchQuery.length >= 2,
+    enabled: debouncedSearchQuery.length >= 3, // Increased to 3 characters for better accuracy
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Debug logging
-  useEffect(() => {
-    if (searchSuggestions && searchSuggestions.length > 0) {
-      console.log(`Found ${searchSuggestions.length} suggestions for "${debouncedSearchQuery}"`, searchSuggestions);
-    }
-  }, [searchSuggestions, debouncedSearchQuery]);
 
   // Handle clicks outside search to close dropdown
   useEffect(() => {
@@ -70,7 +64,7 @@ export default function Navbar({
 
   // Show/hide search results based on query and focus
   useEffect(() => {
-    if (debouncedSearchQuery.length >= 2) {
+    if (debouncedSearchQuery.length >= 3) {
       setShowSearchResults(true);
     } else {
       setShowSearchResults(false);
@@ -90,7 +84,7 @@ export default function Navbar({
   };
 
   const handleSearchFocus = () => {
-    if (debouncedSearchQuery.length >= 2) {
+    if (debouncedSearchQuery.length >= 3) {
       setShowSearchResults(true);
     }
   };

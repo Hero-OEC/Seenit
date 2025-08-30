@@ -118,22 +118,37 @@ export class DatabaseStorage implements IStorage {
 
   async searchContent(query: string): Promise<Content[]> {
     const lowerQuery = `%${query.toLowerCase()}%`;
-    return await db
+    const exactQuery = query.toLowerCase();
+    const startsWithQuery = `${query.toLowerCase()}%`;
+    
+    // First get exact title matches
+    const exactMatches = await db
       .select()
       .from(content)
-      .where(
-        or(
-          ilike(content.title, lowerQuery),
-          ilike(content.overview, lowerQuery),
-          sql`${content.genres}::text ILIKE ${lowerQuery}`,
-          ilike(content.network, lowerQuery),
-          ilike(content.studio, lowerQuery),
-          sql`${content.tags}::text ILIKE ${lowerQuery}`,
-          ilike(content.sourceMaterial, lowerQuery),
-          sql`${content.streamingPlatforms}::text ILIKE ${lowerQuery}`
-        )
-      )
+      .where(sql`LOWER(${content.title}) = ${exactQuery}`)
       .orderBy(desc(content.popularity));
+    
+    // Then get "starts with" matches  
+    const startsWithMatches = await db
+      .select()
+      .from(content)
+      .where(sql`LOWER(${content.title}) LIKE ${startsWithQuery}`)
+      .orderBy(desc(content.popularity));
+    
+    // Then get contains matches in title
+    const titleContainsMatches = await db
+      .select()
+      .from(content)
+      .where(ilike(content.title, lowerQuery))
+      .orderBy(desc(content.popularity));
+    
+    // Combine results and remove duplicates, maintaining priority order
+    const allResults = [...exactMatches, ...startsWithMatches, ...titleContainsMatches];
+    const uniqueResults = allResults.filter((item, index, arr) => 
+      arr.findIndex(i => i.id === item.id) === index
+    );
+    
+    return uniqueResults;
   }
 
   async createContent(insertContent: InsertContent): Promise<Content> {
