@@ -213,10 +213,15 @@ export default function ContentDetails() {
         ? JSON.parse(content.episodeData) 
         : content.episodeData;
       
+      // Check if episodeData has the expected structure
+      const episodes = episodeData?.episodes || episodeData;
+      
+      if (!Array.isArray(episodes)) return [];
+      
       // Filter episodes for the selected season
-      return episodeData.filter((ep: any) => ep.season === seasonNumber);
+      return episodes.filter((ep: any) => ep.season === seasonNumber);
     } catch (error) {
-      console.error('Error parsing episode data:', error);
+      console.error('Error parsing episode data:', content.title);
       return [];
     }
   };
@@ -489,7 +494,7 @@ export default function ContentDetails() {
                   
                   <div className="space-y-4">
                     {/* Episodes from database */}
-                    {getEpisodesFromContent(content, selectedSeason).map((episode, index) => (
+                    {getEpisodesFromContent(content, selectedSeason).map((episode: any, index: number) => (
                       <div key={index} className="border-b border-retro-200 pb-4 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
