@@ -524,11 +524,15 @@ export default function ContentDetails() {
                   </div>
                 )}
                 {content.rating && !content.imdbRating && !content.malRating && (
-                  <div className="flex items-center gap-2" data-testid="general-rating">
-                    <span className="font-semibold text-retro-900">Rating:</span>
+                  <div className="flex items-center gap-3" data-testid="tvmaze-imdb-rating">
+                    {/* IMDb Logo */}
+                    <svg className="w-12 h-6" viewBox="0 0 64 32" fill="none">
+                      <rect width="64" height="32" rx="4" fill="#F5C518"/>
+                      <text x="32" y="20" fontSize="14" fontWeight="bold" textAnchor="middle" fill="#000">IMDb</text>
+                    </svg>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{content.rating}/10</span>
+                      <span className="font-medium text-lg">{content.rating}/10</span>
                     </div>
                   </div>
                 )}
