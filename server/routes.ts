@@ -82,9 +82,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid content type for schedule" });
       }
       
-      const content = await storage.getContentByScheduleDate(date, type as string);
-      res.json(content);
+      const allContent = await storage.getAllContent();
+      const episodes: any[] = [];
+      
+      // Extract episodes that air on the specified date
+      allContent.forEach((content: any) => {
+        if (content.episodeData && content.type === type) {
+          try {
+            const episodeData = typeof content.episodeData === 'string' 
+              ? JSON.parse(content.episodeData) 
+              : content.episodeData;
+            
+            if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
+              // Find episodes that air on this date
+              const dateEpisodes = episodeData.episodes
+                .filter((ep: any) => ep.airdate === date)
+                .map((ep: any) => ({
+                  ...ep,
+                  contentId: content.id,
+                  showTitle: content.title,
+                  type: content.type,
+                  status: content.status,
+                  image: content.poster ? { medium: content.poster } : null
+                }));
+              
+              episodes.push(...dateEpisodes);
+            }
+          } catch (error) {
+            console.error('Error parsing episode data for schedule:', content.id, error);
+          }
+        }
+      });
+      
+      // If no episodes found for exact date, return recent episodes as fallback
+      if (episodes.length === 0) {
+        allContent.forEach((content: any) => {
+          if (content.episodeData && content.type === type) {
+            try {
+              const episodeData = typeof content.episodeData === 'string' 
+                ? JSON.parse(content.episodeData) 
+                : content.episodeData;
+              
+              if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
+                // Get some recent episodes as fallback
+                const recentEpisodes = episodeData.episodes
+                  .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
+                  .slice(0, 2)
+                  .map((ep: any) => ({
+                    ...ep,
+                    contentId: content.id,
+                    showTitle: content.title,
+                    type: content.type,
+                    status: content.status,
+                    image: content.poster ? { medium: content.poster } : null
+                  }));
+                
+                episodes.push(...recentEpisodes);
+              }
+            } catch (error) {
+              console.error('Error parsing episode data for fallback:', content.id, error);
+            }
+          }
+        });
+      }
+      
+      res.json(episodes.slice(0, 10)); // Limit to 10 episodes
     } catch (error) {
+      console.error('Schedule error:', error);
       res.status(500).json({ message: "Failed to fetch scheduled content" });
     }
   });
@@ -279,9 +343,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? JSON.parse(content.episodeData) 
               : content.episodeData;
             
-            if (Array.isArray(episodeData) && episodeData.length > 0) {
+            // Handle the nested episodes structure
+            const episodeArray = episodeData?.episodes || episodeData;
+            
+            if (Array.isArray(episodeArray) && episodeArray.length > 0) {
               // Get the most recent episodes
-              const recentEpisodes = episodeData
+              const recentEpisodes = episodeArray
                 .filter((ep: any) => ep.airdate && new Date(ep.airdate) <= new Date())
                 .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
                 .slice(0, 2)
