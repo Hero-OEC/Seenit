@@ -124,10 +124,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 : content.episodeData;
               
               if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
-                // Get some recent episodes as fallback
+                // Get recent episodes as fallback
                 const recentEpisodes = episodeData.episodes
                   .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
-                  .slice(0, 2)
+                  .slice(0, 5)
                   .map((ep: any) => ({
                     ...ep,
                     contentId: content.id,
@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.json(episodes.slice(0, 10)); // Limit to 10 episodes
+      res.json(episodes); // Return all episodes for the date
     } catch (error) {
       console.error('Schedule error:', error);
       res.status(500).json({ message: "Failed to fetch scheduled content" });
