@@ -535,65 +535,6 @@ export default function ContentDetails() {
               </div>
             )}
 
-            {/* Content-specific details */}
-            {(content.runtime || content.network || content.studio || content.sourceMaterial) && (
-              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
-                <h2 className="text-xl font-bold text-retro-900 mb-4">Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Movie-specific fields */}
-                  {content.type === "movie" && content.runtime && (
-                    <div data-testid="movie-runtime">
-                      <span className="font-medium text-retro-900">Runtime:</span>
-                      <span className="ml-2 text-retro-700">{content.runtime} minutes</span>
-                    </div>
-                  )}
-                  
-                  {/* TV-specific fields */}
-                  {content.type === "tv" && content.network && (
-                    <div data-testid="tv-network">
-                      <span className="font-medium text-retro-900">Network:</span>
-                      <span className="ml-2 text-retro-700">{content.network}</span>
-                    </div>
-                  )}
-                  {content.type === "tv" && content.airTime && (
-                    <div data-testid="tv-airtime">
-                      <span className="font-medium text-retro-900">Air Time:</span>
-                      <span className="ml-2 text-retro-700">{content.airTime}</span>
-                    </div>
-                  )}
-                  {content.type === "tv" && content.airDays && content.airDays.length > 0 && (
-                    <div data-testid="tv-airdays">
-                      <span className="font-medium text-retro-900">Air Days:</span>
-                      <span className="ml-2 text-retro-700">{content.airDays.join(", ")}</span>
-                    </div>
-                  )}
-                  
-                  {/* Anime-specific fields */}
-                  {content.type === "anime" && content.studio && (
-                    <div data-testid="anime-studio">
-                      <span className="font-medium text-retro-900">Studio:</span>
-                      <span className="ml-2 text-retro-700">{content.studio}</span>
-                    </div>
-                  )}
-                  {content.type === "anime" && content.sourceMaterial && (
-                    <div data-testid="anime-source">
-                      <span className="font-medium text-retro-900">Source:</span>
-                      <span className="ml-2 text-retro-700 capitalize">{content.sourceMaterial.replace('_', ' ')}</span>
-                    </div>
-                  )}
-                  
-                  {/* Common episode information */}
-                  {content.totalEpisodes && (
-                    <div data-testid="total-episodes">
-                      <span className="font-medium text-retro-900">Total Episodes:</span>
-                      <span className="ml-2 text-retro-700">{content.totalEpisodes}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-
             {/* Synopsis */}
             {content.overview && (
               <div className="mb-8">
