@@ -43,13 +43,13 @@ function Import() {
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tvmaze/status', refreshKey],
-    refetchInterval: 5000, // Refetch every 5 seconds when active
+    refetchInterval: (data) => data?.isActive ? 3000 : 10000, // 3s when active, 10s when idle
   });
 
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: (data) => tvmazeStatus?.isActive ? 8000 : 30000, // 8s when importing, 30s when idle
   });
 
   // Mutation to start TVmaze import
@@ -96,22 +96,31 @@ function Import() {
     },
   });
 
-  // Auto-start import if no content exists yet
+  // Auto-start import only once when first loading and no content exists
+  const [hasAutoStarted, setHasAutoStarted] = useState(false);
   useEffect(() => {
-    if (tvmazeContent?.count === 0 && !tvmazeStatus?.isActive && !statusLoading) {
+    if (!hasAutoStarted && 
+        tvmazeContent?.count === 0 && 
+        !tvmazeStatus?.isActive && 
+        !statusLoading &&
+        !startImport.isPending) {
       console.log('No TVmaze content found, auto-starting import...');
+      setHasAutoStarted(true);
       startImport.mutate();
     }
-  }, [tvmazeContent?.count, tvmazeStatus?.isActive, statusLoading]);
+  }, [tvmazeContent?.count, tvmazeStatus?.isActive, statusLoading, hasAutoStarted, startImport.isPending]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
     return new Date(dateString).toLocaleString();
   };
 
-  const getStatusBadge = (isActive: boolean, hasContent: boolean) => {
+  const getStatusBadge = (isActive: boolean, hasContent: boolean, isLoading: boolean) => {
+    if (isLoading) {
+      return <Badge className="bg-yellow-100 text-yellow-800" data-testid="status-loading">Loading...</Badge>;
+    }
     if (isActive) {
-      return <Badge className="bg-green-100 text-green-800" data-testid="status-active">Active</Badge>;
+      return <Badge className="bg-green-100 text-green-800" data-testid="status-active">Importing</Badge>;
     }
     if (hasContent) {
       return <Badge className="bg-blue-100 text-blue-800" data-testid="status-ready">Ready</Badge>;
@@ -199,10 +208,10 @@ function Import() {
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                {statusLoading ? (
-                  <Badge className="bg-gray-100 text-gray-800">Loading...</Badge>
-                ) : (
-                  getStatusBadge(tvmazeStatus?.isActive || false, (tvmazeContent?.count || 0) > 0)
+                {getStatusBadge(
+                  tvmazeStatus?.isActive || false, 
+                  (tvmazeContent?.count || 0) > 0,
+                  statusLoading || startImport.isPending || pauseImport.isPending
                 )}
               </div>
               <div className="flex justify-between items-center">
@@ -308,25 +317,28 @@ function Import() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <div className="flex gap-2">
-                <Button
-                  onClick={() => startImport.mutate()}
-                  disabled={tvmazeStatus?.isActive || startImport.isPending}
-                  className="flex items-center gap-2"
-                  data-testid="button-start-import"
-                >
-                  <Play className="w-4 h-4" />
-                  {startImport.isPending ? 'Starting...' : 'Start Import'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => pauseImport.mutate()}
-                  disabled={!tvmazeStatus?.isActive || pauseImport.isPending}
-                  className="flex items-center gap-2"
-                  data-testid="button-pause-import"
-                >
-                  <Pause className="w-4 h-4" />
-                  {pauseImport.isPending ? 'Pausing...' : 'Pause Import'}
-                </Button>
+                {tvmazeStatus?.isActive ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => pauseImport.mutate()}
+                    disabled={pauseImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-stop-import"
+                  >
+                    <Pause className="w-4 h-4" />
+                    {pauseImport.isPending ? 'Stopping...' : 'Stop Import'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => startImport.mutate()}
+                    disabled={startImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-start-import"
+                  >
+                    <Play className="w-4 h-4" />
+                    {startImport.isPending ? 'Starting...' : 'Start Import'}
+                  </Button>
+                )}
               </div>
               
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
