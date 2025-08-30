@@ -232,6 +232,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recommendations route
+  app.get("/api/content/:contentId/recommendations", async (req, res) => {
+    try {
+      const { contentId } = req.params;
+      const content = await storage.getContent(contentId);
+      
+      if (!content) {
+        return res.status(404).json({ message: "Content not found" });
+      }
+      
+      // Get recommendations based on shared genres and type
+      const allContent = await storage.getAllContent();
+      const currentGenres = content.genres || [];
+      
+      const recommendations = allContent
+        .filter((item: any) => item.id !== contentId)
+        .map((item: any) => {
+          const sharedGenres = item.genres?.filter((g: string) => currentGenres.includes(g)).length || 0;
+          const typeMatch = item.type === content.type ? 1 : 0;
+          return {
+            ...item,
+            score: sharedGenres * 2 + typeMatch
+          };
+        })
+        .sort((a: any, b: any) => b.score - a.score)
+        .slice(0, 8);
+      
+      res.json(recommendations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recommendations" });
+    }
+  });
+
   // User routes
   app.post("/api/users", async (req, res) => {
     try {

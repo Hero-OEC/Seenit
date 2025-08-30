@@ -198,133 +198,28 @@ export default function ContentDetails() {
     );
   };
 
-  // Function to generate sample episodes for demonstration
-  const generateSampleEpisodes = (content: Content) => {
-    const episodeCount = Math.min(content.episodes || 10, 10); // Show max 10 episodes
-    const currentSeason = content.season || 1;
+  // Get episodes from database content
+  const getEpisodesFromContent = (content: Content, seasonNumber: number) => {
+    if (!content.episodeData) return [];
     
-    const episodeTitles = [
-      "The Beginning", "Shadows of the Past", "Revelations", "The Hunt Begins", 
-      "Unexpected Allies", "Betrayal", "The Truth Unveiled", "Final Confrontation", 
-      "New Horizons", "The End of an Era"
-    ];
-
-    return Array.from({ length: episodeCount }, (_, i) => ({
-      number: i + 1,
-      title: episodeTitles[i] || `Episode ${i + 1}`,
-      description: `An intense episode that continues the storyline with unexpected twists and character development. The stakes are higher than ever as our protagonists face new challenges.`,
-      duration: content.type === "anime" ? Math.floor(Math.random() * 5) + 22 : Math.floor(Math.random() * 10) + 42,
-      airDate: new Date(2024, 0, 15 + (i * 7)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      rating: (8.0 + Math.random() * 1.5).toFixed(1),
-      watched: false // Episodes start unwatched
-    }));
+    try {
+      const episodeData = typeof content.episodeData === 'string' 
+        ? JSON.parse(content.episodeData) 
+        : content.episodeData;
+      
+      // Filter episodes for the selected season
+      return episodeData.filter((ep: any) => ep.season === seasonNumber);
+    } catch (error) {
+      console.error('Error parsing episode data:', error);
+      return [];
+    }
   };
 
-  // Function to get recommended content based on current content
-  const getRecommendedContent = (currentContent: Content) => {
-    // Sample recommended content based on type and genre
-    const allRecommendations = [
-      {
-        id: "rec1",
-        title: "Dark Mysteries",
-        type: "tv",
-        year: 2023,
-        genre: ["Mystery", "Thriller"],
-        rating: "8.7",
-        poster: null,
-        season: 2,
-        episode: 8
-      },
-      {
-        id: "rec2", 
-        title: "Action Chronicles",
-        type: "movie",
-        year: 2024,
-        genre: ["Action", "Adventure"],
-        rating: "8.2",
-        poster: null
-      },
-      {
-        id: "rec3",
-        title: "Cyber Anime",
-        type: "anime",
-        year: 2023,
-        genre: ["Sci-Fi", "Action"],
-        rating: "9.1",
-        poster: null,
-        season: 1,
-        episode: 12
-      },
-      {
-        id: "rec4",
-        title: "Romance Heights",
-        type: "movie",
-        year: 2024,
-        genre: ["Romance", "Drama"],
-        rating: "7.9",
-        poster: null
-      },
-      {
-        id: "rec5",
-        title: "Space Odyssey",
-        type: "tv",
-        year: 2023,
-        genre: ["Sci-Fi", "Adventure"],
-        rating: "8.5",
-        poster: null,
-        season: 3,
-        episode: 4
-      },
-      {
-        id: "rec6",
-        title: "Horror Nights",
-        type: "movie",
-        year: 2024,
-        genre: ["Horror", "Thriller"],
-        rating: "7.6",
-        poster: null
-      },
-      {
-        id: "rec7",
-        title: "Comedy Central",
-        type: "tv",
-        year: 2023,
-        genre: ["Comedy", "Drama"],
-        rating: "8.3",
-        poster: null,
-        season: 1,
-        episode: 6
-      },
-      {
-        id: "rec8",
-        title: "Fantasy Quest",
-        type: "anime",
-        year: 2024,
-        genre: ["Fantasy", "Adventure"],
-        rating: "8.8",
-        poster: null,
-        season: 2,
-        episode: 3
-      }
-    ];
-
-    // Filter and sort recommendations based on shared genres
-    const currentGenres = currentContent.genres || [];
-    const scored = allRecommendations
-      .filter(item => item.id !== currentContent.id)
-      .map(item => {
-        const sharedGenres = item.genre.filter(g => currentGenres.includes(g)).length;
-        const typeMatch = item.type === currentContent.type ? 1 : 0;
-        return {
-          ...item,
-          score: sharedGenres * 2 + typeMatch
-        };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8);
-
-    return scored;
-  };
+  // Fetch recommended content from database
+  const { data: recommendedContent } = useQuery<Content[]>({
+    queryKey: [`/api/content/${content?.id}/recommendations`],
+    enabled: !!content?.id,
+  });
 
   return (
     <div className="min-h-screen bg-retro-50">
@@ -391,11 +286,16 @@ export default function ContentDetails() {
 
                 {/* Recommended Content List - Vertical */}
                 <div className="space-y-3">
-                  {getRecommendedContent(content).slice(0, 6).map((item, index) => (
-                    <div key={index} className="flex gap-3 cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" data-testid={`recommended-${index}`}>
+                  {recommendedContent?.slice(0, 6).map((item, index) => (
+                    <div 
+                      key={item.id} 
+                      className="flex gap-3 cursor-pointer hover:bg-retro-50 p-2 rounded-lg transition-colors" 
+                      data-testid={`recommended-${index}`}
+                      onClick={() => navigate(`/content/${item.id}`)}
+                    >
                       <div className="flex-shrink-0 w-12 h-16 bg-retro-200 rounded overflow-hidden">
                         <img 
-                          src={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                          src={item.poster || "/api/placeholder/300/450"}
                           alt={`${item.title} poster`}
                           className="w-full h-full object-cover"
                         />
@@ -410,18 +310,13 @@ export default function ContentDetails() {
                           </span>
                           <span>{item.year}</span>
                         </div>
-                        {/* Season/Episode Info for TV Shows and Anime */}
-                        {(item.type === "tv" || item.type === "anime") && (item.season !== undefined || item.episode !== undefined) && (
-                          <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1">
-                            <Play className="w-2.5 h-2.5 fill-white" />
-                            {item.season !== undefined && `S${item.season}`}
-                            {item.season !== undefined && item.episode !== undefined && " • "}
-                            {item.episode !== undefined && `E${item.episode}`}
-                          </div>
-                        )}
                       </div>
                     </div>
-                  ))}
+                  )) || (
+                    <div className="text-sm text-retro-500 text-center py-4">
+                      No recommendations available
+                    </div>
+                  )}
                 </div>
 
               </div>
@@ -592,41 +487,41 @@ export default function ContentDetails() {
                   </div>
                   
                   <div className="space-y-4">
-                    {/* Sample episodes - in a real app this would come from API */}
-                    {generateSampleEpisodes(content).map((episode, index) => (
+                    {/* Episodes from database */}
+                    {getEpisodesFromContent(content, selectedSeason).map((episode, index) => (
                       <div key={index} className="border-b border-retro-200 pb-4 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <h4 className="text-lg font-medium text-retro-900">
-                                S{selectedSeason.toString().padStart(2, '0')} E{episode.number.toString().padStart(2, '0')} • {episode.title}
+                                S{episode.season?.toString().padStart(2, '0') || selectedSeason.toString().padStart(2, '0')} E{episode.number?.toString().padStart(2, '0')} • {episode.name || episode.title}
                               </h4>
-                              {isEpisodeWatched(selectedSeason, episode.number) && (
+                              {isEpisodeWatched(episode.season || selectedSeason, episode.number) && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                   <Check className="w-3 h-3" />
                                   Watched
                                 </div>
                               )}
                             </div>
-                            <p className="text-sm text-retro-500 mb-3">{episode.airDate}</p>
-                            <p className="text-retro-700 leading-relaxed mb-4">{episode.description}</p>
+                            <p className="text-sm text-retro-500 mb-3">{episode.airdate || episode.aired || 'TBA'}</p>
+                            <p className="text-retro-700 leading-relaxed mb-4">{episode.summary || episode.description || 'No description available.'}</p>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4 text-sm text-retro-500">
-                                <span>{episode.duration} min</span>
-                                {episode.rating && <span>★ {episode.rating}</span>}
+                                <span>{episode.runtime || episode.duration || 'TBA'} min</span>
+                                {episode.rating?.average && <span>★ {episode.rating.average}</span>}
                               </div>
                               <button 
-                                onClick={() => toggleEpisodeWatched(selectedSeason, episode.number)}
+                                onClick={() => toggleEpisodeWatched(episode.season || selectedSeason, episode.number)}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  isEpisodeWatched(selectedSeason, episode.number)
+                                  isEpisodeWatched(episode.season || selectedSeason, episode.number)
                                     ? 'bg-green-500 hover:bg-green-600 text-white'
                                     : 'bg-retro-500 hover:bg-retro-600 text-white'
                                 }`}
-                                title={isEpisodeWatched(selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
+                                title={isEpisodeWatched(episode.season || selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
                                 data-testid={`episode-${episode.number}-watch-button`}
                               >
                                 <Check className="w-4 h-4" />
-                                {isEpisodeWatched(selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
+                                {isEpisodeWatched(episode.season || selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
                               </button>
                             </div>
                           </div>
@@ -746,89 +641,9 @@ export default function ContentDetails() {
                 </div>
               )}
 
-              {/* Sample Reviews */}
-              <div className="space-y-6">
-                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-semibold text-sm">AK</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-semibold text-retro-900">Alex K.</h4>
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`w-4 h-4 ${star <= 4 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-retro-500">2 days ago</span>
-                      </div>
-                      <p className="text-retro-700 leading-relaxed">
-                        Great storyline and excellent character development. The plot keeps you engaged throughout, though some episodes feel a bit slow. Overall, definitely worth watching!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-semibold text-sm">MR</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-semibold text-retro-900">Maria R.</h4>
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`w-4 h-4 ${star <= 5 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-retro-500">1 week ago</span>
-                      </div>
-                      <p className="text-retro-700 leading-relaxed">
-                        Absolutely loved it! The cinematography is stunning and the acting is top-notch. This is exactly what I was looking for. Highly recommend to anyone who enjoys this genre.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-b border-retro-100 pb-6 last:border-b-0 last:pb-0">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-retro-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-semibold text-sm">JS</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-semibold text-retro-900">John S.</h4>
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`w-4 h-4 ${star <= 3 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-retro-500">2 weeks ago</span>
-                      </div>
-                      <p className="text-retro-700 leading-relaxed">
-                        It's okay, nothing groundbreaking. Some good moments but overall feels like something I've seen before. The production quality is decent though.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* View More Reviews Button */}
-              <div className="mt-6 text-center">
-                <button className="px-6 py-2 border border-retro-300 text-retro-700 rounded-lg hover:bg-retro-50 transition-colors font-medium">
-                  View All Reviews
-                </button>
+              {/* Database Reviews - Will be populated when review system is implemented */}
+              <div className="text-center py-8">
+                <p className="text-retro-500">No reviews yet. Be the first to review!</p>
               </div>
             </div>
 
