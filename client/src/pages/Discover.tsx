@@ -31,18 +31,6 @@ export default function Discover() {
     console.log(`Search: ${query}`);
   };
 
-  const observerRef = useRef<IntersectionObserver>();
-  const lastElementRef = useCallback((node: HTMLDivElement) => {
-    if (isLoading) return;
-    if (observerRef.current) observerRef.current.disconnect();
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        fetchNextPage();
-      }
-    });
-    if (node) observerRef.current.observe(node);
-  }, []);
-
   // Fetch content with infinite pagination
   const {
     data,
@@ -80,6 +68,19 @@ export default function Discover() {
   // Flatten all pages of content
   const allContent = data?.pages.flatMap(page => page.content) || [];
   const totalCount = data?.pages[0]?.pagination?.total || 0;
+
+  const observerRef = useRef<IntersectionObserver>();
+  const lastElementRef = useCallback((node: HTMLDivElement) => {
+    if (isLoading || isFetchingNextPage) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        console.log('Loading next page...');
+        fetchNextPage();
+      }
+    });
+    if (node) observerRef.current.observe(node);
+  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const contentTypeConfig = {
     movie: { icon: Film, label: "Movies", color: "bg-blue-500" },
