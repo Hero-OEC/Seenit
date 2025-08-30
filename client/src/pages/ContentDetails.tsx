@@ -23,6 +23,12 @@ export default function ContentDetails() {
     enabled: !!params?.id,
   });
 
+  // Fetch recommended content from database
+  const { data: recommendedContent } = useQuery<Content[]>({
+    queryKey: [`/api/content/${params?.id}/recommendations`],
+    enabled: !!params?.id,
+  });
+
   // Initialize empty watched episodes state - all start unwatched
   useEffect(() => {
     if (!content || (content.type !== "tv" && content.type !== "anime")) return;
@@ -215,11 +221,6 @@ export default function ContentDetails() {
     }
   };
 
-  // Fetch recommended content from database
-  const { data: recommendedContent } = useQuery<Content[]>({
-    queryKey: [`/api/content/${content?.id}/recommendations`],
-    enabled: !!content?.id,
-  });
 
   return (
     <div className="min-h-screen bg-retro-50">
