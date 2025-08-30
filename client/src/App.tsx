@@ -7,6 +7,7 @@ import ContentDetails from "@/pages/ContentDetails";
 import SignIn from "@/pages/SignIn";
 import Watchlist from "@/pages/Watchlist";
 import Profile from "@/pages/Profile";
+import Import from "@/pages/Import";
 import Navbar from "@/components/Navbar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
@@ -58,6 +59,7 @@ function AppContent() {
           <Route path="/content/:id" component={ContentDetails} />
           <Route path="/signin" component={SignIn} />
           <Route path="/components" component={ComponentsPage} />
+          <Route path="/import" component={Import} />
           <Route>
             <div className="min-h-screen flex items-center justify-center bg-retro-50">
               <div className="text-center">
