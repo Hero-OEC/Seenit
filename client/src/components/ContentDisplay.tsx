@@ -251,49 +251,39 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-        {/* Year - Show for all content types */}
-        <p 
-          className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
-          data-testid="content-year"
-        >
-          {year || 'Year not available'}
-        </p>
+        {/* Year and Season Info Row */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Year */}
+          <p 
+            className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
+            data-testid="content-year"
+          >
+            {year || 'Year not available'}
+          </p>
 
-        {/* TV Shows: Show season count and current episode if available */}
-        {type === "tv" && (
-          <div className="space-y-1">
-            {/* Total seasons for TV shows */}
-            {(totalSeasons || season) && (
-              <div 
-                className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-blue-500 text-white font-semibold shadow-md border border-blue-600`} 
-                data-testid="content-season-info"
-              >
-                <span>{totalSeasons ? `${totalSeasons} Season${totalSeasons > 1 ? 's' : ''}` : `Season ${season}`}</span>
-              </div>
-            )}
-            {/* Current episode if available */}
-            {episode !== undefined && (
-              <div 
-                className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
-                data-testid="content-episode-info"
-              >
-                <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
-                {season !== undefined && `S${season} • `}E{episode}
-              </div>
-            )}
-          </div>
-        )}
+          {/* Season badge for TV shows and anime */}
+          {(type === "tv" || type === "anime") && (totalSeasons || season) && (
+            <div 
+              className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full ${
+                type === "tv" ? 'bg-blue-500 border-blue-600' : 'bg-purple-500 border-purple-600'
+              } text-white font-semibold shadow-md border`} 
+              data-testid="content-season-info"
+            >
+              <span>
+                {totalSeasons ? `${totalSeasons} Season${totalSeasons > 1 ? 's' : ''}` : `S${season}`}
+              </span>
+            </div>
+          )}
+        </div>
 
-        {/* Anime: Show season and episode info */}
-        {type === "anime" && (season !== undefined || episode !== undefined) && (
+        {/* Current episode info if available */}
+        {(type === "tv" || type === "anime") && episode !== undefined && (
           <div 
-            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-purple-500 text-white font-semibold shadow-md border border-purple-600`} 
+            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
             data-testid="content-episode-info"
           >
             <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
-            {season !== undefined && `S${season}`}
-            {season !== undefined && episode !== undefined && " • "}
-            {episode !== undefined && `E${episode}`}
+            {season !== undefined && `S${season} • `}E{episode}
           </div>
         )}
       </div>
