@@ -8,6 +8,7 @@ import SignIn from "@/pages/SignIn";
 import Watchlist from "@/pages/Watchlist";
 import Profile from "@/pages/Profile";
 import Import from "@/pages/Import";
+import SearchResults from "@/pages/SearchResults";
 import Navbar from "@/components/Navbar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
@@ -16,8 +17,8 @@ function AppContent() {
   const [location, setLocation] = useLocation();
 
   const handleSearch = (query: string) => {
-    // Navigate to discover page with search
-    setLocation(`/discover?search=${encodeURIComponent(query)}`);
+    // Navigate to search results page
+    setLocation(`/search?q=${encodeURIComponent(query)}`);
   };
 
   const handleGetStarted = () => {
@@ -52,6 +53,7 @@ function AppContent() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/discover" component={Discover} />
+          <Route path="/search" component={SearchResults} />
           <Route path="/schedule" component={Schedule} />
           <Route path="/watchlist" component={Watchlist} />
           <Route path="/profile" component={Profile} />

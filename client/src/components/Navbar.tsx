@@ -43,9 +43,9 @@ export default function Navbar({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search results query
-  const { data: searchResults, isLoading: isSearching } = useQuery<any[]>({
-    queryKey: ["/api/content/search", debouncedSearchQuery],
+  // Search suggestions query (lighter than full search)
+  const { data: searchSuggestions, isLoading: isSearching } = useQuery<any[]>({
+    queryKey: ["/api/content/search/suggestions", debouncedSearchQuery],
     enabled: debouncedSearchQuery.length >= 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -220,9 +220,9 @@ export default function Navbar({
                     <div className="animate-spin inline-block w-4 h-4 border-2 border-retro-300 border-t-retro-500 rounded-full"></div>
                     <span className="ml-2">Searching...</span>
                   </div>
-                ) : searchResults && searchResults.length > 0 ? (
+                ) : searchSuggestions && searchSuggestions.length > 0 ? (
                   <div className="py-2">
-                    {searchResults.slice(0, 8).map((result: any) => (
+                    {searchSuggestions.map((result: any) => (
                       <div key={result.id} className="px-2">
                         <ContentDisplay
                           id={result.id}
@@ -237,11 +237,9 @@ export default function Navbar({
                         />
                       </div>
                     ))}
-                    {searchResults.length > 8 && (
-                      <div className="px-4 py-2 text-xs text-retro-500 border-t border-retro-100">
-                        Showing first 8 results. Press Enter to see all results.
-                      </div>
-                    )}
+                    <div className="px-4 py-2 text-xs text-retro-500 border-t border-retro-100">
+                      Press Enter to see all results
+                    </div>
                   </div>
                 ) : debouncedSearchQuery.length >= 2 ? (
                   <div className="p-4 text-center text-retro-600">

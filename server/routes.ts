@@ -61,6 +61,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/content/search/suggestions", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string' || q.trim().length < 2) {
+        return res.json([]);
+      }
+      
+      const results = await storage.searchContent(q.trim());
+      // Return just essential info for suggestions, limited to 8 results
+      const suggestions = results
+        .slice(0, 8)
+        .map(item => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          poster: item.poster
+        }));
+      
+      res.json(suggestions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get suggestions" });
+    }
+  });
+
   app.get("/api/content/recommended", async (_req, res) => {
     try {
       // Get a random selection of content for recommendations

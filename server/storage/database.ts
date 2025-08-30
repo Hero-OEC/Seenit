@@ -1,7 +1,7 @@
 import { type User, type InsertUser, type Content, type InsertContent, type UserContent, type InsertUserContent, type ImportStatus, type InsertImportStatus } from "@shared/schema";
 import { db } from "../db";
 import { users, content, userContent, importStatus } from "@shared/schema";
-import { eq, and, ilike, or, sql } from "drizzle-orm";
+import { eq, and, ilike, or, sql, desc, asc, gte, lte } from "drizzle-orm";
 import type { IStorage } from "../storage";
 
 export class DatabaseStorage implements IStorage {
@@ -40,29 +40,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]> {
-    let query = db.select().from(content).where(eq(content.type, type));
-
+    // Build where conditions
+    const conditions = [eq(content.type, type)];
+    
     // Add genre filtering if specified
     if (options?.genre && options.genre !== 'all') {
-      query = query.where(and(eq(content.type, type), ilike(content.genres, `%${options.genre}%`)));
+      conditions.push(sql`${content.genres}::text ILIKE ${`%${options.genre}%`}`);
     }
+
+    let query = db.select().from(content).where(and(...conditions));
 
     // Add sorting
     if (options?.sort) {
       switch (options.sort) {
         case 'new':
         case 'release_date':
-          query = query.orderBy(content.year);
+          query = query.orderBy(desc(content.year));
           break;
         case 'reviews':
         case 'popular':
-          query = query.orderBy(content.rating);
+          query = query.orderBy(desc(content.rating));
           break;
         case 'air_date':
-          query = query.orderBy(content.airDate);
+          query = query.orderBy(desc(content.releaseDate));
           break;
         default:
-          query = query.orderBy(content.createdAt);
+          query = query.orderBy(desc(content.createdAt));
       }
     }
 
@@ -78,14 +81,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getContentCountByType(type: string, options?: {genre?: string}): Promise<number> {
-    let query = db.select({count: sql`count(*)`}).from(content).where(eq(content.type, type));
-
+    // Build where conditions
+    const conditions = [eq(content.type, type)];
+    
     // Add genre filtering if specified
     if (options?.genre && options.genre !== 'all') {
-      query = query.where(and(eq(content.type, type), ilike(content.genres, `%${options.genre}%`)));
+      conditions.push(sql`${content.genres}::text ILIKE ${`%${options.genre}%`}`);
     }
 
-    const result = await query;
+    const result = await db.select({count: sql`count(*)`}).from(content).where(and(...conditions));
     return Number(result[0]?.count || 0);
   }
 
@@ -102,8 +106,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(content.type, type),
-          sql`${content.airDate} >= ${startOfDay}`,
-          sql`${content.airDate} <= ${endOfDay}`
+          sql`${content.releaseDate} >= ${startOfDay}`,
+          sql`${content.releaseDate} <= ${endOfDay}`
         )
       );
   }
@@ -120,9 +124,16 @@ export class DatabaseStorage implements IStorage {
       .where(
         or(
           ilike(content.title, lowerQuery),
-          ilike(content.overview, lowerQuery)
+          ilike(content.overview, lowerQuery),
+          sql`${content.genres}::text ILIKE ${lowerQuery}`,
+          ilike(content.network, lowerQuery),
+          ilike(content.studio, lowerQuery),
+          sql`${content.tags}::text ILIKE ${lowerQuery}`,
+          ilike(content.sourceMaterial, lowerQuery),
+          sql`${content.streamingPlatforms}::text ILIKE ${lowerQuery}`
         )
-      );
+      )
+      .orderBy(desc(content.popularity));
   }
 
   async createContent(insertContent: InsertContent): Promise<Content> {
