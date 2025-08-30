@@ -156,9 +156,10 @@ export default function Schedule() {
 
     if (!isOpen) return null;
 
-    return (
-      <div className="p-6 border-t border-retro-200">
-        {isLoadingAllEpisodes && dayContent.length === 0 && (
+    // Show loading only if we're still loading and have no data at all
+    if (isLoadingAllEpisodes && allWeekEpisodes.length === 0) {
+      return (
+        <div className="p-6 border-t border-retro-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="animate-pulse">
@@ -168,46 +169,54 @@ export default function Schedule() {
               </div>
             ))}
           </div>
-        )}
+        </div>
+      );
+    }
 
-        {!isLoadingAllEpisodes && dayContent.length === 0 && (
+    // Show empty state if no episodes for this day
+    if (dayContent.length === 0) {
+      return (
+        <div className="p-6 border-t border-retro-200">
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 mx-auto text-retro-400 mb-3" />
             <p className="text-retro-600">No {activeContentType === 'tv' ? 'TV shows' : 'anime'} scheduled for {day.dayName}</p>
           </div>
-        )}
+        </div>
+      );
+    }
 
-        {!isLoadingAllEpisodes && dayContent.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {dayContent.map((episode: any) => {
-              const getContentStatus = () => {
-                if (episode.status === "airing") return "ongoing";
-                if (episode.status === "upcoming") return "coming-soon";
-                if (episode.status === "completed") return "finished";
-                return "finished";
-              };
+    // Show all episodes for this day immediately
+    return (
+      <div className="p-6 border-t border-retro-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {dayContent.map((episode: any) => {
+            const getContentStatus = () => {
+              if (episode.status === "airing") return "ongoing";
+              if (episode.status === "upcoming") return "coming-soon";
+              if (episode.status === "completed") return "finished";
+              return "finished";
+            };
 
-              return (
-                <ContentDisplay
-                  key={`${episode.contentId}-${episode.id}`}
-                  id={episode.contentId}
-                  posterUrl={episode.image?.medium || `https://picsum.photos/300/450?random=${episode.contentId}`}
-                  title={episode.showTitle}
-                  type={activeContentType}
-                  status={getContentStatus()}
-                  year={episode.airdate ? new Date(episode.airdate).getFullYear() : undefined}
-                  season={episode.season}
-                  episode={episode.number}
-                  episodeTitle={episode.name}
-                  airDate={episode.airdate}
-                  size="small"
-                  onClick={() => console.log(`Clicked on ${episode.showTitle} S${episode.season}E${episode.number}`)}
-                  data-testid={`schedule-episode-${episode.contentId}-${episode.id}`}
-                />
-              );
-            })}
-          </div>
-        )}
+            return (
+              <ContentDisplay
+                key={`${episode.contentId}-${episode.id}`}
+                id={episode.contentId}
+                posterUrl={episode.image?.medium || `https://picsum.photos/300/450?random=${episode.contentId}`}
+                title={episode.showTitle}
+                type={activeContentType}
+                status={getContentStatus()}
+                year={episode.airdate ? new Date(episode.airdate).getFullYear() : undefined}
+                season={episode.season}
+                episode={episode.number}
+                episodeTitle={episode.name}
+                airDate={episode.airdate}
+                size="small"
+                onClick={() => console.log(`Clicked on ${episode.showTitle} S${episode.season}E${episode.number}`)}
+                data-testid={`schedule-episode-${episode.contentId}-${episode.id}`}
+              />
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -355,7 +364,7 @@ export default function Schedule() {
 
               {/* Help text */}
               <div className="text-sm text-retro-600">
-                <p>Click on any day to see what's scheduled to air. Content is loaded on-demand for better performance.</p>
+                <p>Click on any day to see what's scheduled to air. All episodes are pre-loaded for instant viewing.</p>
               </div>
             </div>
           </div>
