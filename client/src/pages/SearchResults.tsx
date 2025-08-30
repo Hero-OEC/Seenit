@@ -58,10 +58,26 @@ export default function SearchResults() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("popular");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Extract search query from URL params
-  const searchParams = new URLSearchParams(location.includes('?') ? location.split('?')[1] : '');
-  const searchQuery = searchParams.get('q') || '';
+  // Extract search query from URL params using both methods for reliability
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryFromURL = urlParams.get('q') || '';
+    
+    // Also try from wouter location
+    const locationSearch = location.includes('?') ? location.split('?')[1] : '';
+    const locationParams = new URLSearchParams(locationSearch);
+    const queryFromLocation = locationParams.get('q') || '';
+    
+    const finalQuery = queryFromURL || queryFromLocation;
+    
+    console.log('URL search params:', window.location.search);
+    console.log('Wouter location:', location);
+    console.log('Final search query:', finalQuery);
+    
+    setSearchQuery(finalQuery);
+  }, [location]);
   
   // Search results query
   const { data: searchResults = [], isLoading, error } = useQuery<any[]>({

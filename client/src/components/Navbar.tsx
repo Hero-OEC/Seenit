@@ -74,6 +74,7 @@ export default function Navbar({
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      console.log('Submitting search for:', searchQuery.trim());
       onSearch(searchQuery.trim());
       setShowSearchResults(false);
     }

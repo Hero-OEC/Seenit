@@ -18,7 +18,10 @@ function AppContent() {
 
   const handleSearch = (query: string) => {
     // Navigate to search results page
-    setLocation(`/search?q=${encodeURIComponent(query)}`);
+    console.log('Navigating to search with query:', query);
+    const searchURL = `/search?q=${encodeURIComponent(query)}`;
+    console.log('Search URL:', searchURL);
+    setLocation(searchURL);
   };
 
   const handleGetStarted = () => {
