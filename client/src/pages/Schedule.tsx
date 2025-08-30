@@ -117,8 +117,8 @@ export default function Schedule() {
     return (
       <div className="p-6 border-t border-retro-200">
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-retro-200 rounded-lg aspect-[2/3] mb-3"></div>
                 <div className="bg-retro-200 rounded h-4 mb-2"></div>
@@ -136,7 +136,7 @@ export default function Schedule() {
         )}
 
         {!isLoading && dayContent.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {dayContent.map((item) => {
               const getContentStatus = () => {
                 if (item.status === "airing") return "ongoing";
@@ -154,8 +154,8 @@ export default function Schedule() {
                   type={activeContentType}
                   status={getContentStatus()}
                   year={item.year || undefined}
-                  season={item.season || undefined}
-                  totalSeasons={item.totalSeasons || undefined}
+                  season={activeContentType === "tv" || activeContentType === "anime" ? item.season || undefined : undefined}
+                  totalSeasons={activeContentType === "tv" ? item.totalSeasons || undefined : undefined}
                   size="small"
                   onClick={() => console.log(`Clicked on ${item.title}`)}
                   data-testid={`schedule-content-${item.id}`}
