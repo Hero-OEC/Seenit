@@ -257,26 +257,27 @@ export default function ContentDisplay({
           {title}
         </h3>
 
-        {/* Year Info */}
+        {/* Year and Episode Info Row */}
         <div className="flex items-center justify-between gap-2">
+          {/* Show release year */}
           <p 
             className={`${isSmall ? 'text-[10px]' : 'text-xs'} text-retro-600 font-medium`}
             data-testid="content-year"
           >
             {year || 'Year not available'}
           </p>
-        </div>
 
-        {/* Current episode info if available */}
-        {(type === "tv" || type === "anime") && episode !== undefined && (
-          <div 
-            className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
-            data-testid="content-episode-info"
-          >
-            <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
-            {season !== undefined && `S${season} • `}E{episode}
-          </div>
-        )}
+          {/* Current episode info if available */}
+          {(type === "tv" || type === "anime") && episode !== undefined && (
+            <div 
+              className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
+              data-testid="content-episode-info"
+            >
+              <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
+              {season !== undefined && `S${season} • `}E{episode}
+            </div>
+          )}
+        </div>
       </div>
     </ContentWrapper>
   );
