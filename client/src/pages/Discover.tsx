@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
 import ContentDisplay from "@/components/ContentDisplay";
-import { Film, Tv, Star, Calendar, TrendingUp } from "lucide-react";
+import { Film, Tv, Star, Calendar, TrendingUp, Loader2 } from "lucide-react";
 import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
 
@@ -31,10 +31,43 @@ export default function Discover() {
     console.log(`Search: ${query}`);
   };
 
-  // Fetch content based on selected type
-  const { data: content = [], isLoading } = useQuery<Content[]>({
-    queryKey: ["/api/content/type", activeContentType],
-    enabled: true,
+  const observerRef = useRef<IntersectionObserver>();
+  const lastElementRef = useCallback((node: HTMLDivElement) => {
+    if (isLoading) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+    if (node) observerRef.current.observe(node);
+  }, []);
+
+  // Fetch content with infinite pagination
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["/api/content/type", activeContentType, selectedGenre, sortBy],
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams({
+        page: pageParam.toString(),
+        limit: "20",
+        ...(selectedGenre !== "all" && { genre: selectedGenre }),
+        ...(sortBy && { sort: sortBy }),
+      });
+      
+      const response = await fetch(`/api/content/type/${activeContentType}?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch content');
+      return response.json();
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.pagination.hasMore ? lastPage.pagination.page + 1 : undefined;
+    },
+    initialPageParam: 0,
   });
 
   // Available genres for filtering
@@ -44,25 +77,9 @@ export default function Discover() {
     "thriller", "war", "western"
   ];
 
-  // Filter and sort content
-  const filteredAndSortedContent = content
-    .filter((item) => {
-      if (selectedGenre === "all") return true;
-      return item.genres?.some((g: string) => g.toLowerCase() === selectedGenre.toLowerCase());
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "new":
-          return (b.year || 0) - (a.year || 0);
-        case "release_date":
-          return (b.year || 0) - (a.year || 0);
-        case "reviews":
-          return (b.rating || 0) - (a.rating || 0);
-        case "popular":
-        default:
-          return (b.rating || 0) - (a.rating || 0);
-      }
-    });
+  // Flatten all pages of content
+  const allContent = data?.pages.flatMap(page => page.content) || [];
+  const totalCount = data?.pages[0]?.pagination?.total || 0;
 
   const contentTypeConfig = {
     movie: { icon: Film, label: "Movies", color: "bg-blue-500" },
@@ -124,7 +141,8 @@ export default function Discover() {
                 {contentTypeConfig[activeContentType].label}
               </h2>
               
-              {isLoading ? (
+              {/* Initial loading state */}
+              {isLoading && allContent.length === 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {Array.from({ length: 10 }).map((_, i) => (
                     <div key={i} className="animate-pulse">
@@ -134,9 +152,12 @@ export default function Discover() {
                     </div>
                   ))}
                 </div>
-              ) : (
+              )}
+
+              {/* Content items */}
+              {allContent.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {filteredAndSortedContent.map((item) => {
+                  {allContent.map((item, index) => {
                     // Determine status based on item data
                     const getContentStatus = () => {
                       if (item.status === "airing") return "ongoing";
@@ -145,27 +166,41 @@ export default function Discover() {
                       return "finished"; // default fallback
                     };
 
+                    const isLast = index === allContent.length - 1;
+
                     return (
-                      <ContentDisplay
+                      <div
                         key={item.id}
-                        id={item.id}
-                        posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                        title={item.title}
-                        type={activeContentType}
-                        status={getContentStatus()}
-                        year={item.year || undefined}
-                        season={activeContentType === "tv" || activeContentType === "anime" ? item.season || undefined : undefined}
-                        totalSeasons={activeContentType === "tv" ? item.totalSeasons || undefined : undefined}
-                        size="small"
-                        onClick={() => console.log(`Clicked on ${item.title}`)}
-                        data-testid={`content-display-${item.id}`}
-                      />
+                        ref={isLast ? lastElementRef : null}
+                      >
+                        <ContentDisplay
+                          id={item.id}
+                          posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                          title={item.title}
+                          type={activeContentType}
+                          status={getContentStatus()}
+                          year={item.year || undefined}
+                          season={activeContentType === "tv" || activeContentType === "anime" ? item.season || undefined : undefined}
+                          totalSeasons={activeContentType === "tv" ? item.totalSeasons || undefined : undefined}
+                          size="small"
+                          onClick={() => console.log(`Clicked on ${item.title}`)}
+                          data-testid={`content-display-${item.id}`}
+                        />
+                      </div>
                     );
                   })}
                 </div>
               )}
 
-              {!isLoading && filteredAndSortedContent.length === 0 && (
+              {/* Loading indicator for additional pages */}
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-retro-500" />
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!isLoading && allContent.length === 0 && (
                 <div className="text-center py-12">
                   <div className="text-retro-400 mb-4">
                     <Film className="w-16 h-16 mx-auto" />
@@ -214,11 +249,11 @@ export default function Discover() {
                 <div className="text-sm text-retro-600">
                   <div className="flex justify-between mb-2">
                     <span>Total {contentTypeConfig[activeContentType].label.toLowerCase()}:</span>
-                    <span className="font-medium" data-testid="text-total-count">{content.length}</span>
+                    <span className="font-medium" data-testid="text-total-count">{totalCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Showing:</span>
-                    <span className="font-medium" data-testid="text-filtered-count">{filteredAndSortedContent.length}</span>
+                    <span className="font-medium" data-testid="text-filtered-count">{allContent.length}</span>
                   </div>
                 </div>
               </div>

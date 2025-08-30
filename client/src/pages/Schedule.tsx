@@ -5,7 +5,7 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { Tag } from "@/components/Tags";
 import ContentDisplay from "@/components/ContentDisplay";
-import { Calendar, Tv, ChevronDown, ChevronRight } from "lucide-react";
+import { Calendar, Tv, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import SharinganIcon from "@/components/icons/SharinganIcon";
 import type { Content } from "@shared/schema";
 
@@ -47,38 +47,6 @@ export default function Schedule() {
     { value: "new", label: "Recently Added" },
     { value: "reviews", label: "Highest Rated" }
   ];
-
-  // Fetch content data
-  const { data: content = [], isLoading } = useQuery<Content[]>({
-    queryKey: ['/api/content/type', activeContentType],
-    enabled: true
-  });
-
-  // Get unique genres for the selected content type
-  const genres = ["all", ...Array.from(new Set(
-    content.flatMap((item) => item.genre || [])
-  ))];
-
-  // Filter and sort content
-  const filteredAndSortedContent = content
-    .filter((item) => {
-      if (selectedGenre === "all") return true;
-      return item.genre?.includes(selectedGenre);
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "air_date":
-          return (Number(b.year) || 0) - (Number(a.year) || 0);
-        case "popular":
-          return (Number(b.rating) || 0) - (Number(a.rating) || 0);
-        case "new":
-          return b.id.localeCompare(a.id);
-        case "reviews":
-          return (Number(b.rating) || 0) - (Number(a.rating) || 0);
-        default:
-          return 0;
-      }
-    });
 
   // Generate 7 days starting from today
   const generateWeekDays = () => {
@@ -132,40 +100,81 @@ export default function Schedule() {
     setOpenDays(newOpenDays);
   };
 
-  // Mock episode data and distribute across the week
-  const getEpisodeInfo = (item: Content, dayIndex: number) => {
-    const currentSeason = Math.floor(Math.random() * 5) + 1;
-    const currentEpisode = Math.floor(Math.random() * 12) + 1;
-    
-    return {
-      currentSeason,
-      currentEpisode,
-      status: Math.random() > 0.5 ? "Airing" : "Upcoming"
-    };
-  };
+  // Component for each day's content
+  function DayContent({ day, isOpen }: { day: any, isOpen: boolean }) {
+    const { data: dayContent = [], isLoading } = useQuery<Content[]>({
+      queryKey: ["/api/content/schedule", day.fullDate.toISOString().split('T')[0], activeContentType],
+      queryFn: async () => {
+        const response = await fetch(`/api/content/schedule/${day.fullDate.toISOString().split('T')[0]}?type=${activeContentType}`);
+        if (!response.ok) throw new Error('Failed to fetch schedule content');
+        return response.json();
+      },
+      enabled: isOpen, // Only fetch when the day is expanded
+    });
 
-  // Distribute content across the week for each day
-  const getContentForDay = (dayIndex: number) => {
-    const shuffledContent = [...filteredAndSortedContent].sort(() => Math.random() - 0.5);
-    const contentPerDay = Math.ceil(shuffledContent.length / 7);
-    const startIndex = dayIndex * contentPerDay;
-    const endIndex = Math.min(startIndex + contentPerDay, shuffledContent.length);
-    
-    return shuffledContent.slice(startIndex, endIndex);
-  };
+    if (!isOpen) return null;
+
+    return (
+      <div className="p-6 border-t border-retro-200">
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-retro-200 rounded-lg aspect-[2/3] mb-3"></div>
+                <div className="bg-retro-200 rounded h-4 mb-2"></div>
+                <div className="bg-retro-200 rounded h-3 w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && dayContent.length === 0 && (
+          <div className="text-center py-8">
+            <Calendar className="w-12 h-12 mx-auto text-retro-400 mb-3" />
+            <p className="text-retro-600">No {activeContentType === 'tv' ? 'TV shows' : 'anime'} scheduled for this day</p>
+          </div>
+        )}
+
+        {!isLoading && dayContent.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {dayContent.map((item) => {
+              const getContentStatus = () => {
+                if (item.status === "airing") return "ongoing";
+                if (item.status === "upcoming") return "coming-soon";
+                if (item.status === "completed") return "finished";
+                return "finished";
+              };
+
+              return (
+                <ContentDisplay
+                  key={item.id}
+                  id={item.id}
+                  posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
+                  title={item.title}
+                  type={activeContentType}
+                  status={getContentStatus()}
+                  year={item.year || undefined}
+                  season={item.season || undefined}
+                  totalSeasons={item.totalSeasons || undefined}
+                  size="small"
+                  onClick={() => console.log(`Clicked on ${item.title}`)}
+                  data-testid={`schedule-content-${item.id}`}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-retro-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
+        {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Calendar className="w-8 h-8 text-retro-600" />
-            <h1 className="text-4xl font-bold text-retro-900">Schedule</h1>
-          </div>
-          <p className="text-retro-600 text-lg">
-            Keep track of your favorite shows and upcoming episodes
-          </p>
+          <h1 className="text-4xl font-bold text-retro-900 mb-2">Schedule</h1>
+          <p className="text-retro-700">See what's airing this week</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -200,110 +209,56 @@ export default function Schedule() {
               </div>
             </div>
 
-            {/* Weekly Schedule Sections */}
-            <div className="space-y-2">
-              {isLoading ? (
-                <div className="space-y-2">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="animate-pulse bg-white rounded-lg p-4 shadow-sm">
-                      <div className="bg-retro-200 rounded h-4 w-36 mb-3"></div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {Array.from({ length: 3 }).map((_, j) => (
-                          <div key={j} className="bg-retro-200 rounded-lg aspect-[16/9]"></div>
-                        ))}
+            {/* Weekly Schedule */}
+            <div className="bg-white rounded-lg shadow-sm border border-retro-200 overflow-hidden">
+              <div className="p-6 border-b border-retro-200">
+                <h2 className="text-xl font-semibold text-retro-900 mb-2">This Week's Schedule</h2>
+                <p className="text-retro-600">Click on a day to see what's airing</p>
+              </div>
+              
+              {weekDays.map((day) => {
+                const isOpen = openDays.has(day.index);
+                
+                return (
+                  <div key={day.index} className="border-b border-retro-200 last:border-b-0">
+                    <button
+                      onClick={() => toggleDay(day.index)}
+                      className={`w-full p-6 text-left hover:bg-retro-50 transition-colors duration-200 flex items-center justify-between ${
+                        day.isToday ? 'bg-retro-100' : ''
+                      }`}
+                      data-testid={`button-toggle-day-${day.index}`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className={`text-center ${day.isToday ? 'text-retro-700' : 'text-retro-600'}`}>
+                          <div className="text-xs font-medium uppercase tracking-wide">{day.month}</div>
+                          <div className={`text-2xl font-bold ${day.isToday ? 'text-retro-900' : 'text-retro-800'}`}>
+                            {day.date}
+                          </div>
+                        </div>
+                        <div>
+                          <div className={`text-lg font-semibold ${day.isToday ? 'text-retro-900' : 'text-retro-800'}`}>
+                            {day.dayName}
+                          </div>
+                          <div className="text-sm text-retro-600">{day.fullDayName}</div>
+                        </div>
+                        {day.isToday && (
+                          <Tag size="sm" className="bg-retro-600 text-white">Today</Tag>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                weekDays.map((day) => {
-                  const dayContent = getContentForDay(day.index);
-                  const isOpen = openDays.has(day.index);
-                  
-                  return (
-                    <div key={day.index} className="bg-white rounded-lg shadow-sm border border-retro-200 overflow-hidden">
-                      {/* Day Header - Always visible */}
-                      <button
-                        onClick={() => toggleDay(day.index)}
-                        className="w-full flex items-center justify-between p-4 hover:bg-retro-50 transition-colors text-left"
-                        data-testid={`day-header-${day.index}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                            day.isToday 
-                              ? 'bg-retro-500 text-white' 
-                              : 'bg-retro-100 text-retro-700'
-                          }`}>
-                            <span className="font-bold text-sm">{day.date}</span>
-                          </div>
-                          <div>
-                            <h2 className={`text-lg font-semibold ${
-                              day.isToday ? 'text-retro-900' : 'text-retro-800'
-                            }`}>
-                              {day.dayName}
-                              {day.isToday && <span className="ml-2 text-xs font-normal text-retro-600">• What's New</span>}
-                            </h2>
-                            <p className="text-xs text-retro-500">
-                              {day.month} {day.date} • {dayContent.length} show{dayContent.length !== 1 ? 's' : ''}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isOpen ? (
-                            <ChevronDown className="w-4 h-4 text-retro-400" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-retro-400" />
-                          )}
-                        </div>
-                      </button>
-
-                      {/* Day Content - Collapsible */}
-                      {isOpen && (
-                        <div className="border-t border-retro-200 p-4">
-                          {dayContent.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                              {dayContent.map((item) => {
-                                const episodeInfo = getEpisodeInfo(item, day.index);
-                                
-                                return (
-                                  <div key={`${day.index}-${item.id}`} className="group">
-                                    <ContentDisplay
-                                      posterUrl={item.poster || `https://picsum.photos/300/450?random=${item.id}`}
-                                      title={item.title}
-                                      type={activeContentType as "tv" | "anime"}
-                                      status={episodeInfo.status === "Airing" ? "ongoing" : "coming-soon"}
-                                      season={episodeInfo.currentSeason}
-                                      episode={episodeInfo.currentEpisode}
-                                      size="small"
-                                      onClick={() => console.log(`Clicked ${item.title}`)}
-                                      className="w-full"
-                                    />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <div className="text-center py-6">
-                              <Calendar className="w-8 h-8 mx-auto text-retro-300 mb-2" />
-                              <p className="text-sm text-retro-500">No shows scheduled for this day</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-
-              {!isLoading && filteredAndSortedContent.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-retro-400 mb-4">
-                    <Calendar className="w-16 h-16 mx-auto" />
+                      
+                      <div className="flex items-center space-x-2">
+                        {isOpen ? (
+                          <ChevronDown className="w-5 h-5 text-retro-600" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-retro-600" />
+                        )}
+                      </div>
+                    </button>
+                    
+                    <DayContent day={day} isOpen={isOpen} />
                   </div>
-                  <h3 className="text-xl font-semibold text-retro-900 mb-2">No shows found</h3>
-                  <p className="text-retro-600">Try adjusting your filters or check back later</p>
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
 
@@ -331,26 +286,32 @@ export default function Schedule() {
                   inputType="select"
                   value={selectedGenre}
                   onChange={(e) => setSelectedGenre(e.target.value)}
-                  options={genres.map(genre => ({ 
-                    value: genre, 
-                    label: genre === "all" ? "All Genres" : genre.charAt(0).toUpperCase() + genre.slice(1) 
-                  }))}
+                  options={[
+                    { value: "all", label: "All Genres" },
+                    { value: "action", label: "Action" },
+                    { value: "adventure", label: "Adventure" },
+                    { value: "animation", label: "Animation" },
+                    { value: "comedy", label: "Comedy" },
+                    { value: "crime", label: "Crime" },
+                    { value: "documentary", label: "Documentary" },
+                    { value: "drama", label: "Drama" },
+                    { value: "family", label: "Family" },
+                    { value: "fantasy", label: "Fantasy" },
+                    { value: "horror", label: "Horror" },
+                    { value: "mystery", label: "Mystery" },
+                    { value: "romance", label: "Romance" },
+                    { value: "sci-fi", label: "Sci-Fi" },
+                    { value: "thriller", label: "Thriller" },
+                    { value: "war", label: "War" },
+                    { value: "western", label: "Western" }
+                  ]}
                   data-testid="select-genre"
                 />
               </div>
 
-              {/* Statistics */}
-              <div className="mt-6 pt-6 border-t border-retro-200">
-                <div className="text-sm text-retro-600">
-                  <div className="flex justify-between mb-2">
-                    <span>Total {contentTypeConfig[activeContentType].label.toLowerCase()}:</span>
-                    <span className="font-medium" data-testid="text-total-count">{content?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Showing:</span>
-                    <span className="font-medium" data-testid="text-filtered-count">{filteredAndSortedContent.length}</span>
-                  </div>
-                </div>
+              {/* Help text */}
+              <div className="text-sm text-retro-600">
+                <p>Click on any day to see what's scheduled to air. Content is loaded on-demand for better performance.</p>
               </div>
             </div>
           </div>

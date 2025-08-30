@@ -1,7 +1,7 @@
 import { type User, type InsertUser, type Content, type InsertContent, type UserContent, type InsertUserContent, type ImportStatus, type InsertImportStatus } from "@shared/schema";
 import { db } from "../db";
 import { users, content, userContent, importStatus } from "@shared/schema";
-import { eq, and, ilike, or } from "drizzle-orm";
+import { eq, and, ilike, or, sql } from "drizzle-orm";
 import type { IStorage } from "../storage";
 
 export class DatabaseStorage implements IStorage {
@@ -39,8 +39,73 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(content);
   }
 
-  async getContentByType(type: string): Promise<Content[]> {
-    return await db.select().from(content).where(eq(content.type, type));
+  async getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]> {
+    let query = db.select().from(content).where(eq(content.type, type));
+
+    // Add genre filtering if specified
+    if (options?.genre && options.genre !== 'all') {
+      query = query.where(and(eq(content.type, type), ilike(content.genres, `%${options.genre}%`)));
+    }
+
+    // Add sorting
+    if (options?.sort) {
+      switch (options.sort) {
+        case 'new':
+        case 'release_date':
+          query = query.orderBy(content.year);
+          break;
+        case 'reviews':
+        case 'popular':
+          query = query.orderBy(content.rating);
+          break;
+        case 'air_date':
+          query = query.orderBy(content.airDate);
+          break;
+        default:
+          query = query.orderBy(content.createdAt);
+      }
+    }
+
+    // Add pagination
+    if (options?.offset !== undefined) {
+      query = query.offset(options.offset);
+    }
+    if (options?.limit !== undefined) {
+      query = query.limit(options.limit);
+    }
+
+    return await query;
+  }
+
+  async getContentCountByType(type: string, options?: {genre?: string}): Promise<number> {
+    let query = db.select({count: sql`count(*)`}).from(content).where(eq(content.type, type));
+
+    // Add genre filtering if specified
+    if (options?.genre && options.genre !== 'all') {
+      query = query.where(and(eq(content.type, type), ilike(content.genres, `%${options.genre}%`)));
+    }
+
+    const result = await query;
+    return Number(result[0]?.count || 0);
+  }
+
+  async getContentByScheduleDate(date: string, type: string): Promise<Content[]> {
+    const targetDate = new Date(date);
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await db
+      .select()
+      .from(content)
+      .where(
+        and(
+          eq(content.type, type),
+          sql`${content.airDate} >= ${startOfDay}`,
+          sql`${content.airDate} <= ${endOfDay}`
+        )
+      );
   }
 
   async getContentBySource(source: string): Promise<Content[]> {

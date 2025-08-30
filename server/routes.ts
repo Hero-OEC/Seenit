@@ -19,8 +19,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/content/type/:type", async (req, res) => {
     try {
       const { type } = req.params;
-      const content = await storage.getContentByType(type);
-      res.json(content);
+      const { page = "0", limit = "20", genre, sort } = req.query;
+      
+      const pageNum = parseInt(page as string) || 0;
+      const limitNum = parseInt(limit as string) || 20;
+      const offset = pageNum * limitNum;
+      
+      const result = await storage.getContentByType(type, {
+        offset,
+        limit: limitNum,
+        genre: genre as string,
+        sort: sort as string
+      });
+      
+      const total = await storage.getContentCountByType(type, { genre: genre as string });
+      
+      res.json({
+        content: result,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          hasMore: (offset + limitNum) < total
+        }
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch content by type" });
     }
@@ -48,6 +70,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recommended);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch recommended content" });
+    }
+  });
+
+  app.get("/api/content/schedule/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const { type = "tv" } = req.query;
+      
+      if (!["tv", "anime"].includes(type as string)) {
+        return res.status(400).json({ message: "Invalid content type for schedule" });
+      }
+      
+      const content = await storage.getContentByScheduleDate(date, type as string);
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch scheduled content" });
     }
   });
 

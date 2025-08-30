@@ -14,7 +14,9 @@ export interface IStorage {
   // Content methods
   getContent(id: string): Promise<Content | undefined>;
   getAllContent(): Promise<Content[]>;
-  getContentByType(type: string): Promise<Content[]>;
+  getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]>;
+  getContentCountByType(type: string, options?: {genre?: string}): Promise<number>;
+  getContentByScheduleDate(date: string, type: string): Promise<Content[]>;
   getContentBySource(source: string): Promise<Content[]>;
   searchContent(query: string): Promise<Content[]>;
   createContent(content: InsertContent): Promise<Content>;
@@ -84,10 +86,71 @@ export class MemStorage implements IStorage {
     return Array.from(this.content.values());
   }
 
-  async getContentByType(type: string): Promise<Content[]> {
-    return Array.from(this.content.values()).filter(
+  async getContentByType(type: string, options?: {offset?: number; limit?: number; genre?: string; sort?: string}): Promise<Content[]> {
+    let filtered = Array.from(this.content.values()).filter(
       (content) => content.type === type
     );
+
+    // Apply genre filtering
+    if (options?.genre && options.genre !== 'all') {
+      filtered = filtered.filter(content => 
+        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
+      );
+    }
+
+    // Apply sorting
+    if (options?.sort) {
+      filtered.sort((a, b) => {
+        switch (options.sort) {
+          case 'new':
+          case 'release_date':
+            return (b.year || 0) - (a.year || 0);
+          case 'reviews':
+          case 'popular':
+            return (b.rating || 0) - (a.rating || 0);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    // Apply pagination
+    const offset = options?.offset || 0;
+    const limit = options?.limit;
+    
+    if (limit !== undefined) {
+      return filtered.slice(offset, offset + limit);
+    }
+
+    return filtered.slice(offset);
+  }
+
+  async getContentCountByType(type: string, options?: {genre?: string}): Promise<number> {
+    let filtered = Array.from(this.content.values()).filter(
+      (content) => content.type === type
+    );
+
+    // Apply genre filtering
+    if (options?.genre && options.genre !== 'all') {
+      filtered = filtered.filter(content => 
+        content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
+      );
+    }
+
+    return filtered.length;
+  }
+
+  async getContentByScheduleDate(date: string, type: string): Promise<Content[]> {
+    const targetDate = new Date(date);
+    
+    return Array.from(this.content.values()).filter((content) => {
+      if (content.type !== type) return false;
+      
+      // For demo purposes, randomly assign content to different days
+      // In a real app, this would check the actual air date/schedule
+      const contentDate = new Date(content.airDate || content.createdAt);
+      return contentDate.toDateString() === targetDate.toDateString();
+    });
   }
 
   async searchContent(query: string): Promise<Content[]> {
