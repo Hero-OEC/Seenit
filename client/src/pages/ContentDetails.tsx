@@ -547,7 +547,7 @@ export default function ContentDetails() {
                   {content.overview}
                 </p>
                 
-                {/* Genre and Tags */}
+                {/* Genres */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {content.genres && content.genres.length > 0 && (
                     <div>
