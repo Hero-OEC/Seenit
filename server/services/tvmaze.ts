@@ -340,8 +340,8 @@ export class TVMazeService {
           }
         }
 
-        // Update progress only every 5 pages to reduce database load
-        if (page % 5 === 0 || shows.length < 250) {
+        // Update progress every 5 pages to reduce database load
+        if (page % 5 === 0) {
           await db
             .update(importStatus)
             .set({
