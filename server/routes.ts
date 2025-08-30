@@ -250,7 +250,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const content = await storage.getContentBySource('tvmaze');
       res.json({
         count: content.length,
-        content: content.slice(0, 20) // Return first 20 for preview
+        content: content.slice(0, 20).map(item => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          rating: item.rating,
+          status: item.status,
+          totalSeasons: item.totalSeasons,
+          totalEpisodes: item.totalEpisodes,
+          network: item.network,
+          genres: item.genres
+        })) // Return first 20 for preview with full details
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to get TVmaze content" });

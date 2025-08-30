@@ -29,6 +29,10 @@ interface TVMazeContent {
     year: number | null;
     rating: number | null;
     status: string;
+    totalSeasons: number | null;
+    totalEpisodes: number | null;
+    network: string | null;
+    genres: string[] | null;
   }>;
 }
 
@@ -270,21 +274,86 @@ function Import() {
             
             {tvmazeContent && tvmazeContent.count > 0 && (
               <div className="mt-6">
-                <h3 className="font-medium mb-3">Recent Imports Preview</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {tvmazeContent.content.slice(0, 8).map((item) => (
-                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                      <div className="font-medium text-sm truncate" title={item.title}>
-                        {item.title}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {item.year} • {item.rating ? `★ ${item.rating}` : 'No rating'}
-                      </div>
-                      <Badge variant="outline" className="text-xs mt-1">
-                        {item.status}
-                      </Badge>
+                <h3 className="font-medium mb-3">Recent TV Shows Imported</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800">
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Title</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Year</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Rating</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Seasons</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Episodes</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Network</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Status</th>
+                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Genres</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tvmazeContent.content.slice(0, 15).map((item) => (
+                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 font-medium" title={item.title}>
+                            <div className="max-w-[200px] truncate">{item.title}</div>
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            {item.year || 'Unknown'}
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            {item.rating ? (
+                              <span className="flex items-center gap-1">
+                                ★ {item.rating}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">No rating</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            {item.totalSeasons ? (
+                              <span className="font-medium text-blue-600">{item.totalSeasons}</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            {item.totalEpisodes ? (
+                              <span className="text-gray-600">{item.totalEpisodes}</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            <div className="max-w-[120px] truncate" title={item.network || ''}>
+                              {item.network || 'Unknown'}
+                            </div>
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                item.status === 'airing' ? 'bg-green-50 text-green-700 border-green-200' :
+                                item.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                item.status === 'upcoming' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                'bg-gray-50 text-gray-700 border-gray-200'
+                              }`}
+                            >
+                              {item.status}
+                            </Badge>
+                          </td>
+                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
+                            <div className="max-w-[150px] truncate" title={item.genres?.join(', ') || ''}>
+                              {item.genres?.slice(0, 2).join(', ') || 'Unknown'}
+                              {item.genres && item.genres.length > 2 && '...'}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {tvmazeContent.count > 15 && (
+                    <div className="mt-2 text-xs text-gray-500 text-center">
+                      Showing 15 of {tvmazeContent.count} imported shows
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             )}
