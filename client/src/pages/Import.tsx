@@ -42,14 +42,16 @@ function Import() {
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
-    queryKey: ['/api/import/tvmaze/status', refreshKey],
-    refetchInterval: (data) => data?.isActive ? 5000 : 15000, // 5s when active, 15s when idle (reduced polling)
+    queryKey: ['/api/import/tvmaze/status'],
+    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
+    staleTime: 0, // Always refetch, don't use stale data
   });
 
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
-    refetchInterval: tvmazeStatus?.isActive ? 8000 : 30000, // 8s when importing, 30s when idle
+    refetchInterval: 10000, // Fixed 10s polling for content
+    staleTime: 5000, // Allow some stale data for content
   });
 
   // Mutation to start TVmaze import
@@ -57,7 +59,6 @@ function Import() {
     mutationFn: () => apiRequest('POST', '/api/import/tvmaze/start'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
-      setRefreshKey(prev => prev + 1);
     },
   });
 
@@ -66,7 +67,6 @@ function Import() {
     mutationFn: () => apiRequest('POST', '/api/import/tvmaze/pause'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
-      setRefreshKey(prev => prev + 1);
     },
   });
 
@@ -160,7 +160,6 @@ function Import() {
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/content'] });
-              setRefreshKey(prev => prev + 1);
             }}
             data-testid="button-refresh"
           >
