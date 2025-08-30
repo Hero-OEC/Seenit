@@ -235,18 +235,6 @@ function Import() {
                   {tvmazeContent?.count || 0}
                 </span>
               </div>
-              {tvmazeStatus?.isActive && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress:</span>
-                    <span>{tvmazeStatus.totalImported} imported</span>
-                  </div>
-                  <Progress value={calculateProgress()} className="h-2" />
-                  <div className="text-xs text-gray-500">
-                    Page {tvmazeStatus.currentPage}
-                  </div>
-                </div>
-              )}
               {tvmazeStatus?.errors && tvmazeStatus.errors.length > 0 && (
                 <div className="mt-2">
                   <details className="text-sm">
