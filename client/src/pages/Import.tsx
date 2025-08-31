@@ -58,8 +58,10 @@ interface AniListContent {
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [consoleMessages, setConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
-  const consoleRef = useRef<HTMLDivElement>(null);
+  const [tvmazeConsoleMessages, setTvmazeConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const [anilistConsoleMessages, setAnilistConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const tvmazeConsoleRef = useRef<HTMLDivElement>(null);
+  const anilistConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
   const lastAniListStatusRef = useRef<ImportStatus | null>(null);
 
@@ -77,22 +79,38 @@ function Import() {
     staleTime: 0, // Always refetch, don't use stale data
   });
 
-  // Add console message
-  const addConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  // Add console message for TVmaze
+  const addTvmazeConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
-    setConsoleMessages(prev => {
+    setTvmazeConsoleMessages(prev => {
       const newMessages = [...prev, { id: Date.now(), timestamp, message, type }];
       // Keep only last 50 messages
       return newMessages.slice(-50);
     });
   };
 
-  // Auto-scroll console to bottom
+  // Add console message for AniList
+  const addAnilistConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setAnilistConsoleMessages(prev => {
+      const newMessages = [...prev, { id: Date.now(), timestamp, message, type }];
+      // Keep only last 50 messages
+      return newMessages.slice(-50);
+    });
+  };
+
+  // Auto-scroll consoles to bottom
   useEffect(() => {
-    if (consoleRef.current) {
-      consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+    if (tvmazeConsoleRef.current) {
+      tvmazeConsoleRef.current.scrollTop = tvmazeConsoleRef.current.scrollHeight;
     }
-  }, [consoleMessages]);
+  }, [tvmazeConsoleMessages]);
+
+  useEffect(() => {
+    if (anilistConsoleRef.current) {
+      anilistConsoleRef.current.scrollTop = anilistConsoleRef.current.scrollHeight;
+    }
+  }, [anilistConsoleMessages]);
 
   // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
@@ -104,58 +122,58 @@ function Import() {
     // Don't log on first load
     if (!lastStatus) {
       if (tvmazeStatus.isActive) {
-        addConsoleMessage("🔄 TVmaze import is currently active", 'info');
+        addTvmazeConsoleMessage("🔄 TVmaze import is currently active", 'info');
         // Since page 26 is stuck from previous sync, assume Phase 1 on first load when active
-        addConsoleMessage("📋 Phase 1: Updating existing shows with new episodes", 'info');
+        addTvmazeConsoleMessage("📋 Phase 1: Updating existing shows with new episodes", 'info');
       } else {
-        addConsoleMessage("⏸️ TVmaze import is paused", 'warning');
+        addTvmazeConsoleMessage("⏸️ TVmaze import is paused", 'warning');
       }
-      addConsoleMessage(`📊 Current status: ${tvmazeStatus.totalImported} shows imported`, 'info');
+      addTvmazeConsoleMessage(`📊 Current status: ${tvmazeStatus.totalImported} shows imported`, 'info');
       return;
     }
 
     // Status changed from inactive to active
     if (!lastStatus.isActive && tvmazeStatus.isActive) {
-      addConsoleMessage("🚀 TVmaze import started", 'success');
-      addConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+      addTvmazeConsoleMessage("🚀 TVmaze import started", 'success');
+      addTvmazeConsoleMessage("🔍 Running health check to verify database consistency", 'info');
     }
 
     // Status changed from active to inactive
     if (lastStatus.isActive && !tvmazeStatus.isActive) {
-      addConsoleMessage("⏹️ TVmaze import stopped", 'warning');
+      addTvmazeConsoleMessage("⏹️ TVmaze import stopped", 'warning');
     }
 
     // Page progress - only log actual page changes for Phase 2
     if (lastStatus.currentPage !== tvmazeStatus.currentPage && tvmazeStatus.isActive) {
       if (tvmazeStatus.currentPage === 0) {
-        addConsoleMessage("📋 Starting Phase 1: Updating existing shows with new episodes", 'info');
+        addTvmazeConsoleMessage("📋 Starting Phase 1: Updating existing shows with new episodes", 'info');
       } else if (tvmazeStatus.currentPage > 26) {
         // Only show page progress when we're actually past the stuck page 26
-        addConsoleMessage(`📄 Phase 2: Processing page ${tvmazeStatus.currentPage} (importing new shows)`, 'info');
+        addTvmazeConsoleMessage(`📄 Phase 2: Processing page ${tvmazeStatus.currentPage} (importing new shows)`, 'info');
       }
     }
 
     // Import count increased
     if (lastStatus.totalImported < tvmazeStatus.totalImported) {
       const diff = tvmazeStatus.totalImported - lastStatus.totalImported;
-      addConsoleMessage(`✅ Imported/updated ${diff} shows (Total: ${tvmazeStatus.totalImported})`, 'success');
+      addTvmazeConsoleMessage(`✅ Imported/updated ${diff} shows (Total: ${tvmazeStatus.totalImported})`, 'success');
     }
 
     // Phase 1 progress updated
     if (lastStatus.phase1Progress !== tvmazeStatus.phase1Progress && tvmazeStatus.phase1Progress) {
       if (tvmazeStatus.phase1Progress.includes('Phase 1 Complete')) {
-        addConsoleMessage(`✅ ${tvmazeStatus.phase1Progress}`, 'success');
+        addTvmazeConsoleMessage(`✅ ${tvmazeStatus.phase1Progress}`, 'success');
       } else {
-        addConsoleMessage(`📋 Phase 1 Progress: ${tvmazeStatus.phase1Progress} shows updated`, 'info');
+        addTvmazeConsoleMessage(`📋 Phase 1 Progress: ${tvmazeStatus.phase1Progress} shows updated`, 'info');
       }
     }
 
     // Phase 2 progress updated
     if (lastStatus.phase2Progress !== tvmazeStatus.phase2Progress && tvmazeStatus.phase2Progress) {
       if (tvmazeStatus.phase2Progress.includes('Phase 2 Complete')) {
-        addConsoleMessage(`🎉 ${tvmazeStatus.phase2Progress}`, 'success');
+        addTvmazeConsoleMessage(`🎉 ${tvmazeStatus.phase2Progress}`, 'success');
       } else {
-        addConsoleMessage(`📄 Phase 2 Progress: ${tvmazeStatus.phase2Progress}`, 'info');
+        addTvmazeConsoleMessage(`📄 Phase 2 Progress: ${tvmazeStatus.phase2Progress}`, 'info');
       }
     }
 
@@ -163,7 +181,7 @@ function Import() {
     if (tvmazeStatus.errors.length > lastStatus.errors.length) {
       const newErrors = tvmazeStatus.errors.slice(lastStatus.errors.length);
       newErrors.forEach(error => {
-        addConsoleMessage(`❌ Error: ${error}`, 'error');
+        addTvmazeConsoleMessage(`❌ Error: ${error}`, 'error');
       });
     }
 
@@ -179,63 +197,63 @@ function Import() {
     // Don't log on first load
     if (!lastStatus) {
       if (anilistStatus.isActive) {
-        addConsoleMessage("🔄 AniList import is currently active", 'info');
-        addConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
+        addAnilistConsoleMessage("🔄 AniList import is currently active", 'info');
+        addAnilistConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
       } else {
-        addConsoleMessage("⏸️ AniList import is paused", 'warning');
+        addAnilistConsoleMessage("⏸️ AniList import is paused", 'warning');
       }
-      addConsoleMessage(`📊 Current status: ${anilistStatus.totalImported} anime imported`, 'info');
+      addAnilistConsoleMessage(`📊 Current status: ${anilistStatus.totalImported} anime imported`, 'info');
       return;
     }
 
     // Status changed from inactive to active
     if (!lastStatus.isActive && anilistStatus.isActive) {
-      addConsoleMessage("🚀 AniList import started", 'success');
-      addConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+      addAnilistConsoleMessage("🚀 AniList import started", 'success');
+      addAnilistConsoleMessage("🔍 Running health check to verify database consistency", 'info');
     }
 
     // Status changed from active to inactive
     if (lastStatus.isActive && !anilistStatus.isActive) {
-      addConsoleMessage("⏹️ AniList import stopped", 'warning');
+      addAnilistConsoleMessage("⏹️ AniList import stopped", 'warning');
     }
 
     // Page progress - only log actual page changes for Phase 2
     if (lastStatus.currentPage !== anilistStatus.currentPage && anilistStatus.isActive) {
       if (anilistStatus.currentPage === 0) {
-        addConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
+        addAnilistConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
       } else if (anilistStatus.currentPage > 1) {
-        addConsoleMessage(`📄 Phase 2: Processing page ${anilistStatus.currentPage} (importing new anime)`, 'info');
+        addAnilistConsoleMessage(`📄 Phase 2: Processing page ${anilistStatus.currentPage} (importing new anime)`, 'info');
       }
     }
 
     // Import count increased
     if (lastStatus.totalImported < anilistStatus.totalImported) {
       const diff = anilistStatus.totalImported - lastStatus.totalImported;
-      addConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anilistStatus.totalImported})`, 'success');
+      addAnilistConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anilistStatus.totalImported})`, 'success');
     }
 
     // Phase 1 progress updated
     if (lastStatus.phase1Progress !== anilistStatus.phase1Progress && anilistStatus.phase1Progress) {
       if (anilistStatus.phase1Progress.includes('Phase 1 Complete')) {
-        addConsoleMessage(`✅ ${anilistStatus.phase1Progress}`, 'success');
+        addAnilistConsoleMessage(`✅ ${anilistStatus.phase1Progress}`, 'success');
       } else {
-        addConsoleMessage(`📋 Phase 1 Progress: ${anilistStatus.phase1Progress} anime updated`, 'info');
+        addAnilistConsoleMessage(`📋 Phase 1 Progress: ${anilistStatus.phase1Progress} anime updated`, 'info');
       }
     }
 
     // Phase 2 progress updated
     if (lastStatus.phase2Progress !== anilistStatus.phase2Progress && anilistStatus.phase2Progress) {
       if (anilistStatus.phase2Progress.includes('Complete')) {
-        addConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
+        addAnilistConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
       } else {
         // Check for migration information in the progress message
         if (anilistStatus.phase2Progress.includes('migrated')) {
           const migrationMatch = anilistStatus.phase2Progress.match(/(\d+) TV shows migrated/);
           if (migrationMatch && parseInt(migrationMatch[1]) > 0) {
-            addConsoleMessage(`🔄 Found and migrated ${migrationMatch[1]} TV shows to anime category`, 'success');
+            addAnilistConsoleMessage(`🔄 Found and migrated ${migrationMatch[1]} TV shows to anime category`, 'success');
           }
         }
-        addConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
+        addAnilistConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
       }
     }
 
@@ -243,7 +261,7 @@ function Import() {
     if (anilistStatus.errors && anilistStatus.errors.length > (lastStatus.errors?.length || 0)) {
       const newErrors = anilistStatus.errors.slice(lastStatus.errors?.length || 0);
       newErrors.forEach(error => {
-        addConsoleMessage(`❌ AniList Error: ${error}`, 'error');
+        addAnilistConsoleMessage(`❌ AniList Error: ${error}`, 'error');
       });
     }
   }, [anilistStatus]);
@@ -534,29 +552,7 @@ function Import() {
                 </div>
               )}
               
-              <div className="pt-4 border-t space-y-2">
-                <div className="flex gap-2">
-                  <Button
-                    variant={anilistStatus?.isActive ? "destructive" : "default"}
-                    size="sm"
-                    onClick={() => anilistStatus?.isActive ? pauseAniListImport.mutate() : startAniListImport.mutate()}
-                    disabled={startAniListImport.isPending || pauseAniListImport.isPending}
-                    className="flex-1 flex items-center gap-2"
-                    data-testid={anilistStatus?.isActive ? "button-pause-anilist" : "button-start-anilist"}
-                  >
-                    {anilistStatus?.isActive ? (
-                      <>
-                        <Pause className="w-4 h-4" />
-                        {pauseAniListImport.isPending ? 'Pausing...' : 'Pause'}
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4" />
-                        {startAniListImport.isPending ? 'Starting...' : 'Start Import'}
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="pt-4 border-t">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -634,18 +630,18 @@ function Import() {
               
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700 shadow-inner h-80 overflow-hidden">
                 <div 
-                  ref={consoleRef}
+                  ref={tvmazeConsoleRef}
                   className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
-                  data-testid="import-console"
+                  data-testid="tvmaze-console"
                 >
-                  {consoleMessages.length === 0 ? (
+                  {tvmazeConsoleMessages.length === 0 ? (
                     <div className="text-gray-400 flex items-center gap-2">
-                      <span className="text-green-400 font-semibold">seenit@import:~$</span> 
-                      <span className="text-gray-500">Waiting for import activity...</span>
+                      <span className="text-green-400 font-semibold">seenit@tvmaze:~$</span> 
+                      <span className="text-gray-500">Waiting for TVmaze import activity...</span>
                       <span className="animate-pulse text-green-400">▊</span>
                     </div>
                   ) : (
-                    consoleMessages.map((msg) => (
+                    tvmazeConsoleMessages.map((msg) => (
                       <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-gray-800/30 transition-colors duration-200">
                         <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
                         <span className={`leading-relaxed ${
@@ -666,10 +662,10 @@ function Import() {
                       <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
                       <span className="text-green-300 leading-relaxed">
                         {/* Determine current phase based on latest activity */}
-                        {consoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                        {tvmazeConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
                           `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...` :
-                          consoleMessages.some(msg => msg.message.includes("Phase 1")) && 
-                          !consoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
+                          tvmazeConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                          !tvmazeConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
                           "📋 Phase 1: Updating existing shows..." :
                           tvmazeStatus.currentPage === 0 ? 
                           "🔄 Health check and setup..." : 
@@ -686,12 +682,139 @@ function Import() {
               <div className="mt-3 flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-medium">
                   <Terminal className="inline w-3 h-3 mr-1" />
-                  {consoleMessages.length} messages logged
+                  {tvmazeConsoleMessages.length} messages logged
                 </span>
                 <button 
-                  onClick={() => setConsoleMessages([])}
+                  onClick={() => setTvmazeConsoleMessages([])}
                   className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
-                  data-testid="clear-console"
+                  data-testid="clear-tvmaze-console"
+                >
+                  Clear Console
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* AniList Controls Section */}
+        <Card className="mt-8" data-testid="card-anilist-controls">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              AniList Import Controls
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="flex gap-2">
+                {anilistStatus?.isActive ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => pauseAniListImport.mutate()}
+                    disabled={pauseAniListImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-pause-anilist"
+                  >
+                    <Pause className="w-4 h-4" />
+                    {pauseAniListImport.isPending ? 'Stopping...' : 'Stop Import'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => startAniListImport.mutate()}
+                    disabled={startAniListImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-start-anilist"
+                  >
+                    <Play className="w-4 h-4" />
+                    {startAniListImport.isPending ? 'Starting...' : 'Start Import'}
+                  </Button>
+                )}
+              </div>
+              
+              <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>Smart Import: Automatic duplicate detection and TV show migration</span>
+                </div>
+                <div>Phase 1: Updates existing anime | Phase 2: Imports new anime with migration</div>
+                {anilistStatus?.isActive && (
+                  <div className="mt-2 text-purple-600 dark:text-purple-400">
+                    Currently importing anime from AniList API with migration detection...
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* AniList Import Console */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Terminal className="w-4 h-4" />
+                <h3 className="font-medium">AniList Import Console</h3>
+                <Badge variant="outline" className={anilistStatus?.isActive ? 'bg-purple-50 text-purple-700' : 'bg-gray-50 text-gray-500'}>
+                  {anilistStatus?.isActive ? 'Active' : 'Idle'}
+                </Badge>
+              </div>
+              
+              <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-lg border border-purple-700 shadow-inner h-80 overflow-hidden">
+                <div 
+                  ref={anilistConsoleRef}
+                  className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
+                  data-testid="anilist-console"
+                >
+                  {anilistConsoleMessages.length === 0 ? (
+                    <div className="text-gray-400 flex items-center gap-2">
+                      <span className="text-purple-400 font-semibold">seenit@anilist:~$</span> 
+                      <span className="text-gray-500">Waiting for AniList import activity...</span>
+                      <span className="animate-pulse text-purple-400">▊</span>
+                    </div>
+                  ) : (
+                    anilistConsoleMessages.map((msg) => (
+                      <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-purple-800/30 transition-colors duration-200">
+                        <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
+                        <span className={`leading-relaxed ${
+                          msg.type === 'success' ? 'text-purple-300' :
+                          msg.type === 'warning' ? 'text-yellow-400' :
+                          msg.type === 'error' ? 'text-red-400' :
+                          'text-gray-200'
+                        }`}>
+                          {msg.message}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Live cursor */}
+                  {anilistStatus?.isActive && (
+                    <div className="flex items-center text-purple-400 py-1 px-2 bg-purple-400/10 rounded border-l-2 border-purple-400 mt-2">
+                      <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
+                      <span className="text-purple-300 leading-relaxed">
+                        {/* Determine current phase based on latest activity */}
+                        {anilistConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                          `📄 Phase 2: Processing page ${anilistStatus.currentPage}...` :
+                          anilistConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                          !anilistConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
+                          "📋 Phase 1: Updating existing anime..." :
+                          anilistStatus.currentPage === 0 ? 
+                          "🔄 Health check and setup..." : 
+                          "🔄 Processing with migration detection..."
+                        }
+                      </span>
+                      <span className="ml-2 animate-pulse text-purple-400 font-bold">▊</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Console Controls */}
+              <div className="mt-3 flex justify-between items-center text-xs">
+                <span className="text-gray-500 font-medium">
+                  <Terminal className="inline w-3 h-3 mr-1" />
+                  {anilistConsoleMessages.length} messages logged
+                </span>
+                <button 
+                  onClick={() => setAnilistConsoleMessages([])}
+                  className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
+                  data-testid="clear-anilist-console"
                 >
                   Clear Console
                 </button>
