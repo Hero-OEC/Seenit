@@ -1,12 +1,12 @@
-# AniList API Integration Documentation
+# Anime Database Integration Documentation
 
 ## Overview
 
-This document outlines the AniList API integration implemented for Seenit, including what was accomplished, current limitations, and future enhancement opportunities.
+This document outlines the anime database integration strategy for Seenit. Originally implemented with AniList API for basic metadata, the system is now planned for **complete replacement with AniDB** to enable comprehensive episode tracking and detailed anime management capabilities.
 
-## What Was Accomplished
+## Current Status: AniList Implementation (To Be Replaced)
 
-### 🚀 Core AniList Integration
+### 🚀 What Was Accomplished with AniList
 
 **API Integration:**
 - ✅ Full GraphQL integration with AniList API (`https://graphql.anilist.co`)
@@ -22,7 +22,7 @@ This document outlines the AniList API integration implemented for Seenit, inclu
 - ✅ Rating conversion (0-100 scale to 0-10 scale)
 - ✅ Genre and tag processing
 
-### 🔄 3-Phase Import System (Major Restructuring)
+### 🔄 Established 3-Phase Import System
 
 **Phase 1: Update Ongoing Anime**
 - ✅ Identifies existing airing/upcoming anime in database
@@ -31,8 +31,8 @@ This document outlines the AniList API integration implemented for Seenit, inclu
 - ✅ Progress tracking and console messaging
 
 **Phase 2: Import New Anime**
-- ✅ Clean import process for new anime from AniList
-- ✅ Avoids duplicates by checking existing AniList content
+- ✅ Clean import process for new anime from source
+- ✅ Avoids duplicates by checking existing content
 - ✅ Page-by-page processing with resume capability
 - ✅ Real-time progress tracking
 
@@ -43,189 +43,179 @@ This document outlines the AniList API integration implemented for Seenit, inclu
 - ✅ Substring matching for anime with different title formats
 - ✅ Safe deletion of TV show duplicates after migration
 
-### 🎯 Smart Duplicate Detection
-
-**Title Matching Algorithm:**
-- ✅ 80%+ similarity threshold for title matching
-- ✅ Support for English, Romaji, and Native title variations
-- ✅ Year-based validation (allows 1-year difference)
-- ✅ Substring matching for titles with different formatting
-- ✅ Genre overlap validation for additional accuracy
-
-**Migration Examples Successfully Handled:**
-- "Digimon: Digital Monsters" → Perfect 100% match
-- "Bubblegum Crisis TOKYO 2040" → 96.4% similarity match
-- "Steel Angel Kurumi" → Substring match with "Angel"
-
-### 💾 Database Integration
-
-**Schema Updates:**
-- ✅ Added `phase3Progress` field for migration tracking
-- ✅ Proper import status management
-- ✅ Episode and season field support for anime
-- ✅ Source material and studio fields
-
-**Data Management:**
-- ✅ Reset functionality to start fresh imports
-- ✅ Pause/resume capability
-- ✅ Error tracking and logging
-- ✅ Progress persistence across restarts
-
-### 🖥️ Frontend Integration
-
-**Import Console:**
-- ✅ Real-time phase progress tracking
-- ✅ Clear messaging for each phase
-- ✅ Console output with timestamps and status indicators
-- ✅ Error display and handling
-- ✅ Content count tracking (currently 544 anime)
-
-**Content Display:**
-- ✅ Anime properly categorized and displayed
-- ✅ Compatible with existing TV show UI components
-- ✅ Proper metadata display (studio, source material, episodes)
-- ✅ Status indicators for airing/completed anime
-
-## Current Status
-
-### 📊 Import Statistics
+### 📊 Current Import Statistics
 ```
-✅ 544 anime successfully imported
+✅ 544 anime successfully imported via AniList
 ✅ ~15+ TV shows migrated to anime category
 ✅ 0 errors in recent imports
 ✅ Full 3-phase system operational
 ```
 
-### 🔧 Technical Implementation
-- **Backend:** `server/services/anilist.ts` - Complete AniList service
-- **Frontend:** Import console with phase tracking
-- **Database:** Proper schema with anime support
-- **Migration:** Advanced duplicate detection system
+## Critical Limitation: Episode Data Gap
 
-## Known Limitations
+### ❌ AniList Limitations (Why We're Switching)
+- **No individual episode lists** - Only total episode counts
+- **No episode titles, summaries, or specific air dates**
+- **Cannot track episode-by-episode progress** like TV shows
+- **Limited to basic series metadata** vs detailed episode tracking
 
-### 📺 Episode Data Limitations
-- ❌ **No individual episode lists** (AniList API limitation)
-- ❌ **No episode titles, summaries, or specific air dates**
-- ❌ **Cannot track episode-by-episode progress** like TV shows
-- ✅ Only total episode count and next airing episode info available
+## Migration Plan: AniDB Complete Replacement
 
-### 🔍 Data Quality Issues
-- ⚠️ **Older anime** (pre-2000) may have incomplete data
-- ⚠️ **English titles** sometimes missing for obscure anime
-- ⚠️ **Image quality** varies for less popular titles
-- ⚠️ **Genre consistency** between AniList and other sources varies
+### 🎯 AniDB Integration Strategy
 
-### ⚡ Performance Considerations
-- ⏳ **Full import time** scales with AniList database growth
-- 🔄 **No real-time sync** - data reflects last import time
-- 📄 **Page-by-page processing** required (no bulk operations)
-- 💾 **Memory usage** increases with dataset size
+**Obtained Credentials:**
+- ✅ **Client Name:** `Seenitclient`
+- ✅ **Client Version:** `1`
+- ✅ **Status:** Active and Official (Approved)
+- ✅ **API Endpoint:** `http://api.anidb.net:9001/httpapi`
 
-## Future Enhancement Opportunities
+**Integration Goals:**
+- 🔄 **Complete replacement** of AniList with AniDB
+- 📺 **Full episode tracking** matching TV show functionality  
+- 🎯 **Detailed episode metadata** (titles, air dates, summaries)
+- 📊 **Episode-by-episode progress** tracking
+- 🏷️ **Proper categorization** of episodes, specials, OVAs
 
-### 🎯 High Priority Improvements
+### 🚀 Implementation Roadmap
 
-**Enhanced Episode Support:**
-- 🔮 **Integrate with additional APIs** (Kitsu, MyAnimeList) for episode data
-- 🔮 **Manual episode entry** system for popular anime
-- 🔮 **Episode progress tracking** similar to TV shows
-- 🔮 **Season-based organization** for multi-season anime
+### **Phase 1: AniDB Service Development** (Week 1)
+- 🔧 **Create AniDB service** (`server/services/anidb.ts`)
+- 📄 **XML response parsing** for anime and episode data
+- 🔐 **Authentication and rate limiting** implementation
+- 🧪 **Basic anime lookup** and data mapping
+- ⚡ **Error handling** and retry logic
 
-**Improved Data Quality:**
-- 🔮 **Data validation and cleanup** algorithms
-- 🔮 **Multiple source aggregation** for better metadata
-- 🔮 **User-contributed corrections** system
-- 🔮 **Auto-update of ongoing anime** (daily/weekly sync)
+### **Phase 2: Episode Data Integration** (Week 2)
+- 📺 **Episode data schema** updates in database
+- 🔄 **Episode import processing** with full metadata
+- 🗃️ **Storage optimization** for larger episode datasets
+- 📊 **Progress tracking** for episode-level imports
+- 🎯 **Episode categorization** (regular, special, OVA)
 
-### 🚀 Medium Priority Enhancements
+### **Phase 3: Frontend Episode Management** (Week 3)
+- 🖥️ **Episode display components** matching TV show interface
+- ✅ **Episode progress tracking** UI implementation
+- 📋 **Season/episode organization** for anime
+- 🎮 **Episode marking** (watched/unwatched) functionality
+- 📈 **Progress visualization** for anime series
 
-**Performance Optimizations:**
-- 🔮 **Incremental sync** (only update changed content)
-- 🔮 **Background import jobs** to avoid UI blocking
-- 🔮 **Caching layer** for frequently accessed data
-- 🔮 **Parallel processing** for large imports
+### **Phase 4: Data Migration & Optimization** (Week 4)
+- 🔄 **Migrate existing anime** from AniList to AniDB data
+- 🧹 **Data cleanup** and validation
+- ⚡ **Performance optimization** for larger datasets
+- 🗑️ **Remove AniList dependencies** completely
+- 🧪 **Comprehensive testing** of new system
 
-**User Experience:**
-- 🔮 **Advanced search filters** for anime-specific criteria
-- 🔮 **Recommendation engine** based on anime preferences
-- 🔮 **Seasonal anime tracking** (current season highlights)
-- 🔮 **Watchlist import** from other anime services
+## Expected Benefits of AniDB Integration
 
-### 🔧 Technical Improvements
-
-**Migration Enhancements:**
-- 🔮 **Machine learning** for better title matching
-- 🔮 **Manual review system** for uncertain matches
-- 🔮 **Reverse migration** capability (anime → TV if needed)
-- 🔮 **Bulk migration tools** for administrators
-
-**API Enhancements:**
-- 🔮 **GraphQL optimization** for faster queries
-- 🔮 **Rate limiting improvements** with better backoff
-- 🔮 **Real-time updates** using webhooks (if available)
-- 🔮 **Data validation** and integrity checks
-
-## Integration Architecture
-
-### 🏗️ Current Structure
+### 📺 Complete Episode Tracking
+```javascript
+// What AniDB will provide (vs current AniList limitations):
+episodes: [
+  {
+    id: 1,
+    number: "1",
+    title: "The Beginning of Everything",
+    airdate: "2024-04-07", 
+    duration: 24,
+    summary: "Episode summary...",
+    type: "regular" // regular, special, OVA
+  },
+  {
+    id: 2,
+    number: "S1", 
+    title: "Beach Episode Special",
+    airdate: "2024-06-15",
+    duration: 12,
+    summary: "Special episode...",
+    type: "special"
+  }
+]
 ```
-AniList Service (anilist.ts)
-├── GraphQL API Integration
-├── 3-Phase Import System
-│   ├── Phase 1: Update Existing
-│   ├── Phase 2: Import New
-│   └── Phase 3: Migration
-├── Smart Duplicate Detection
-├── Progress Tracking
-└── Error Handling
 
-Frontend Integration
-├── Import Console UI
-├── Progress Visualization
-├── Content Display
-└── Status Management
+### 🎯 Enhanced User Experience
+- ✅ **Episode-by-episode progress** tracking
+- ✅ **Individual episode ratings** and notes
+- ✅ **Detailed episode information** display
+- ✅ **Season organization** with proper episode lists
+- ✅ **Special episodes and OVAs** properly categorized
+- ✅ **Watch history** at episode level
+
+## Technical Implementation Details
+
+### 🏗️ New Architecture
+```
+AniDB Service (anidb.ts)
+├── HTTP API Integration (XML)
+├── Episode Data Processing
+├── 3-Phase Import System (Adapted)
+│   ├── Phase 1: Update Existing + Episodes
+│   ├── Phase 2: Import New + Full Episode Data
+│   └── Phase 3: Migration + Episode Mapping
+├── Smart Duplicate Detection
+├── Progress Tracking (Series + Episode Level)
+└── Enhanced Error Handling
 ```
 
 ### 🔄 Data Flow
 ```
-AniList API → Service Layer → Database → Frontend
-     ↓              ↓           ↓         ↓
-  GraphQL      Phase System   Content   Import UI
-   Query      Processing      Storage   Console
+AniDB API → XML Parser → Episode Processor → Database → Frontend
+     ↓           ↓             ↓              ↓         ↓
+   HTTP       Service      Episode        Content   Episode UI
+  Request     Layer        Storage        Schema    Components
 ```
 
-## Best Practices Established
+## Migration Challenges & Solutions
 
-### ✅ Code Quality
-- Comprehensive error handling with detailed logging
-- Type-safe data mapping with validation
-- Modular service architecture for maintainability
-- Clear separation of concerns between phases
+### ⚠️ Technical Challenges
+- **XML parsing complexity** → Robust parser with error handling
+- **Rate limiting** (1 req/2s) → Intelligent caching and batching
+- **Large dataset storage** → Optimized episode schema design
+- **Import time increase** → Background processing + progress tracking
 
-### ✅ User Experience
-- Real-time progress feedback
-- Clear phase messaging and status updates
-- Graceful error handling and recovery
-- Pause/resume functionality for long imports
+### 💡 Solutions Implemented
+- **Maintain 3-phase system** for organized migration
+- **Keep existing import infrastructure** (console, progress tracking)
+- **Gradual rollout** with fallback to current system
+- **Comprehensive testing** before full replacement
 
-### ✅ Data Integrity
-- Duplicate prevention at multiple levels
-- Transaction-safe database operations
-- Rollback capability through checkpoints
-- Comprehensive validation before insertion
+## Success Criteria
+
+### 🎯 Target Metrics
+- **Episode data completeness** > 95% for major anime
+- **Import performance** < 30 minutes for full dataset
+- **UI responsiveness** matching current TV show experience
+- **Zero data loss** during AniList → AniDB migration
+
+### ✅ Completion Indicators
+- [ ] AniDB service fully operational
+- [ ] Episode tracking UI implemented
+- [ ] All 544+ anime migrated with episode data
+- [ ] AniList dependencies removed
+- [ ] System performance optimized
+
+## Future Enhancements (Post-Migration)
+
+### 🚀 Advanced Features
+- **Episode recommendations** based on viewing history
+- **Seasonal anime tracking** with episode schedules
+- **Batch episode operations** (mark season watched)
+- **Episode notes and ratings** system
+- **Integration with streaming platforms** for episode availability
 
 ## Conclusion
 
-The AniList integration represents a significant enhancement to Seenit's entertainment tracking capabilities. The 3-phase import system ensures clean data organization, while the smart migration system prevents duplicate content across categories.
+The migration from AniList to AniDB represents a fundamental upgrade from **basic anime metadata** to **comprehensive episode tracking**. This change will bring anime functionality to parity with TV show tracking, providing users with the detailed episode management they expect.
 
-While episode-level tracking remains limited by the AniList API, the current implementation provides a solid foundation for anime content management and can be extended with additional data sources as needed.
-
-The system is production-ready and successfully handles the complexity of anime metadata while maintaining the same user experience standards as TV show tracking.
+The established 3-phase import system and robust infrastructure will be adapted to handle the increased complexity and data volume of AniDB integration, ensuring a smooth transition while significantly enhancing the anime tracking experience.
 
 ---
 
+**Current Status:** 🔄 AniList Implementation (544 anime imported)  
+**Next Phase:** 🚀 AniDB Integration Development  
+**Target Completion:** 4 weeks from development start  
+**Expected Outcome:** 📺 Full episode tracking for anime matching TV show functionality
+
 **Last Updated:** January 31, 2025  
-**Integration Version:** 1.0  
-**Total Anime Imported:** 544+  
-**System Status:** ✅ Fully Operational
+**Integration Version:** 2.0 (AniDB Migration Plan)  
+**AniDB Credentials:** ✅ Approved and Ready
