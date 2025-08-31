@@ -459,25 +459,27 @@ function Import() {
                 </Badge>
               </div>
               
-              <div className="bg-gray-900 rounded-lg p-4 h-80 overflow-hidden">
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700 shadow-inner h-80 overflow-hidden">
                 <div 
                   ref={consoleRef}
-                  className="h-full overflow-y-auto space-y-1 font-mono text-sm"
+                  className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
                   data-testid="import-console"
                 >
                   {consoleMessages.length === 0 ? (
-                    <div className="text-gray-500">
-                      <span className="text-green-400">seenit@import:~$</span> Waiting for import activity...
+                    <div className="text-gray-400 flex items-center gap-2">
+                      <span className="text-green-400 font-semibold">seenit@import:~$</span> 
+                      <span className="text-gray-500">Waiting for import activity...</span>
+                      <span className="animate-pulse text-green-400">▊</span>
                     </div>
                   ) : (
                     consoleMessages.map((msg) => (
-                      <div key={msg.id} className="flex gap-2">
-                        <span className="text-gray-500 text-xs shrink-0">{msg.timestamp}</span>
-                        <span className={`${
+                      <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-gray-800/30 transition-colors duration-200">
+                        <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
+                        <span className={`leading-relaxed ${
                           msg.type === 'success' ? 'text-green-400' :
                           msg.type === 'warning' ? 'text-yellow-400' :
                           msg.type === 'error' ? 'text-red-400' :
-                          'text-gray-300'
+                          'text-gray-200'
                         }`}>
                           {msg.message}
                         </span>
@@ -487,9 +489,9 @@ function Import() {
                   
                   {/* Live cursor */}
                   {tvmazeStatus?.isActive && (
-                    <div className="flex items-center text-green-400">
-                      <span className="text-gray-500 text-xs mr-2">{new Date().toLocaleTimeString()}</span>
-                      <span>
+                    <div className="flex items-center text-green-400 py-1 px-2 bg-green-400/10 rounded border-l-2 border-green-400 mt-2">
+                      <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
+                      <span className="text-green-300 leading-relaxed">
                         {/* Determine current phase based on latest activity */}
                         {consoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
                           `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...` :
@@ -501,18 +503,21 @@ function Import() {
                           "🔄 Processing..."
                         }
                       </span>
-                      <span className="ml-1 animate-pulse">▊</span>
+                      <span className="ml-2 animate-pulse text-green-400 font-bold">▊</span>
                     </div>
                   )}
                 </div>
               </div>
               
               {/* Console Controls */}
-              <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
-                <span>{consoleMessages.length} messages logged</span>
+              <div className="mt-3 flex justify-between items-center text-xs">
+                <span className="text-gray-500 font-medium">
+                  <Terminal className="inline w-3 h-3 mr-1" />
+                  {consoleMessages.length} messages logged
+                </span>
                 <button 
                   onClick={() => setConsoleMessages([])}
-                  className="hover:text-gray-700 underline"
+                  className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
                   data-testid="clear-console"
                 >
                   Clear Console
