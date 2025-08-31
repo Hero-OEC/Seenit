@@ -245,15 +245,22 @@ function Import() {
     if (lastStatus.phase2Progress !== anilistStatus.phase2Progress && anilistStatus.phase2Progress) {
       if (anilistStatus.phase2Progress.includes('Complete')) {
         addAnilistConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
+        addAnilistConsoleMessage(`🔄 Starting Phase 3: Migration - searching for anime in TV shows...`, 'info');
       } else {
-        // Check for migration information in the progress message
-        if (anilistStatus.phase2Progress.includes('migrated')) {
-          const migrationMatch = anilistStatus.phase2Progress.match(/(\d+) TV shows migrated/);
-          if (migrationMatch && parseInt(migrationMatch[1]) > 0) {
-            addAnilistConsoleMessage(`🔄 Found and migrated ${migrationMatch[1]} TV shows to anime category`, 'success');
-          }
-        }
         addAnilistConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
+      }
+    }
+
+    // Phase 3 progress updated
+    // @ts-ignore - temporary fix for type loading
+    if (lastStatus.phase3Progress !== anilistStatus.phase3Progress && anilistStatus.phase3Progress) {
+      // @ts-ignore
+      if (anilistStatus.phase3Progress.includes('Phase 3 Complete')) {
+        // @ts-ignore
+        addAnilistConsoleMessage(`✅ ${anilistStatus.phase3Progress}`, 'success');
+      } else {
+        // @ts-ignore
+        addAnilistConsoleMessage(`🔄 Phase 3: ${anilistStatus.phase3Progress}`, 'info');
       }
     }
 
@@ -264,7 +271,7 @@ function Import() {
         addAnilistConsoleMessage(`❌ AniList Error: ${error}`, 'error');
       });
     }
-  }, [anilistStatus]);
+  }, [anilistStatus]); // Track AniList phase updates
 
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({

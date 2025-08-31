@@ -577,34 +577,12 @@ export class AniListService {
                 .where(eq(content.id, existingAniListContent.id));
               updated++;
             } else {
-              // Check if this anime exists as a TV show that should be migrated
-              const existingTvShow = await this.findExistingTvShowMatch(anime);
-              
-              if (existingTvShow) {
-                // Migrate TV show to anime
-                console.log(`🔄 Migrating "${existingTvShow.title}" from TV to anime (matched with "${anime.title?.english || anime.title?.romaji}")"`);
-                
-                await db
-                  .update(content)
-                  .set({
-                    ...mappedContent,
-                    // Preserve the original ID and creation date
-                    id: existingTvShow.id,
-                    createdAt: existingTvShow.createdAt,
-                    lastUpdated: new Date()
-                  })
-                  .where(eq(content.id, existingTvShow.id));
-                
-                migrated++;
-                console.log(`✅ Successfully migrated "${existingTvShow.title}" to anime category`);
-              } else {
-                // Insert new anime content
-                await db
-                  .insert(content)
-                  .values(mappedContent);
-                imported++;
-                totalAnimeInPhase2++;
-              }
+              // Phase 2: Only import new anime (migration will be handled in Phase 3)
+              await db
+                .insert(content)
+                .values(mappedContent);
+              imported++;
+              totalAnimeInPhase2++;
             }
           } catch (error) {
             const errorMsg = `Error processing anime ${anime.title?.english || anime.title?.romaji} (ID: ${anime.id}): ${error}`;
@@ -618,8 +596,8 @@ export class AniListService {
           .update(importStatus)
           .set({
             currentPage: page,
-            totalImported: imported + updated + migrated,
-            phase2Progress: `Page ${page}: ${totalPagesProcessed} pages processed, ${totalAnimeInPhase2} anime imported, ${migrated} TV shows migrated`,
+            totalImported: imported + updated,
+            phase2Progress: `Page ${page}: ${totalPagesProcessed} pages processed, ${totalAnimeInPhase2} anime imported`,
             updatedAt: new Date()
           })
           .where(eq(importStatus.id, currentStatus.id));
@@ -629,6 +607,11 @@ export class AniListService {
         // Small delay to be respectful to the API
         await new Promise(resolve => setTimeout(resolve, 100));
       }
+
+      // Phase 3: Migration phase - Find anime in TV shows and migrate them
+      console.log('Phase 2 complete. Starting Phase 3: Migration phase...');
+      const migratedCount = await this.performMigrationPhase();
+      migrated = migratedCount;
 
     } catch (error) {
       const errorMsg = `AniList sync failed: ${error}`;
@@ -745,6 +728,123 @@ export class AniListService {
     }
     
     console.log(`Completed updating ${updated} existing airing/upcoming anime`);
+  }
+
+  // Phase 3: Migration phase - Find anime in TV shows and migrate them
+  private async performMigrationPhase(): Promise<number> {
+    console.log('Phase 3: Starting migration - searching for anime in TV shows...');
+    
+    let migrated = 0;
+    
+    // Get all existing anime from AniList
+    const existingAnime = await db
+      .select()
+      .from(content)
+      .where(eq(content.source, 'anilist'));
+    
+    console.log(`Checking ${existingAnime.length} anime against TV shows for potential migrations...`);
+    
+    for (const anime of existingAnime) {
+      try {
+        // Check if sync is still active
+        const [currentStatus] = await db
+          .select()
+          .from(importStatus)
+          .where(eq(importStatus.source, 'anilist'));
+        
+        if (!currentStatus?.isActive) {
+          console.log('AniList sync paused during migration phase');
+          break;
+        }
+
+        // Try to find a matching TV show for this anime
+        const matchingTvShow = await this.findExistingTvShowByAnimeData(anime);
+        
+        if (matchingTvShow) {
+          console.log(`🔄 Phase 3: Migrating TV show "${matchingTvShow.title}" to anime (matched with "${anime.title}")`);
+          
+          // Delete the TV show (it will be replaced by the anime)
+          await db
+            .delete(content)
+            .where(eq(content.id, matchingTvShow.id));
+          
+          migrated++;
+          console.log(`✅ Successfully migrated "${matchingTvShow.title}" from TV shows to anime`);
+          
+          // Update migration progress every 5 migrations
+          if (migrated % 5 === 0) {
+            await db
+              .update(importStatus)
+              .set({
+                phase3Progress: `${migrated} TV shows migrated to anime`,
+                updatedAt: new Date()
+              })
+              .where(eq(importStatus.id, currentStatus.id));
+          }
+        }
+        
+      } catch (error) {
+        console.error(`Error during migration check for anime "${anime.title}":`, error);
+      }
+    }
+    
+    // Mark Phase 3 as complete
+    const [currentStatus] = await db
+      .select()
+      .from(importStatus)
+      .where(eq(importStatus.source, 'anilist'));
+    
+    if (currentStatus) {
+      await db
+        .update(importStatus)
+        .set({
+          phase3Progress: `${migrated} TV shows migrated (Phase 3 Complete)`,
+          updatedAt: new Date()
+        })
+        .where(eq(importStatus.id, currentStatus.id));
+    }
+    
+    console.log(`Phase 3 complete: ${migrated} TV shows migrated to anime`);
+    return migrated;
+  }
+
+  // Helper method to find TV show matches based on existing anime data
+  private async findExistingTvShowByAnimeData(anime: any): Promise<any | null> {
+    // Get all TV shows to check for matches
+    const existingTvShows = await db
+      .select()
+      .from(content)
+      .where(eq(content.type, 'tv'));
+
+    const animeTitle = anime.title;
+    const animeYear = anime.year;
+    
+    for (const tvShow of existingTvShows) {
+      // Skip if years don't match (allow 1 year difference for different release dates)
+      if (animeYear && tvShow.year && Math.abs(animeYear - tvShow.year) > 1) {
+        continue;
+      }
+
+      // Check title similarity
+      const similarity = this.calculateStringSimilarity(animeTitle, tvShow.title);
+      
+      // If similarity is high enough (80%+), consider it a match
+      if (similarity >= 0.8) {
+        console.log(`Found potential migration target: "${animeTitle}" (${animeYear}) matches TV show "${tvShow.title}" (${tvShow.year}) with ${(similarity * 100).toFixed(1)}% similarity`);
+        return tvShow;
+      }
+      
+      // Also check for exact substring matches (common for anime with subtitles)
+      const animeTitleLower = animeTitle.toLowerCase();
+      const tvTitleLower = tvShow.title.toLowerCase();
+      
+      if (animeTitleLower.includes(tvTitleLower) || tvTitleLower.includes(animeTitleLower)) {
+        console.log(`Found exact substring migration target: "${animeTitle}" matches TV show "${tvShow.title}"`);
+        return tvShow;
+      }
+    }
+    
+    return null;
   }
 
   async getImportStatus() {
