@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, RefreshCw, Database, Calendar, Clock, Trash2 } from "lucide-react";
+import { Play, Pause, RefreshCw, Database, Calendar, Clock, Trash2, Terminal } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ImportStatus {
@@ -39,6 +39,9 @@ interface TVMazeContent {
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [consoleMessages, setConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const consoleRef = useRef<HTMLDivElement>(null);
+  const lastStatusRef = useRef<ImportStatus | null>(null);
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
@@ -46,6 +49,83 @@ function Import() {
     refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
     staleTime: 0, // Always refetch, don't use stale data
   });
+
+  // Add console message
+  const addConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setConsoleMessages(prev => {
+      const newMessages = [...prev, { id: Date.now(), timestamp, message, type }];
+      // Keep only last 50 messages
+      return newMessages.slice(-50);
+    });
+  };
+
+  // Auto-scroll console to bottom
+  useEffect(() => {
+    if (consoleRef.current) {
+      consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+    }
+  }, [consoleMessages]);
+
+  // Watch for status changes and generate console messages
+  useEffect(() => {
+    if (!tvmazeStatus) return;
+    
+    const lastStatus = lastStatusRef.current;
+    lastStatusRef.current = tvmazeStatus;
+    
+    // Don't log on first load
+    if (!lastStatus) {
+      if (tvmazeStatus.isActive) {
+        addConsoleMessage("🔄 TVmaze import is currently active", 'info');
+        // Determine current phase based on status
+        if (tvmazeStatus.currentPage === 0) {
+          addConsoleMessage("📋 Phase 1: Performing health check and updating existing shows", 'info');
+        } else {
+          addConsoleMessage(`📄 Phase 2: Processing page ${tvmazeStatus.currentPage} of new shows`, 'info');
+        }
+      } else {
+        addConsoleMessage("⏸️ TVmaze import is paused", 'warning');
+      }
+      addConsoleMessage(`📊 Current status: ${tvmazeStatus.totalImported} shows imported`, 'info');
+      return;
+    }
+
+    // Status changed from inactive to active
+    if (!lastStatus.isActive && tvmazeStatus.isActive) {
+      addConsoleMessage("🚀 TVmaze import started", 'success');
+      addConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+    }
+
+    // Status changed from active to inactive
+    if (lastStatus.isActive && !tvmazeStatus.isActive) {
+      addConsoleMessage("⏹️ TVmaze import stopped", 'warning');
+    }
+
+    // Page progress
+    if (lastStatus.currentPage !== tvmazeStatus.currentPage && tvmazeStatus.isActive) {
+      if (tvmazeStatus.currentPage === 0) {
+        addConsoleMessage("📋 Starting Phase 1: Updating existing shows with new episodes", 'info');
+      } else {
+        addConsoleMessage(`📄 Processing page ${tvmazeStatus.currentPage} (importing new shows)`, 'info');
+      }
+    }
+
+    // Import count increased
+    if (lastStatus.totalImported < tvmazeStatus.totalImported) {
+      const diff = tvmazeStatus.totalImported - lastStatus.totalImported;
+      addConsoleMessage(`✅ Imported/updated ${diff} shows (Total: ${tvmazeStatus.totalImported})`, 'success');
+    }
+
+    // Errors detected
+    if (tvmazeStatus.errors.length > lastStatus.errors.length) {
+      const newErrors = tvmazeStatus.errors.slice(lastStatus.errors.length);
+      newErrors.forEach(error => {
+        addConsoleMessage(`❌ Error: ${error}`, 'error');
+      });
+    }
+
+  }, [tvmazeStatus]);
 
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
@@ -352,91 +432,70 @@ function Import() {
               </div>
             </div>
             
-            {tvmazeContent && tvmazeContent.count > 0 && (
-              <div className="mt-6">
-                <h3 className="font-medium mb-3">Recent TV Shows Imported</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-200 dark:border-gray-700 text-sm">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-800">
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Title</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Year</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Rating</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Seasons</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Episodes</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Network</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Status</th>
-                        <th className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium">Genres</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tvmazeContent.content.slice(0, 15).map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2 font-medium" title={item.title}>
-                            <div className="max-w-[200px] truncate">{item.title}</div>
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            {item.year || 'Unknown'}
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            {item.rating ? (
-                              <span className="flex items-center gap-1">
-                                ★ {item.rating}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400">No rating</span>
-                            )}
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            {item.totalSeasons ? (
-                              <span className="font-medium text-blue-600">{item.totalSeasons}</span>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            {item.totalEpisodes ? (
-                              <span className="text-gray-600">{item.totalEpisodes}</span>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            <div className="max-w-[120px] truncate" title={item.network || ''}>
-                              {item.network || 'Unknown'}
-                            </div>
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${
-                                item.status === 'airing' ? 'bg-green-50 text-green-700 border-green-200' :
-                                item.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                item.status === 'upcoming' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                                'bg-gray-50 text-gray-700 border-gray-200'
-                              }`}
-                            >
-                              {item.status}
-                            </Badge>
-                          </td>
-                          <td className="border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            <div className="max-w-[150px] truncate" title={item.genres?.join(', ') || ''}>
-                              {item.genres?.slice(0, 2).join(', ') || 'Unknown'}
-                              {item.genres && item.genres.length > 2 && '...'}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {tvmazeContent.count > 15 && (
-                    <div className="mt-2 text-xs text-gray-500 text-center">
-                      Showing 15 of {tvmazeContent.count} imported shows
+            {/* Live Import Console */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Terminal className="w-4 h-4" />
+                <h3 className="font-medium">Import Console</h3>
+                <Badge variant="outline" className={tvmazeStatus?.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}>
+                  {tvmazeStatus?.isActive ? 'Active' : 'Idle'}
+                </Badge>
+              </div>
+              
+              <div className="bg-gray-900 rounded-lg p-4 h-80 overflow-hidden">
+                <div 
+                  ref={consoleRef}
+                  className="h-full overflow-y-auto space-y-1 font-mono text-sm"
+                  data-testid="import-console"
+                >
+                  {consoleMessages.length === 0 ? (
+                    <div className="text-gray-500">
+                      <span className="text-green-400">seenit@import:~$</span> Waiting for import activity...
+                    </div>
+                  ) : (
+                    consoleMessages.map((msg) => (
+                      <div key={msg.id} className="flex gap-2">
+                        <span className="text-gray-500 text-xs shrink-0">{msg.timestamp}</span>
+                        <span className={`${
+                          msg.type === 'success' ? 'text-green-400' :
+                          msg.type === 'warning' ? 'text-yellow-400' :
+                          msg.type === 'error' ? 'text-red-400' :
+                          'text-gray-300'
+                        }`}>
+                          {msg.message}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Live cursor */}
+                  {tvmazeStatus?.isActive && (
+                    <div className="flex items-center text-green-400">
+                      <span className="text-gray-500 text-xs mr-2">{new Date().toLocaleTimeString()}</span>
+                      <span>
+                        {tvmazeStatus.currentPage === 0 ? 
+                          "🔄 Updating existing shows..." : 
+                          `📄 Processing page ${tvmazeStatus.currentPage}...`
+                        }
+                      </span>
+                      <span className="ml-1 animate-pulse">▊</span>
                     </div>
                   )}
                 </div>
               </div>
-            )}
+              
+              {/* Console Controls */}
+              <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
+                <span>{consoleMessages.length} messages logged</span>
+                <button 
+                  onClick={() => setConsoleMessages([])}
+                  className="hover:text-gray-700 underline"
+                  data-testid="clear-console"
+                >
+                  Clear Console
+                </button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
