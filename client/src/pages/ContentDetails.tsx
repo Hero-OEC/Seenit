@@ -11,7 +11,7 @@ export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
   const [, navigate] = useLocation();
   const [selectedWatchlistStatus, setSelectedWatchlistStatus] = useState<string>("Add to Watch List");
-  const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [selectedSeason, setSelectedSeason] = useState<number>(0); // Will be set dynamically
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
@@ -29,12 +29,18 @@ export default function ContentDetails() {
     enabled: !!params?.id,
   });
 
-  // Initialize empty watched episodes state - all start unwatched
+  // Initialize empty watched episodes state and set default season
   useEffect(() => {
     if (!content || (content.type !== "tv" && content.type !== "anime")) return;
     // Start with empty state - all episodes unwatched
     setWatchedEpisodes({});
-  }, [content]);
+    
+    // Set selected season to the most recent available season
+    const availableSeasons = getAvailableSeasons(content);
+    if (availableSeasons.length > 0 && selectedSeason === 0) {
+      setSelectedSeason(availableSeasons[0]); // Most recent season first
+    }
+  }, [content, selectedSeason]);
 
   const handleSearch = (query: string) => {
     console.log(`Search: ${query}`);
@@ -202,6 +208,27 @@ export default function ContentDetails() {
         ))}
       </div>
     );
+  };
+
+  // Get all unique seasons from episode data
+  const getAvailableSeasons = (content: Content): number[] => {
+    if (!content.episodeData) return [];
+    
+    try {
+      const episodeData = typeof content.episodeData === 'string' 
+        ? JSON.parse(content.episodeData) 
+        : content.episodeData;
+      
+      const episodes = episodeData?.episodes || episodeData;
+      if (!Array.isArray(episodes)) return [];
+      
+      // Get unique season numbers and sort them
+      const uniqueSeasons = [...new Set(episodes.map((ep: any) => ep.season))];
+      return uniqueSeasons.sort((a, b) => b - a); // Newest first
+    } catch (error) {
+      console.error('Error parsing episode data:', content.title);
+      return [];
+    }
   };
 
   // Get episodes from database content
@@ -467,24 +494,27 @@ export default function ContentDetails() {
                 <h2 className="text-2xl font-bold text-retro-900 mb-4">Seasons & Episodes</h2>
 
                 {/* Season Tabs */}
-                {content.totalSeasons && content.totalSeasons > 1 && (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {Array.from({ length: content.totalSeasons }, (_, i) => (
-                      <button
-                        key={i + 1}
-                        onClick={() => setSelectedSeason(i + 1)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                          selectedSeason === i + 1
-                            ? 'bg-retro-500 text-white shadow-md'
-                            : 'border border-retro-300 text-retro-700 hover:bg-retro-50'
-                        }`}
-                        data-testid={`season-tab-${i + 1}`}
-                      >
-                        Season {i + 1}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  const availableSeasons = getAvailableSeasons(content);
+                  return availableSeasons.length > 1 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {availableSeasons.map((seasonNum) => (
+                        <button
+                          key={seasonNum}
+                          onClick={() => setSelectedSeason(seasonNum)}
+                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                            selectedSeason === seasonNum
+                              ? 'bg-retro-500 text-white shadow-md'
+                              : 'border border-retro-300 text-retro-700 hover:bg-retro-50'
+                          }`}
+                          data-testid={`season-tab-${seasonNum}`}
+                        >
+                          Season {seasonNum}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Episode List */}
                 <div>
