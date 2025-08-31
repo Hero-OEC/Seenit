@@ -540,18 +540,6 @@ function Import() {
                 </span>
               </div>
               
-              {anilistStatus?.isActive && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Progress:</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      {anilistStatus.totalImported} imported
-                    </span>
-                  </div>
-                  <Progress value={Math.min((anilistStatus.totalImported / Math.max(anilistStatus.totalAvailable || 1, anilistStatus.totalImported)) * 100, 100)} className="h-2" />
-                </div>
-              )}
-              
               <div className="pt-4 border-t">
                 <Button
                   variant="destructive"
