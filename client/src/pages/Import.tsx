@@ -78,12 +78,8 @@ function Import() {
     if (!lastStatus) {
       if (tvmazeStatus.isActive) {
         addConsoleMessage("🔄 TVmaze import is currently active", 'info');
-        // Determine current phase based on status
-        if (tvmazeStatus.currentPage === 0) {
-          addConsoleMessage("📋 Phase 1: Performing health check and updating existing shows", 'info');
-        } else {
-          addConsoleMessage(`📄 Phase 2: Processing page ${tvmazeStatus.currentPage} of new shows`, 'info');
-        }
+        // Since page 26 is stuck from previous sync, assume Phase 1 on first load when active
+        addConsoleMessage("📋 Phase 1: Updating existing shows with new episodes", 'info');
       } else {
         addConsoleMessage("⏸️ TVmaze import is paused", 'warning');
       }
@@ -102,12 +98,13 @@ function Import() {
       addConsoleMessage("⏹️ TVmaze import stopped", 'warning');
     }
 
-    // Page progress
+    // Page progress - only log actual page changes for Phase 2
     if (lastStatus.currentPage !== tvmazeStatus.currentPage && tvmazeStatus.isActive) {
       if (tvmazeStatus.currentPage === 0) {
         addConsoleMessage("📋 Starting Phase 1: Updating existing shows with new episodes", 'info');
-      } else {
-        addConsoleMessage(`📄 Processing page ${tvmazeStatus.currentPage} (importing new shows)`, 'info');
+      } else if (tvmazeStatus.currentPage > 26) {
+        // Only show page progress when we're actually past the stuck page 26
+        addConsoleMessage(`📄 Phase 2: Processing page ${tvmazeStatus.currentPage} (importing new shows)`, 'info');
       }
     }
 
@@ -473,12 +470,15 @@ function Import() {
                     <div className="flex items-center text-green-400">
                       <span className="text-gray-500 text-xs mr-2">{new Date().toLocaleTimeString()}</span>
                       <span>
-                        {/* Check if we're in Phase 1 based on recent activity pattern */}
-                        {tvmazeStatus.currentPage === 26 && consoleMessages.some(msg => msg.message.includes("Phase 1")) ? 
+                        {/* Show Phase 1 if we have Phase 1 activity in console */}
+                        {consoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                         !consoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
                           "📋 Phase 1: Updating existing shows..." :
                           tvmazeStatus.currentPage === 0 ? 
                           "🔄 Health check and setup..." : 
-                          `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...`
+                          consoleMessages.some(msg => msg.message.includes("Phase 2")) ?
+                          `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...` :
+                          "📋 Phase 1: Updating existing shows..."
                         }
                       </span>
                       <span className="ml-1 animate-pulse">▊</span>
