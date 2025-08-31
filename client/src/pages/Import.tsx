@@ -228,6 +228,13 @@ function Import() {
       if (anilistStatus.phase2Progress.includes('Complete')) {
         addConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
       } else {
+        // Check for migration information in the progress message
+        if (anilistStatus.phase2Progress.includes('migrated')) {
+          const migrationMatch = anilistStatus.phase2Progress.match(/(\d+) TV shows migrated/);
+          if (migrationMatch && parseInt(migrationMatch[1]) > 0) {
+            addConsoleMessage(`🔄 Found and migrated ${migrationMatch[1]} TV shows to anime category`, 'success');
+          }
+        }
         addConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
       }
     }
