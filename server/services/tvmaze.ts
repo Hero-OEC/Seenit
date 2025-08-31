@@ -466,11 +466,36 @@ export class TVMazeService {
         
         if (updated % 10 === 0) {
           console.log(`Updated ${updated}/${existingActiveShows.length} existing shows`);
+          
+          // Update status with Phase 1 progress
+          await db
+            .update(importStatus)
+            .set({
+              phase1Progress: `${updated}/${existingActiveShows.length}`,
+              updatedAt: new Date()
+            })
+            .where(eq(importStatus.id, currentStatus.id));
         }
         
       } catch (error) {
         console.error(`Error updating existing show ${show.title} (ID: ${show.sourceId}):`, error);
       }
+    }
+    
+    // Mark Phase 1 as complete
+    const [currentStatus] = await db
+      .select()
+      .from(importStatus)
+      .where(eq(importStatus.source, 'tvmaze'));
+    
+    if (currentStatus) {
+      await db
+        .update(importStatus)
+        .set({
+          phase1Progress: `${updated}/${existingActiveShows.length} (Phase 1 Complete)`,
+          updatedAt: new Date()
+        })
+        .where(eq(importStatus.id, currentStatus.id));
     }
     
     console.log(`Completed updating ${updated} existing airing/upcoming shows`);

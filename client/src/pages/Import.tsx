@@ -114,6 +114,15 @@ function Import() {
       addConsoleMessage(`✅ Imported/updated ${diff} shows (Total: ${tvmazeStatus.totalImported})`, 'success');
     }
 
+    // Phase 1 progress updated
+    if (lastStatus.phase1Progress !== tvmazeStatus.phase1Progress && tvmazeStatus.phase1Progress) {
+      if (tvmazeStatus.phase1Progress.includes('Phase 1 Complete')) {
+        addConsoleMessage(`✅ ${tvmazeStatus.phase1Progress}`, 'success');
+      } else {
+        addConsoleMessage(`📋 Phase 1 Progress: ${tvmazeStatus.phase1Progress} shows updated`, 'info');
+      }
+    }
+
     // Errors detected
     if (tvmazeStatus.errors.length > lastStatus.errors.length) {
       const newErrors = tvmazeStatus.errors.slice(lastStatus.errors.length);
