@@ -15,6 +15,8 @@ interface ImportStatus {
   totalImported: number;
   totalAvailable: number;
   currentPage: number;
+  phase1Progress?: string;
+  phase2Progress?: string;
   errors: string[];
   createdAt: string;
   updatedAt: string;
@@ -120,6 +122,15 @@ function Import() {
         addConsoleMessage(`✅ ${tvmazeStatus.phase1Progress}`, 'success');
       } else {
         addConsoleMessage(`📋 Phase 1 Progress: ${tvmazeStatus.phase1Progress} shows updated`, 'info');
+      }
+    }
+
+    // Phase 2 progress updated
+    if (lastStatus.phase2Progress !== tvmazeStatus.phase2Progress && tvmazeStatus.phase2Progress) {
+      if (tvmazeStatus.phase2Progress.includes('Phase 2 Complete')) {
+        addConsoleMessage(`🎉 ${tvmazeStatus.phase2Progress}`, 'success');
+      } else {
+        addConsoleMessage(`📄 Phase 2 Progress: ${tvmazeStatus.phase2Progress}`, 'info');
       }
     }
 
@@ -479,15 +490,15 @@ function Import() {
                     <div className="flex items-center text-green-400">
                       <span className="text-gray-500 text-xs mr-2">{new Date().toLocaleTimeString()}</span>
                       <span>
-                        {/* Show Phase 1 if we have Phase 1 activity in console */}
-                        {consoleMessages.some(msg => msg.message.includes("Phase 1")) && 
-                         !consoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                        {/* Determine current phase based on latest activity */}
+                        {consoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                          `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...` :
+                          consoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                          !consoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
                           "📋 Phase 1: Updating existing shows..." :
                           tvmazeStatus.currentPage === 0 ? 
                           "🔄 Health check and setup..." : 
-                          consoleMessages.some(msg => msg.message.includes("Phase 2")) ?
-                          `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...` :
-                          "📋 Phase 1: Updating existing shows..."
+                          "🔄 Processing..."
                         }
                       </span>
                       <span className="ml-1 animate-pulse">▊</span>

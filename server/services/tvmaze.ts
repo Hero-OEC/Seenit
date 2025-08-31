@@ -281,6 +281,10 @@ export class TVMazeService {
       }
 
       // Phase 2: Continue importing from where we left off
+      console.log(`Phase 2: Starting import from page ${page + 1}...`);
+      let totalPagesProcessed = 0;
+      let totalShowsInPhase2 = 0;
+      
       while (true) {
         // Check if sync is still active (might be paused)
         const [currentStatus] = await db
@@ -297,9 +301,18 @@ export class TVMazeService {
         
         if (shows.length === 0) {
           console.log(`No more shows found at page ${page}, sync complete`);
+          // Mark Phase 2 as complete
+          await db
+            .update(importStatus)
+            .set({
+              phase2Progress: `Phase 2 Complete: ${totalPagesProcessed} pages processed, ${totalShowsInPhase2} shows imported`,
+              updatedAt: new Date()
+            })
+            .where(eq(importStatus.id, currentStatus.id));
           break;
         }
 
+        totalPagesProcessed++;
         console.log(`Processing page ${page} with ${shows.length} shows`);
 
         for (const show of shows) {
@@ -335,6 +348,7 @@ export class TVMazeService {
                 .insert(content)
                 .values(mappedContent);
               imported++;
+              totalShowsInPhase2++;
             }
           } catch (error) {
             const errorMsg = `Error processing show ${show.name} (ID: ${show.id}): ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -343,24 +357,27 @@ export class TVMazeService {
           }
         }
 
-        // Update progress every 5 pages to reduce database load
-        if (page % 5 === 0) {
-          // Get actual count from database instead of using session counters
-          const [actualCount] = await db
-            .select({ count: sql<number>`count(*)` })
-            .from(content)
-            .where(and(eq(content.source, 'tvmaze'), eq(content.type, 'tv')));
-          
-          await db
-            .update(importStatus)
-            .set({
-              currentPage: page + 1,
-              totalImported: actualCount.count,
-              lastSyncAt: new Date(),
-              errors: errors.slice(-10) // Keep last 10 errors
-            })
-            .where(eq(importStatus.id, importStatusRecord.id));
-        }
+        // Update Phase 2 progress after each page
+        const phase2ProgressText = `Page ${page + 1} processed: ${totalShowsInPhase2} new shows imported (${totalPagesProcessed} pages total)`;
+        
+        // Get actual count from database for accurate total
+        const [actualCount] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(content)
+          .where(and(eq(content.source, 'tvmaze'), eq(content.type, 'tv')));
+        
+        await db
+          .update(importStatus)
+          .set({
+            currentPage: page + 1,
+            totalImported: actualCount.count,
+            phase2Progress: phase2ProgressText,
+            lastSyncAt: new Date(),
+            errors: errors.slice(-10) // Keep last 10 errors
+          })
+          .where(eq(importStatus.id, importStatusRecord.id));
+
+        console.log(`Phase 2 Progress: ${phase2ProgressText}`);
 
         page++;
 

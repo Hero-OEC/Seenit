@@ -85,6 +85,7 @@ export const importStatus = pgTable("import_status", {
   totalAvailable: integer("total_available").default(0),
   currentPage: integer("current_page").default(1),
   phase1Progress: text("phase1_progress"),
+  phase2Progress: text("phase2_progress"),
   errors: text("errors").array(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
