@@ -796,6 +796,17 @@ export class AniListService {
     console.log(`Deleted ${deletedContent.length} AniList anime records`);
     return { deleted: deletedContent.length };
   }
+
+  async resetImportStatus(): Promise<void> {
+    console.log('Resetting AniList import status...');
+    
+    // Delete the import status record so it starts fresh
+    await db
+      .delete(importStatus)
+      .where(eq(importStatus.source, 'anilist'));
+    
+    console.log('✅ AniList import status reset - next import will start from the beginning');
+  }
 }
 
 export const anilistService = new AniListService();

@@ -596,6 +596,17 @@ export class TVMazeService {
       console.log('✅ Health check passed - counts are in sync');
     }
   }
+
+  async resetImportStatus(): Promise<void> {
+    console.log('Resetting TVmaze import status...');
+    
+    // Delete the import status record so it starts fresh
+    await db
+      .delete(importStatus)
+      .where(eq(importStatus.source, 'tvmaze'));
+    
+    console.log('✅ TVmaze import status reset - next import will start from the beginning');
+  }
 }
 
 export const tvmazeService = new TVMazeService();

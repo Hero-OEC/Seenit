@@ -507,8 +507,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/import/tvmaze/data", async (_req, res) => {
     try {
       const deletedCount = await storage.deleteContentBySource('tvmaze');
+      
+      // Reset TVmaze import status so it starts from the beginning
+      await tvmazeService.resetImportStatus();
+      
       res.json({ 
-        message: `Deleted ${deletedCount} TVmaze records`,
+        message: `Deleted ${deletedCount} TVmaze records and reset import status`,
         deletedCount 
       });
     } catch (error) {
@@ -586,8 +590,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/import/anilist/data", async (_req, res) => {
     try {
       const result = await anilistService.deleteAllContent();
+      
+      // Reset AniList import status so it starts from the beginning  
+      await anilistService.resetImportStatus();
+      
       res.json({ 
-        message: `Deleted ${result.deleted} AniList records`,
+        message: `Deleted ${result.deleted} AniList records and reset import status`,
         deletedCount: result.deleted 
       });
     } catch (error) {
