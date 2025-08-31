@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
+import { anilistService } from "./services/anilist";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Content routes
@@ -527,12 +528,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import routes for AniList
+  app.get("/api/import/anilist/status", async (_req, res) => {
+    try {
+      const status = await anilistService.getImportStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get AniList import status" });
+    }
+  });
+
+  app.post("/api/import/anilist/start", async (_req, res) => {
+    try {
+      // Start async sync (don't await completion)
+      anilistService.syncAllAnime().catch(error => {
+        console.error('AniList sync failed:', error);
+      });
+      res.json({ message: "AniList import started" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to start AniList import" });
+    }
+  });
+
+  app.post("/api/import/anilist/pause", async (_req, res) => {
+    try {
+      await anilistService.pauseSync();
+      res.json({ message: "AniList import paused" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to pause AniList import" });
+    }
+  });
+
+  app.get("/api/import/anilist/content", async (_req, res) => {
+    try {
+      const content = await anilistService.getImportedContent();
+      res.json({
+        count: content.count,
+        content: content.content.slice(0, 20).map(item => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          rating: item.rating,
+          status: item.status,
+          episodes: item.episodes,
+          season: item.season,
+          studio: item.studio,
+          sourceMaterial: item.sourceMaterial,
+          genres: item.genres
+        })) // Return first 20 for preview with anime-specific details
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get AniList content" });
+    }
+  });
+
   app.delete("/api/import/anilist/data", async (_req, res) => {
     try {
-      const deletedCount = await storage.deleteContentBySource('anilist');
+      const result = await anilistService.deleteAllContent();
       res.json({ 
-        message: `Deleted ${deletedCount} AniList records`,
-        deletedCount 
+        message: `Deleted ${result.deleted} AniList records`,
+        deletedCount: result.deleted 
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete AniList data" });

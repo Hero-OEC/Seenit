@@ -38,16 +38,41 @@ interface TVMazeContent {
   }>;
 }
 
+interface AniListContent {
+  count: number;
+  content: Array<{
+    id: string;
+    title: string;
+    type: string;
+    year: number | null;
+    rating: number | null;
+    status: string;
+    episodes: number | null;
+    season: number | null;
+    studio: string | null;
+    sourceMaterial: string | null;
+    genres: string[] | null;
+  }>;
+}
+
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
   const [consoleMessages, setConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const consoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
+  const lastAniListStatusRef = useRef<ImportStatus | null>(null);
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tvmaze/status'],
+    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
+    staleTime: 0, // Always refetch, don't use stale data
+  });
+
+  // Query for AniList import status
+  const { data: anilistStatus, isLoading: anilistStatusLoading } = useQuery<ImportStatus | null>({
+    queryKey: ['/api/import/anilist/status'],
     refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
     staleTime: 0, // Always refetch, don't use stale data
   });
@@ -69,7 +94,7 @@ function Import() {
     }
   }, [consoleMessages]);
 
-  // Watch for status changes and generate console messages
+  // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
     if (!tvmazeStatus) return;
     
@@ -144,9 +169,88 @@ function Import() {
 
   }, [tvmazeStatus]);
 
+  // Watch for AniList status changes and generate console messages
+  useEffect(() => {
+    if (!anilistStatus) return;
+    
+    const lastStatus = lastAniListStatusRef.current;
+    lastAniListStatusRef.current = anilistStatus;
+    
+    // Don't log on first load
+    if (!lastStatus) {
+      if (anilistStatus.isActive) {
+        addConsoleMessage("🔄 AniList import is currently active", 'info');
+        addConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
+      } else {
+        addConsoleMessage("⏸️ AniList import is paused", 'warning');
+      }
+      addConsoleMessage(`📊 Current status: ${anilistStatus.totalImported} anime imported`, 'info');
+      return;
+    }
+
+    // Status changed from inactive to active
+    if (!lastStatus.isActive && anilistStatus.isActive) {
+      addConsoleMessage("🚀 AniList import started", 'success');
+      addConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+    }
+
+    // Status changed from active to inactive
+    if (lastStatus.isActive && !anilistStatus.isActive) {
+      addConsoleMessage("⏹️ AniList import stopped", 'warning');
+    }
+
+    // Page progress - only log actual page changes for Phase 2
+    if (lastStatus.currentPage !== anilistStatus.currentPage && anilistStatus.isActive) {
+      if (anilistStatus.currentPage === 0) {
+        addConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
+      } else if (anilistStatus.currentPage > 1) {
+        addConsoleMessage(`📄 Phase 2: Processing page ${anilistStatus.currentPage} (importing new anime)`, 'info');
+      }
+    }
+
+    // Import count increased
+    if (lastStatus.totalImported < anilistStatus.totalImported) {
+      const diff = anilistStatus.totalImported - lastStatus.totalImported;
+      addConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anilistStatus.totalImported})`, 'success');
+    }
+
+    // Phase 1 progress updated
+    if (lastStatus.phase1Progress !== anilistStatus.phase1Progress && anilistStatus.phase1Progress) {
+      if (anilistStatus.phase1Progress.includes('Phase 1 Complete')) {
+        addConsoleMessage(`✅ ${anilistStatus.phase1Progress}`, 'success');
+      } else {
+        addConsoleMessage(`📋 Phase 1 Progress: ${anilistStatus.phase1Progress} anime updated`, 'info');
+      }
+    }
+
+    // Phase 2 progress updated
+    if (lastStatus.phase2Progress !== anilistStatus.phase2Progress && anilistStatus.phase2Progress) {
+      if (anilistStatus.phase2Progress.includes('Complete')) {
+        addConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
+      } else {
+        addConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
+      }
+    }
+
+    // Errors
+    if (anilistStatus.errors && anilistStatus.errors.length > (lastStatus.errors?.length || 0)) {
+      const newErrors = anilistStatus.errors.slice(lastStatus.errors?.length || 0);
+      newErrors.forEach(error => {
+        addConsoleMessage(`❌ AniList Error: ${error}`, 'error');
+      });
+    }
+  }, [anilistStatus]);
+
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
+    refetchInterval: 10000, // Fixed 10s polling for content
+    staleTime: 5000, // Allow some stale data for content
+  });
+
+  // Query for AniList content
+  const { data: anilistContent } = useQuery<AniListContent>({
+    queryKey: ['/api/import/anilist/content', refreshKey],
     refetchInterval: 10000, // Fixed 10s polling for content
     staleTime: 5000, // Allow some stale data for content
   });
@@ -164,6 +268,22 @@ function Import() {
     mutationFn: () => apiRequest('POST', '/api/import/tvmaze/pause'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
+    },
+  });
+
+  // Mutation to start AniList import
+  const startAniListImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/anilist/start'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
+    },
+  });
+
+  // Mutation to pause AniList import
+  const pauseAniListImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/anilist/pause'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
     },
   });
 
@@ -188,6 +308,7 @@ function Import() {
   const deleteAniListData = useMutation({
     mutationFn: () => apiRequest('DELETE', '/api/import/anilist/data'),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/content'] });
       queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
       setRefreshKey(prev => prev + 1);
     },
@@ -257,6 +378,8 @@ function Import() {
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/content'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/content'] });
             }}
             data-testid="button-refresh"
           >
@@ -373,17 +496,60 @@ function Import() {
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                <Badge className="bg-gray-100 text-gray-800" data-testid="status-anilist">Not Configured</Badge>
+                {getStatusBadge(
+                  anilistStatus?.isActive || false, 
+                  (anilistContent?.count || 0) > 0,
+                  anilistStatusLoading && !anilistStatus
+                )}
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Last Sync:</span>
-                <span className="text-gray-400" data-testid="text-anilist-sync">Never</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300" data-testid="text-anilist-sync">
+                  {formatDate(anilistStatus?.lastSyncAt || null)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Content:</span>
-                <span className="text-gray-400" data-testid="text-anilist-count">0</span>
+                <span className="font-medium text-gray-900 dark:text-white" data-testid="text-anilist-count">
+                  {anilistContent?.count || 0}
+                </span>
               </div>
-              <div className="pt-4 border-t">
+              
+              {anilistStatus?.isActive && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 dark:text-gray-400">Progress:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      {anilistStatus.totalImported} imported
+                    </span>
+                  </div>
+                  <Progress value={Math.min((anilistStatus.totalImported / Math.max(anilistStatus.totalAvailable || 1, anilistStatus.totalImported)) * 100, 100)} className="h-2" />
+                </div>
+              )}
+              
+              <div className="pt-4 border-t space-y-2">
+                <div className="flex gap-2">
+                  <Button
+                    variant={anilistStatus?.isActive ? "destructive" : "default"}
+                    size="sm"
+                    onClick={() => anilistStatus?.isActive ? pauseAniListImport.mutate() : startAniListImport.mutate()}
+                    disabled={startAniListImport.isPending || pauseAniListImport.isPending}
+                    className="flex-1 flex items-center gap-2"
+                    data-testid={anilistStatus?.isActive ? "button-pause-anilist" : "button-start-anilist"}
+                  >
+                    {anilistStatus?.isActive ? (
+                      <>
+                        <Pause className="w-4 h-4" />
+                        {pauseAniListImport.isPending ? 'Pausing...' : 'Pause'}
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" />
+                        {startAniListImport.isPending ? 'Starting...' : 'Start Import'}
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -548,7 +714,7 @@ function Import() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-purple-600" data-testid="stat-anilist">
-                  0
+                  {anilistContent?.count || 0}
                 </div>
                 <div className="text-sm text-gray-500">AniList Anime</div>
               </div>
