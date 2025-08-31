@@ -17,7 +17,7 @@ export default function Schedule() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortBy>("air_date");
   const [location] = useLocation();
-  const [openDays, setOpenDays] = useState<Set<number>>(new Set([0])); // Today is open by default
+  const [openDays, setOpenDays] = useState<Set<number>>(new Set([1])); // Today is open by default (index 1 now)
 
   // Parse URL parameters to set initial content type
   useEffect(() => {
@@ -48,43 +48,40 @@ export default function Schedule() {
     { value: "reviews", label: "Highest Rated" }
   ];
 
-  // Generate 7 days starting from today
+  // Generate 7 days: tomorrow, today, and 5 previous days
   const generateWeekDays = () => {
     const days = [];
     const today = new Date();
     
-    for (let i = 0; i < 7; i++) {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Generate days from tomorrow to 5 days ago
+    // Day offset: +1 (tomorrow), 0 (today), -1 (yesterday), -2, -3, -4, -5
+    const dayOffsets = [1, 0, -1, -2, -3, -4, -5];
+    
+    dayOffsets.forEach((offset, index) => {
       const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      date.setDate(today.getDate() + offset);
       
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let dayName;
+      if (offset === 1) dayName = 'Tomorrow';
+      else if (offset === 0) dayName = 'Today';
+      else if (offset === -1) dayName = 'Yesterday';
+      else dayName = dayNames[date.getDay()];
       
       days.push({
-        index: i,
-        dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()],
+        index,
+        dayName,
         fullDayName: dayNames[date.getDay()],
         date: date.getDate(),
         month: monthNames[date.getMonth()],
         fullDate: date,
-        isToday: i === 0
+        isToday: offset === 0
       });
-    }
+    });
     
-    // Reorder so Tomorrow comes before Today, but keep Today as the main focus
-    const reorderedDays = [];
-    if (days.length > 1) {
-      reorderedDays.push(days[1]); // Tomorrow first
-      reorderedDays.push(days[0]); // Today second
-      // Add the rest of the days
-      for (let i = 2; i < days.length; i++) {
-        reorderedDays.push(days[i]);
-      }
-    } else {
-      return days; // Fallback if there's only one day
-    }
-    
-    return reorderedDays;
+    return days;
   };
 
   const weekDays = generateWeekDays();
