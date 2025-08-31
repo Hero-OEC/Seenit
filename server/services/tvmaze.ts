@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { content, importStatus, type Content, type InsertContent, type ImportStatus } from "@shared/schema";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 
 interface TVMazeShow {
   id: number;
@@ -342,11 +342,17 @@ export class TVMazeService {
 
         // Update progress every 5 pages to reduce database load
         if (page % 5 === 0) {
+          // Get actual count from database instead of using session counters
+          const [actualCount] = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(content)
+            .where(and(eq(content.source, 'tvmaze'), eq(content.type, 'tv')));
+          
           await db
             .update(importStatus)
             .set({
               currentPage: page + 1,
-              totalImported: imported + updated,
+              totalImported: actualCount.count,
               lastSyncAt: new Date(),
               errors: errors.slice(-10) // Keep last 10 errors
             })
@@ -359,11 +365,17 @@ export class TVMazeService {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Mark as complete
+      // Mark as complete and update final count
+      const [finalCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(content)
+        .where(and(eq(content.source, 'tvmaze'), eq(content.type, 'tv')));
+      
       await db
         .update(importStatus)
         .set({
           isActive: false,
+          totalImported: finalCount.count,
           lastSyncAt: new Date(),
           errors: errors.slice(-10)
         })
