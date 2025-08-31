@@ -147,10 +147,20 @@ export class TVMazeService {
     const episodes = show._embedded?.episodes || [];
     const totalEpisodes = episodes.length;
     
-    // Calculate total seasons
-    const seasons = episodes.reduce((acc, ep) => {
-      return Math.max(acc, ep.season);
-    }, 0) || 0;
+    // Calculate total seasons - handle year-based vs traditional season numbering
+    let seasons = 0;
+    if (episodes.length > 0) {
+      const uniqueSeasons = new Set(episodes.map(ep => ep.season));
+      const maxSeason = Math.max(...uniqueSeasons);
+      
+      // If the max season is greater than 50, it's likely year-based (e.g., 2024, 2025)
+      // Count unique years instead of using the max value
+      if (maxSeason > 50) {
+        seasons = uniqueSeasons.size; // Count of unique years/seasons
+      } else {
+        seasons = maxSeason; // Traditional season numbering
+      }
+    }
 
     // Process episode data into structured format
     const episodeData = episodes.length > 0 ? {
