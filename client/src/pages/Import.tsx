@@ -473,9 +473,12 @@ function Import() {
                     <div className="flex items-center text-green-400">
                       <span className="text-gray-500 text-xs mr-2">{new Date().toLocaleTimeString()}</span>
                       <span>
-                        {tvmazeStatus.currentPage === 0 ? 
-                          "🔄 Updating existing shows..." : 
-                          `📄 Processing page ${tvmazeStatus.currentPage}...`
+                        {/* Check if we're in Phase 1 based on recent activity pattern */}
+                        {tvmazeStatus.currentPage === 26 && consoleMessages.some(msg => msg.message.includes("Phase 1")) ? 
+                          "📋 Phase 1: Updating existing shows..." :
+                          tvmazeStatus.currentPage === 0 ? 
+                          "🔄 Health check and setup..." : 
+                          `📄 Phase 2: Processing page ${tvmazeStatus.currentPage}...`
                         }
                       </span>
                       <span className="ml-1 animate-pulse">▊</span>
