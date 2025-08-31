@@ -270,6 +270,9 @@ export class TVMazeService {
     }
 
     try {
+      // Health Check: Detect and fix count disparities automatically
+      await this.performHealthCheck(importStatusRecord);
+
       // Phase 1: Update existing airing/upcoming shows first (for new episodes/seasons)
       if (page === 0 || page === (importStatusRecord.currentPage || 0)) {
         console.log('Phase 1: Updating existing airing/upcoming shows for new episodes/seasons...');
@@ -514,6 +517,42 @@ export class TVMazeService {
 
     // Start sync in background
     this.syncAllShows().catch(console.error);
+  }
+
+  private async performHealthCheck(importStatusRecord: ImportStatus): Promise<void> {
+    console.log('Performing sync health check...');
+    
+    // Get actual count from database
+    const [actualCount] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(content)
+      .where(and(eq(content.source, 'tvmaze'), eq(content.type, 'tv')));
+    
+    const trackedCount = importStatusRecord.totalImported || 0;
+    const disparity = Math.abs(actualCount.count - trackedCount);
+    const disparityPercent = trackedCount > 0 ? (disparity / trackedCount) * 100 : 100;
+    
+    console.log(`Health Check: Database=${actualCount.count}, Tracked=${trackedCount}, Disparity=${disparity} (${disparityPercent.toFixed(1)}%)`);
+    
+    // If disparity is > 10% or > 100 shows, auto-correct it
+    if (disparityPercent > 10 || disparity > 100) {
+      console.log(`🔧 Auto-correcting large disparity: ${trackedCount} → ${actualCount.count}`);
+      
+      await db
+        .update(importStatus)
+        .set({
+          totalImported: actualCount.count,
+          updatedAt: new Date()
+        })
+        .where(eq(importStatus.id, importStatusRecord.id));
+      
+      // Update our local record
+      importStatusRecord.totalImported = actualCount.count;
+      
+      console.log('✅ Count disparity auto-corrected');
+    } else {
+      console.log('✅ Health check passed - counts are in sync');
+    }
   }
 }
 
