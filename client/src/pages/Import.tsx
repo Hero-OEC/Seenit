@@ -275,7 +275,7 @@ function Import() {
 
   // Query for AniList content
   const { data: anilistContent } = useQuery<AniListContent>({
-    queryKey: ['/api/import/anilist/content', refreshKey],
+    queryKey: ['/api/import/anilist/content'],
     refetchInterval: 10000, // Fixed 10s polling for content
     staleTime: 5000, // Allow some stale data for content
   });
