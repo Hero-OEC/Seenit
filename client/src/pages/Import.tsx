@@ -83,7 +83,7 @@ function Import() {
   const addTvmazeConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     setTvmazeConsoleMessages(prev => {
-      const newMessages = [...prev, { id: Date.now(), timestamp, message, type }];
+      const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
       // Keep only last 50 messages
       return newMessages.slice(-50);
     });
@@ -93,7 +93,7 @@ function Import() {
   const addAnilistConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     setAnilistConsoleMessages(prev => {
-      const newMessages = [...prev, { id: Date.now(), timestamp, message, type }];
+      const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
       // Keep only last 50 messages
       return newMessages.slice(-50);
     });
