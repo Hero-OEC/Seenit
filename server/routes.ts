@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
+import { jikanService } from "./services/jikan";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -532,7 +533,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import routes for Jikan
+  app.get("/api/import/jikan/status", async (_req, res) => {
+    try {
+      const status = await jikanService.getImportStatus();
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get Jikan import status" });
+    }
+  });
 
+  app.post("/api/import/jikan/start", async (_req, res) => {
+    try {
+      // Start async import (don't await completion)
+      jikanService.startImport().catch(error => {
+        console.error('Jikan import failed:', error);
+      });
+      res.json({ message: "Jikan import started" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to start Jikan import" });
+    }
+  });
+
+  app.post("/api/import/jikan/pause", async (_req, res) => {
+    try {
+      await jikanService.pauseImport();
+      res.json({ message: "Jikan import paused" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to pause Jikan import" });
+    }
+  });
+
+  app.get("/api/import/jikan/content", async (_req, res) => {
+    try {
+      const count = await jikanService.getContentCount();
+      const content = await jikanService.getSampleContent(20);
+      res.json({
+        count,
+        content: content.map(item => ({
+          id: item.id,
+          title: item.title,
+          year: item.year,
+          rating: item.rating,
+          episodes: item.episodes,
+          studio: item.studio
+        }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get Jikan content" });
+    }
+  });
+
+  app.delete("/api/import/jikan/data", async (_req, res) => {
+    try {
+      await jikanService.deleteAllData();
+      res.json({ 
+        message: "Deleted all Jikan records and reset import status",
+        deletedCount: await jikanService.getContentCount()
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete Jikan data" });
+    }
+  });
 
   app.delete("/api/import/:source/data", async (req, res) => {
     try {
