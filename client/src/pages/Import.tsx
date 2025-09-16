@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, RefreshCw, Database, Calendar, Clock, Trash2, Terminal } from "lucide-react";
+import { Play, Pause, RefreshCw, Database, Calendar, Clock, Trash2, Terminal, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ImportStatus {
@@ -60,6 +60,17 @@ function Import() {
   const jikanConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
   const lastJikanStatusRef = useRef<ImportStatus | null>(null);
+  
+  // Delete confirmation dialog state
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    source: string;
+    action: (() => void) | null;
+  }>({
+    isOpen: false,
+    source: '',
+    action: null
+  });
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
@@ -396,9 +407,22 @@ function Import() {
   };
 
   const confirmDelete = (source: string, action: () => void) => {
-    if (window.confirm(`Are you sure you want to delete ALL ${source} data? This action cannot be undone.`)) {
-      action();
+    setDeleteDialog({
+      isOpen: true,
+      source,
+      action
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteDialog.action) {
+      deleteDialog.action();
     }
+    setDeleteDialog({ isOpen: false, source: '', action: null });
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, source: '', action: null });
   };
 
   return (
@@ -873,6 +897,46 @@ function Import() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteDialog.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-confirmation-modal">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Confirm Deletion
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700 dark:text-gray-300">
+                Are you sure you want to delete <strong>ALL {deleteDialog.source} data</strong>?
+              </p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteCancel}
+                  className="flex-1"
+                  data-testid="button-cancel-delete"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirm}
+                  className="flex-1"
+                  data-testid="button-confirm-delete"
+                >
+                  Delete All Data
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
