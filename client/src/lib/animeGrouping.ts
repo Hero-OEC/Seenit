@@ -52,8 +52,9 @@ export function groupAnimeIntoSeries(animeList: Content[]): AnimeSeries[] {
   }
 
   // Sort seasons within each series and finalize
-  for (const series of seriesMap.values()) {
-    series.seasons.sort((a, b) => {
+  const seriesArray = Array.from(seriesMap.values());
+  for (const series of seriesArray) {
+    series.seasons.sort((a: Content, b: Content) => {
       const aSeasonNum = a.seasonNumber || 1;
       const bSeasonNum = b.seasonNumber || 1;
       return aSeasonNum - bSeasonNum;
