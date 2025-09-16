@@ -31,14 +31,14 @@ export default function ContentDetails() {
   });
 
   // Fetch all seasons for anime series
-  const { data: allAnimeContent } = useQuery<Content[]>({
+  const { data: animeResponse } = useQuery<{content: Content[], pagination: any}>({
     queryKey: ["/api/content/type/anime?limit=100"], // Get more anime to find all seasons
     enabled: content?.type === 'anime' && !!content?.seriesKey,
   });
 
   // Get seasons for this anime series if it's anime
-  const seriesSeasons = content?.type === 'anime' && content?.seriesKey && allAnimeContent
-    ? getSeriesSeasons(allAnimeContent, content.seriesKey)
+  const seriesSeasons = content?.type === 'anime' && content?.seriesKey && animeResponse?.content
+    ? getSeriesSeasons(animeResponse.content, content.seriesKey)
     : [];
 
   const hasMultipleSeasons = seriesSeasons.length > 1;
