@@ -221,7 +221,7 @@ export class JikanService {
     }
   }
 
-  // Get episodes for an anime
+  // Get episodes for an anime (single page)
   async getAnimeEpisodes(malId: number, page: number = 1): Promise<ProcessedEpisode[]> {
     try {
       const response = await this.makeRequest<JikanResponse<JikanEpisode[]>>(`/anime/${malId}/episodes?page=${page}`);
@@ -242,6 +242,79 @@ export class JikanService {
       console.error(`[Jikan] Failed to fetch episodes for anime ${malId}:`, error);
       return [];
     }
+  }
+
+  // Get ALL episodes for an anime (pagination helper)
+  async getAllEpisodes(malId: number): Promise<ProcessedEpisode[]> {
+    const allEpisodes: ProcessedEpisode[] = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      try {
+        const response = await this.makeRequest<JikanResponse<JikanEpisode[]>>(`/anime/${malId}/episodes?page=${page}`);
+        
+        if (response.data && response.data.length > 0) {
+          const episodes = response.data.map((episode, index) => ({
+            id: episode.mal_id,
+            episodeNumber: index + 1 + ((page - 1) * 100),
+            title: episode.title,
+            titleJapanese: episode.title_japanese,
+            airdate: episode.aired,
+            score: episode.score,
+            filler: episode.filler,
+            recap: episode.recap,
+            synopsis: episode.synopsis,
+            forumUrl: episode.forum_url
+          }));
+          
+          allEpisodes.push(...episodes);
+          
+          // Check if we have more pages based on response pagination
+          hasMore = response.pagination?.has_next_page || false;
+          page++;
+        } else {
+          hasMore = false;
+        }
+      } catch (error) {
+        console.error(`[Jikan] Failed to fetch episodes page ${page} for anime ${malId}:`, error);
+        hasMore = false;
+      }
+    }
+
+    console.log(`[Jikan] Fetched ${allEpisodes.length} episodes for anime ${malId}`);
+    return allEpisodes;
+  }
+
+  // Paginated anime fetcher for different endpoints
+  async getPaginatedAnime(endpoint: string, maxPages: number = 50): Promise<JikanAnime[]> {
+    const allAnime: JikanAnime[] = [];
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore && page <= maxPages) {
+      try {
+        const url = endpoint.includes('?') ? `${endpoint}&page=${page}` : `${endpoint}?page=${page}`;
+        const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(url);
+        
+        if (response.data && response.data.length > 0) {
+          allAnime.push(...response.data);
+          
+          // Check pagination
+          hasMore = response.pagination?.has_next_page || false;
+          
+          console.log(`[Jikan] Fetched page ${page}: ${response.data.length} anime (total: ${allAnime.length})`);
+          page++;
+        } else {
+          hasMore = false;
+        }
+      } catch (error) {
+        console.error(`[Jikan] Failed to fetch page ${page} from ${endpoint}:`, error);
+        hasMore = false;
+      }
+    }
+
+    return allAnime;
   }
 
   // Search anime by query
@@ -348,7 +421,7 @@ export class JikanService {
       let importedCount = 0;
       let errorMessages: string[] = [];
 
-      for (const anime of currentSeasonAnime.slice(0, 50)) { // Limit to first 50 for testing
+      for (const anime of currentSeasonAnime) { // Process all current season anime
         try {
           await this.waitForRateLimit();
           
