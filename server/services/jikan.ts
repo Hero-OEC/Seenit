@@ -1,7 +1,7 @@
 import { db } from "../db";
 import { content, importStatus } from "@shared/schema";
 import type { InsertContent } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 
 // Jikan API types based on JSON response structure
 interface JikanAnime {
@@ -352,9 +352,9 @@ export class JikanService {
   }
 
   // Convert Jikan anime to our content format
-  private async convertToContent(anime: JikanAnime): Promise<InsertContent> {
-    // Get all episodes for detailed episode data
-    const episodes = await this.getAnimeEpisodes(anime.mal_id);
+  private async convertToContent(anime: JikanAnime, includeAllEpisodes: boolean = false): Promise<InsertContent> {
+    // Get episodes - either single page or all episodes based on flag
+    const episodes = includeAllEpisodes ? await this.getAllEpisodes(anime.mal_id) : await this.getAnimeEpisodes(anime.mal_id);
     
     // Extract studio name
     const studioName = anime.studios?.[0]?.name || null;
@@ -396,7 +396,7 @@ export class JikanService {
     };
   }
 
-  // Start import process
+  // Start comprehensive multi-phase import process
   async startImport(): Promise<void> {
     if (this.isSyncing) {
       console.log('[Jikan] Import already running');
@@ -404,86 +404,321 @@ export class JikanService {
     }
 
     this.isSyncing = true;
-    console.log('[Jikan] Starting Jikan import...');
+    console.log('[Jikan] Starting comprehensive Jikan import...');
+
+    let importedCount = 0;
+    let updatedCount = 0;
+    let errorMessages: string[] = [];
 
     try {
-      // Update import status
+      // Get or create import status
+      const [existingStatus] = await db
+        .select()
+        .from(importStatus)
+        .where(eq(importStatus.source, 'jikan'))
+        .limit(1);
+
+      // Initialize or resume cursor
+      let cursor = existingStatus?.cursor as any || { phase: 1, step: 'start' };
+
       await this.updateImportStatus({
         isActive: true,
-        currentPage: 1,
-        totalImported: 0,
+        totalImported: existingStatus?.totalImported || 0,
         errors: [],
-        phase1Progress: 'Starting Jikan import...'
+        cursor,
+        phase1Progress: 'Starting comprehensive import...'
       });
 
-      // Start with current season anime
-      const currentSeasonAnime = await this.getCurrentSeasonAnime();
-      let importedCount = 0;
-      let errorMessages: string[] = [];
+      // PHASE 1: Update existing active anime
+      if (cursor.phase <= 1) {
+        console.log('[Jikan] Phase 1: Updating existing active anime...');
+        const result = await this.updateExistingActiveAnime();
+        updatedCount += result.updated;
+        errorMessages.push(...result.errors);
+        
+        cursor = { phase: 2, step: 'start', year: new Date().getFullYear() };
+        await this.updateImportStatus({
+          cursor,
+          phase1Progress: `Phase 1 Complete: ${result.updated} anime updated`,
+          phase2Progress: 'Starting seasonal backfill...'
+        });
+      }
 
-      for (const anime of currentSeasonAnime) { // Process all current season anime
-        try {
-          await this.waitForRateLimit();
-          
-          console.log(`[Jikan] Processing anime: ${anime.title} (${anime.mal_id})`);
-          
-          // Check if already exists
-          const existing = await db
-            .select()
-            .from(content)
-            .where(eq(content.sourceId, anime.mal_id.toString()))
-            .limit(1);
+      // PHASE 2: Seasonal backfill
+      if (cursor.phase <= 2) {
+        console.log('[Jikan] Phase 2: Starting seasonal backfill...');
+        const result = await this.importSeasonalAnime(cursor);
+        importedCount += result.imported;
+        errorMessages.push(...result.errors);
+        
+        cursor = { phase: 3, step: 'start', page: 1 };
+        await this.updateImportStatus({
+          cursor,
+          totalImported: (existingStatus?.totalImported || 0) + result.imported,
+          phase2Progress: `Phase 2 Complete: ${result.imported} anime imported from seasons`,
+          phase3Progress: 'Starting top anime import...'
+        });
+      }
 
-          if (existing.length === 0) {
-            const contentData = await this.convertToContent(anime);
-            await db.insert(content).values(contentData);
-            importedCount++;
-            console.log(`[Jikan] Imported: ${anime.title}`);
-          } else {
-            console.log(`[Jikan] Skipped (exists): ${anime.title}`);
-          }
-
-          // Update progress
-          await this.updateImportStatus({
-            isActive: true,
-            currentPage: 1,
-            totalImported: importedCount,
-            errors: errorMessages,
-            phase1Progress: `Processing: ${anime.title}`
-          });
-
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          errorMessages.push(errorMessage);
-          console.error(`[Jikan] Error processing ${anime.title}:`, error);
-        }
+      // PHASE 3: Top anime lists
+      if (cursor.phase <= 3) {
+        console.log('[Jikan] Phase 3: Importing top anime...');
+        const result = await this.importTopAnime(cursor);
+        importedCount += result.imported;
+        errorMessages.push(...result.errors);
+        
+        cursor = { phase: 4, step: 'complete' };
+        await this.updateImportStatus({
+          cursor,
+          totalImported: (existingStatus?.totalImported || 0) + importedCount,
+          phase3Progress: `Phase 3 Complete: ${result.imported} top anime imported`
+        });
       }
 
       // Complete import
       await this.updateImportStatus({
         isActive: false,
-        currentPage: 1,
-        totalImported: importedCount,
-        errors: errorMessages,
-        phase1Progress: `Import complete: ${importedCount} imported, ${errorMessages.length} errors`,
+        cursor: { phase: 'complete' },
         lastSyncAt: new Date()
       });
 
-      console.log(`[Jikan] Import complete: ${importedCount} imported, ${errorMessages.length} errors`);
+      console.log(`[Jikan] Import complete: ${importedCount} imported, ${updatedCount} updated, ${errorMessages.length} errors`);
 
     } catch (error) {
       console.error('[Jikan] Import failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await this.updateImportStatus({
         isActive: false,
-        currentPage: 1,
-        totalImported: 0,
         errors: [errorMessage],
         phase1Progress: `Import failed: ${errorMessage}`
       });
     } finally {
       this.isSyncing = false;
     }
+  }
+
+  // PHASE 1: Update existing active anime
+  private async updateExistingActiveAnime(): Promise<{ updated: number; errors: string[] }> {
+    console.log('[Jikan] Checking existing anime for updates...');
+    
+    // Get all existing anime that are airing or upcoming
+    const existingActiveAnime = await db
+      .select()
+      .from(content)
+      .where(
+        and(
+          eq(content.source, 'jikan'),
+          or(
+            eq(content.status, 'airing'),
+            eq(content.status, 'upcoming')
+          )
+        )
+      );
+
+    console.log(`[Jikan] Found ${existingActiveAnime.length} existing airing/upcoming anime to update`);
+
+    let updated = 0;
+    const errors: string[] = [];
+
+    for (const anime of existingActiveAnime) {
+      try {
+        // Check if sync is still active
+        const [currentStatus] = await db
+          .select()
+          .from(importStatus)
+          .where(eq(importStatus.source, 'jikan'))
+          .limit(1);
+        
+        if (!currentStatus?.isActive) {
+          console.log('[Jikan] Sync paused during existing anime updates');
+          break;
+        }
+
+        // Fetch latest data for this anime
+        const jikanId = parseInt(anime.sourceId);
+        const detailedAnime = await this.getAnimeById(jikanId);
+        
+        if (detailedAnime) {
+          const mappedContent = await this.convertToContent(detailedAnime, true); // Include all episodes
+
+          // Update existing anime with latest data
+          await db
+            .update(content)
+            .set({
+              ...mappedContent,
+              lastUpdated: new Date()
+            })
+            .where(eq(content.id, anime.id));
+          
+          updated++;
+          
+          if (updated % 5 === 0) {
+            console.log(`[Jikan] Updated ${updated}/${existingActiveAnime.length} existing anime`);
+            
+            // Update status with Phase 1 progress
+            await this.updateImportStatus({
+              phase1Progress: `Updating: ${updated}/${existingActiveAnime.length} (${anime.title})`
+            });
+          }
+        }
+        
+      } catch (error) {
+        const errorMsg = `Error updating existing anime ${anime.title} (ID: ${anime.sourceId}): ${error}`;
+        console.error(`[Jikan] ${errorMsg}`);
+        errors.push(errorMsg);
+      }
+    }
+    
+    console.log(`[Jikan] Phase 1 complete: ${updated} anime updated`);
+    return { updated, errors };
+  }
+
+  // PHASE 2: Import seasonal anime
+  private async importSeasonalAnime(cursor: any): Promise<{ imported: number; errors: string[] }> {
+    const currentYear = new Date().getFullYear();
+    const seasons = ['winter', 'spring', 'summer', 'fall'];
+    let imported = 0;
+    const errors: string[] = [];
+    
+    const startYear = cursor.year || currentYear;
+    const startSeason = cursor.season || 0;
+    
+    console.log(`[Jikan] Phase 2: Starting seasonal import from ${startYear}`);
+    
+    // Import anime from current year back to 2020 (reasonable range)
+    for (let year = startYear; year >= 2020; year--) {
+      const seasonStart = year === startYear ? startSeason : 0;
+      
+      for (let seasonIdx = seasonStart; seasonIdx < seasons.length; seasonIdx++) {
+        const season = seasons[seasonIdx];
+        
+        try {
+          console.log(`[Jikan] Importing ${season} ${year} anime...`);
+          
+          const seasonalAnime = await this.getPaginatedAnime(`/seasons/${year}/${season}`, 10); // Limit to 10 pages per season
+          
+          for (const anime of seasonalAnime) {
+            // Check if sync is still active
+            const [currentStatus] = await db
+              .select()
+              .from(importStatus)
+              .where(eq(importStatus.source, 'jikan'))
+              .limit(1);
+            
+            if (!currentStatus?.isActive) {
+              console.log('[Jikan] Sync paused during seasonal import');
+              return { imported, errors };
+            }
+
+            try {
+              // Check if already exists (scoped by source)
+              const [existing] = await db
+                .select()
+                .from(content)
+                .where(
+                  and(
+                    eq(content.source, 'jikan'),
+                    eq(content.sourceId, anime.mal_id.toString())
+                  )
+                )
+                .limit(1);
+
+              if (!existing) {
+                const contentData = await this.convertToContent(anime);
+                await db.insert(content).values(contentData);
+                imported++;
+                
+                if (imported % 10 === 0) {
+                  console.log(`[Jikan] Seasonal import progress: ${imported} anime imported`);
+                  await this.updateImportStatus({
+                    phase2Progress: `Importing ${season} ${year}: ${imported} total imported`,
+                    cursor: { phase: 2, year, season: seasonIdx }
+                  });
+                }
+              }
+            } catch (error) {
+              const errorMsg = `Error importing ${anime.title}: ${error}`;
+              errors.push(errorMsg);
+              console.error(`[Jikan] ${errorMsg}`);
+            }
+          }
+          
+        } catch (error) {
+          const errorMsg = `Error importing ${season} ${year}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[Jikan] ${errorMsg}`);
+        }
+      }
+    }
+    
+    console.log(`[Jikan] Phase 2 complete: ${imported} seasonal anime imported`);
+    return { imported, errors };
+  }
+
+  // PHASE 3: Import top anime
+  private async importTopAnime(cursor: any): Promise<{ imported: number; errors: string[] }> {
+    let imported = 0;
+    const errors: string[] = [];
+    
+    console.log('[Jikan] Phase 3: Starting top anime import...');
+    
+    try {
+      // Get top anime with pagination (limit to 5 pages = ~125 top anime)
+      const topAnime = await this.getPaginatedAnime('/top/anime', 5);
+      
+      for (const anime of topAnime) {
+        // Check if sync is still active
+        const [currentStatus] = await db
+          .select()
+          .from(importStatus)
+          .where(eq(importStatus.source, 'jikan'))
+          .limit(1);
+        
+        if (!currentStatus?.isActive) {
+          console.log('[Jikan] Sync paused during top anime import');
+          break;
+        }
+
+        try {
+          // Check if already exists (scoped by source)
+          const [existing] = await db
+            .select()
+            .from(content)
+            .where(
+              and(
+                eq(content.source, 'jikan'),
+                eq(content.sourceId, anime.mal_id.toString())
+              )
+            )
+            .limit(1);
+
+          if (!existing) {
+            const contentData = await this.convertToContent(anime);
+            await db.insert(content).values(contentData);
+            imported++;
+            
+            if (imported % 10 === 0) {
+              console.log(`[Jikan] Top anime import progress: ${imported} imported`);
+              await this.updateImportStatus({
+                phase3Progress: `Top anime import: ${imported} imported`
+              });
+            }
+          }
+        } catch (error) {
+          const errorMsg = `Error importing top anime ${anime.title}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[Jikan] ${errorMsg}`);
+        }
+      }
+      
+    } catch (error) {
+      const errorMsg = `Error importing top anime: ${error}`;
+      errors.push(errorMsg);
+      console.error(`[Jikan] ${errorMsg}`);
+    }
+    
+    console.log(`[Jikan] Phase 3 complete: ${imported} top anime imported`);
+    return { imported, errors };
   }
 
   // Pause import
@@ -506,6 +741,7 @@ export class JikanService {
     phase2Progress: string;
     phase3Progress: string;
     errors: string[];
+    cursor: any;
     lastSyncAt: Date | null;
   }>): Promise<void> {
     const existing = await db
@@ -522,7 +758,7 @@ export class JikanService {
     } else {
       await db
         .update(importStatus)
-        .set(updates)
+        .set({...updates, updatedAt: new Date()})
         .where(eq(importStatus.source, 'jikan'));
     }
   }
