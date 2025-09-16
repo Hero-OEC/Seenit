@@ -39,7 +39,7 @@ interface TVMazeContent {
 }
 
 
-interface AniDBContent {
+interface JikanContent {
   count: number;
   content: Array<{
     id: string;
@@ -47,7 +47,7 @@ interface AniDBContent {
     year: number | null;
     rating: number | null;
     episodes: number | null;
-    episodeCount: number; // Number of detailed episodes from AniDB
+    studio: string | null;
   }>;
 }
 
@@ -55,11 +55,11 @@ function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
   const [tvmazeConsoleMessages, setTvmazeConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
-  const [anidbConsoleMessages, setAnidbConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const [jikanConsoleMessages, setJikanConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const tvmazeConsoleRef = useRef<HTMLDivElement>(null);
-  const anidbConsoleRef = useRef<HTMLDivElement>(null);
+  const jikanConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
-  const lastAniDBStatusRef = useRef<ImportStatus | null>(null);
+  const lastJikanStatusRef = useRef<ImportStatus | null>(null);
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
@@ -69,9 +69,9 @@ function Import() {
   });
 
 
-  // Query for AniDB import status
-  const { data: anidbStatus, isLoading: anidbStatusLoading } = useQuery<ImportStatus | null>({
-    queryKey: ['/api/import/anidb/status'],
+  // Query for Jikan import status
+  const { data: jikanStatus, isLoading: jikanStatusLoading } = useQuery<ImportStatus | null>({
+    queryKey: ['/api/import/jikan/status'],
     refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
     staleTime: 0, // Always refetch, don't use stale data
   });
@@ -87,10 +87,10 @@ function Import() {
   };
 
 
-  // Add console message for AniDB
-  const addAnidbConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  // Add console message for Jikan
+  const addJikanConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
-    setAnidbConsoleMessages(prev => {
+    setJikanConsoleMessages(prev => {
       const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
       // Keep only last 50 messages
       return newMessages.slice(-50);
@@ -106,10 +106,10 @@ function Import() {
 
 
   useEffect(() => {
-    if (anidbConsoleRef.current) {
-      anidbConsoleRef.current.scrollTop = anidbConsoleRef.current.scrollHeight;
+    if (jikanConsoleRef.current) {
+      jikanConsoleRef.current.scrollTop = jikanConsoleRef.current.scrollHeight;
     }
-  }, [anidbConsoleMessages]);
+  }, [jikanConsoleMessages]);
 
   // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
@@ -187,91 +187,91 @@ function Import() {
   }, [tvmazeStatus]);
 
 
-  // Watch for AniDB status changes and generate console messages
+  // Watch for Jikan status changes and generate console messages
   useEffect(() => {
-    if (!anidbStatus) return;
+    if (!jikanStatus) return;
     
-    const lastStatus = lastAniDBStatusRef.current;
-    lastAniDBStatusRef.current = anidbStatus;
+    const lastStatus = lastJikanStatusRef.current;
+    lastJikanStatusRef.current = jikanStatus;
     
     // Don't log on first load
     if (!lastStatus) {
-      if (anidbStatus.isActive) {
-        addAnidbConsoleMessage("🔄 AniDB import is currently active", 'info');
-        addAnidbConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
+      if (jikanStatus.isActive) {
+        addJikanConsoleMessage("🔄 Jikan import is currently active", 'info');
+        addJikanConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
       } else {
-        addAnidbConsoleMessage("⏸️ AniDB import is paused", 'warning');
+        addJikanConsoleMessage("⏸️ Jikan import is paused", 'warning');
       }
-      addAnidbConsoleMessage(`📊 Current status: ${anidbStatus.totalImported} anime imported`, 'info');
+      addJikanConsoleMessage(`📊 Current status: ${jikanStatus.totalImported} anime imported`, 'info');
       return;
     }
 
     // Status changed from inactive to active
-    if (!lastStatus.isActive && anidbStatus.isActive) {
-      addAnidbConsoleMessage("🚀 AniDB import started", 'success');
-      addAnidbConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+    if (!lastStatus.isActive && jikanStatus.isActive) {
+      addJikanConsoleMessage("🚀 Jikan import started", 'success');
+      addJikanConsoleMessage("🔍 Running health check to verify database consistency", 'info');
     }
 
     // Status changed from active to inactive
-    if (lastStatus.isActive && !anidbStatus.isActive) {
-      addAnidbConsoleMessage("⏹️ AniDB import stopped", 'warning');
+    if (lastStatus.isActive && !jikanStatus.isActive) {
+      addJikanConsoleMessage("⏹️ Jikan import stopped", 'warning');
     }
 
     // Page progress - only log actual page changes for Phase 2
-    if (lastStatus.currentPage !== anidbStatus.currentPage && anidbStatus.isActive) {
-      if (anidbStatus.currentPage === 0) {
-        addAnidbConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
-      } else if (anidbStatus.currentPage > 1) {
-        addAnidbConsoleMessage(`📄 Phase 2: Processing page ${anidbStatus.currentPage} (importing new anime)`, 'info');
+    if (lastStatus.currentPage !== jikanStatus.currentPage && jikanStatus.isActive) {
+      if (jikanStatus.currentPage === 0) {
+        addJikanConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
+      } else if (jikanStatus.currentPage > 1) {
+        addJikanConsoleMessage(`📄 Phase 2: Processing page ${jikanStatus.currentPage} (importing new anime)`, 'info');
       }
     }
 
     // Import count increased
-    if (lastStatus.totalImported < anidbStatus.totalImported) {
-      const diff = anidbStatus.totalImported - lastStatus.totalImported;
-      addAnidbConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anidbStatus.totalImported})`, 'success');
+    if (lastStatus.totalImported < jikanStatus.totalImported) {
+      const diff = jikanStatus.totalImported - lastStatus.totalImported;
+      addJikanConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${jikanStatus.totalImported})`, 'success');
     }
 
     // Phase 1 progress updated
-    if (lastStatus.phase1Progress !== anidbStatus.phase1Progress && anidbStatus.phase1Progress) {
-      if (anidbStatus.phase1Progress.includes('Phase 1 Complete')) {
-        addAnidbConsoleMessage(`✅ ${anidbStatus.phase1Progress}`, 'success');
+    if (lastStatus.phase1Progress !== jikanStatus.phase1Progress && jikanStatus.phase1Progress) {
+      if (jikanStatus.phase1Progress.includes('Phase 1 Complete')) {
+        addJikanConsoleMessage(`✅ ${jikanStatus.phase1Progress}`, 'success');
       } else {
-        addAnidbConsoleMessage(`📋 Phase 1 Progress: ${anidbStatus.phase1Progress} anime updated`, 'info');
+        addJikanConsoleMessage(`📋 Phase 1 Progress: ${jikanStatus.phase1Progress}`, 'info');
       }
     }
 
     // Phase 2 progress updated
-    if (lastStatus.phase2Progress !== anidbStatus.phase2Progress && anidbStatus.phase2Progress) {
-      if (anidbStatus.phase2Progress.includes('Complete')) {
-        addAnidbConsoleMessage(`🎉 ${anidbStatus.phase2Progress}`, 'success');
-        addAnidbConsoleMessage(`🔄 Starting Phase 3: Migration - searching for anime in TV shows...`, 'info');
+    if (lastStatus.phase2Progress !== jikanStatus.phase2Progress && jikanStatus.phase2Progress) {
+      if (jikanStatus.phase2Progress.includes('Complete')) {
+        addJikanConsoleMessage(`🎉 ${jikanStatus.phase2Progress}`, 'success');
+        addJikanConsoleMessage(`🔄 Starting Phase 3: Migration - searching for anime in TV shows...`, 'info');
       } else {
-        addAnidbConsoleMessage(`📄 Phase 2: ${anidbStatus.phase2Progress}`, 'info');
+        addJikanConsoleMessage(`📄 Phase 2: ${jikanStatus.phase2Progress}`, 'info');
       }
     }
 
     // Phase 3 progress updated
     // @ts-ignore - temporary fix for type loading
-    if (lastStatus.phase3Progress !== anidbStatus.phase3Progress && anidbStatus.phase3Progress) {
+    if (lastStatus.phase3Progress !== jikanStatus.phase3Progress && jikanStatus.phase3Progress) {
       // @ts-ignore
-      if (anidbStatus.phase3Progress.includes('Phase 3 Complete')) {
+      if (jikanStatus.phase3Progress.includes('Phase 3 Complete')) {
         // @ts-ignore
-        addAnidbConsoleMessage(`✅ ${anidbStatus.phase3Progress}`, 'success');
+        addJikanConsoleMessage(`✅ ${jikanStatus.phase3Progress}`, 'success');
       } else {
         // @ts-ignore
-        addAnidbConsoleMessage(`🔄 Phase 3: ${anidbStatus.phase3Progress}`, 'info');
+        addJikanConsoleMessage(`🔄 Phase 3: ${jikanStatus.phase3Progress}`, 'info');
       }
     }
 
     // Errors
-    if (anidbStatus.errors && anidbStatus.errors.length > (lastStatus.errors?.length || 0)) {
-      const newErrors = anidbStatus.errors.slice(lastStatus.errors?.length || 0);
+    if (jikanStatus.errors && jikanStatus.errors.length > (lastStatus.errors?.length || 0)) {
+      const newErrors = jikanStatus.errors.slice(lastStatus.errors?.length || 0);
       newErrors.forEach(error => {
-        addAnidbConsoleMessage(`❌ AniDB Error: ${error}`, 'error');
+        addJikanConsoleMessage(`❌ Jikan Error: ${error}`, 'error');
       });
     }
-  }, [anidbStatus]); // Track AniDB phase updates
+  }, [jikanStatus]); // Track Jikan phase updates
 
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
@@ -281,9 +281,9 @@ function Import() {
   });
 
 
-  // Query for AniDB content
-  const { data: anidbContent } = useQuery<AniDBContent>({
-    queryKey: ['/api/import/anidb/content'],
+  // Query for Jikan content
+  const { data: jikanContent } = useQuery<JikanContent>({
+    queryKey: ['/api/import/jikan/content'],
     refetchInterval: 10000, // Fixed 10s polling for content
     staleTime: 5000, // Allow some stale data for content
   });
@@ -324,25 +324,25 @@ function Import() {
   });
 
 
-  // AniDB mutations
-  const startAniDBImport = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/import/anidb/start'),
+  // Jikan mutations
+  const startJikanImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/jikan/start'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/status'] });
     },
   });
 
-  const pauseAniDBImport = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/import/anidb/pause'),
+  const pauseJikanImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/jikan/pause'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/status'] });
     },
   });
 
-  const deleteAniDBData = useMutation({
-    mutationFn: () => apiRequest('DELETE', '/api/import/anidb/data'),
+  const deleteJikanData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/jikan/data'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/content'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/content'] });
       queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
       setRefreshKey(prev => prev + 1);
     },
@@ -412,8 +412,8 @@ function Import() {
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/status'] });
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/content'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/content'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/status'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/content'] });
             }}
             data-testid="button-refresh"
           >
@@ -519,43 +519,43 @@ function Import() {
             </CardContent>
           </Card>
 
-          {/* AniDB Section */}
-          <Card data-testid="card-anidb">
+          {/* Jikan Section */}
+          <Card data-testid="card-jikan">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="w-5 h-5" />
-                AniDB (Anime)
+                Jikan (Anime)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Status:</span>
                 {getStatusBadge(
-                  anidbStatus?.isActive || false, 
-                  (anidbContent?.count || 0) > 0,
-                  anidbStatusLoading && !anidbStatus
+                  jikanStatus?.isActive || false, 
+                  (jikanContent?.count || 0) > 0,
+                  jikanStatusLoading && !jikanStatus
                 )}
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Last Sync:</span>
-                <span className="text-sm text-gray-500" data-testid="text-anidb-sync">
-                  {formatDate(anidbStatus?.lastSyncAt || null)}
+                <span className="text-sm text-gray-500" data-testid="text-jikan-sync">
+                  {formatDate(jikanStatus?.lastSyncAt || null)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Content:</span>
-                <span className="font-medium text-orange-600" data-testid="text-anidb-count">
-                  {anidbContent?.count || 0}
+                <span className="font-medium text-orange-600" data-testid="text-jikan-count">
+                  {jikanContent?.count || 0}
                 </span>
               </div>
-              {anidbStatus?.errors && anidbStatus.errors.length > 0 && (
+              {jikanStatus?.errors && jikanStatus.errors.length > 0 && (
                 <div className="mt-2">
                   <details className="text-sm">
                     <summary className="cursor-pointer text-red-600">
-                      {anidbStatus.errors.length} error(s)
+                      {jikanStatus.errors.length} error(s)
                     </summary>
                     <div className="mt-1 text-xs text-red-500 max-h-20 overflow-y-auto">
-                      {anidbStatus.errors.slice(-3).map((error, i) => (
+                      {jikanStatus.errors.slice(-3).map((error, i) => (
                         <div key={i} className="truncate">{error}</div>
                       ))}
                     </div>
@@ -566,13 +566,13 @@ function Import() {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => confirmDelete('AniDB', () => deleteAniDBData.mutate())}
-                  disabled={deleteAniDBData.isPending || anidbStatus?.isActive}
+                  onClick={() => confirmDelete('Jikan', () => deleteJikanData.mutate())}
+                  disabled={deleteJikanData.isPending || jikanStatus?.isActive}
                   className="w-full flex items-center gap-2"
-                  data-testid="button-delete-anidb-card"
+                  data-testid="button-delete-jikan-card"
                 >
                   <Trash2 className="w-4 h-4" />
-                  {deleteAniDBData.isPending ? 'Deleting...' : 'Delete All AniDB Data'}
+                  {deleteJikanData.isPending ? 'Deleting...' : 'Delete All Jikan Data'}
                 </Button>
               </div>
             </CardContent>
@@ -708,82 +708,82 @@ function Import() {
         </Card>
 
 
-        {/* AniDB Controls Section */}
-        <Card className="mt-8" data-testid="card-anidb-controls">
+        {/* Jikan Controls Section */}
+        <Card className="mt-8" data-testid="card-jikan-controls">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="w-5 h-5" />
-              AniDB Import Controls
+              Jikan Import Controls
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 items-start">
               <div className="flex gap-2">
-                {anidbStatus?.isActive ? (
+                {jikanStatus?.isActive ? (
                   <Button
                     variant="outline"
-                    onClick={() => pauseAniDBImport.mutate()}
-                    disabled={pauseAniDBImport.isPending}
-                    data-testid="button-pause-anidb"
+                    onClick={() => pauseJikanImport.mutate()}
+                    disabled={pauseJikanImport.isPending}
+                    data-testid="button-pause-jikan"
                   >
                     <Pause className="w-4 h-4 mr-2" />
-                    Pause AniDB Import
+                    Pause Jikan Import
                   </Button>
                 ) : (
                   <Button
-                    onClick={() => startAniDBImport.mutate()}
-                    disabled={startAniDBImport.isPending || anidbStatusLoading}
-                    data-testid="button-start-anidb"
+                    onClick={() => startJikanImport.mutate()}
+                    disabled={startJikanImport.isPending || jikanStatusLoading}
+                    data-testid="button-start-jikan"
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    Start AniDB Import
+                    Start Jikan Import
                   </Button>
                 )}
                 
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => confirmDelete('AniDB', () => deleteAniDBData.mutate())}
-                  disabled={deleteAniDBData.isPending || anidbStatus?.isActive}
-                  data-testid="button-delete-anidb"
+                  onClick={() => confirmDelete('Jikan', () => deleteJikanData.mutate())}
+                  disabled={deleteJikanData.isPending || jikanStatus?.isActive}
+                  data-testid="button-delete-jikan"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete All
                 </Button>
               </div>
               
-              {(anidbStatus?.lastRun || anidbContent) && (
+              {(jikanStatus?.lastSyncAt || jikanContent) && (
                 <div className="text-sm text-gray-500 space-y-1">
-                  <div>Last Run: {formatDate(anidbStatus?.lastRun || null)}</div>
-                  <div>Imported: {anidbContent?.count || 0} anime</div>
+                  <div>Last Run: {formatDate(jikanStatus?.lastSyncAt || null)}</div>
+                  <div>Imported: {jikanContent?.count || 0} anime</div>
                 </div>
               )}
             </div>
             
-            {/* AniDB Import Console */}
+            {/* Jikan Import Console */}
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Terminal className="w-4 h-4" />
-                <h3 className="font-medium">AniDB Import Console</h3>
-                <Badge variant="outline" className={anidbStatus?.isActive ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-500'}>
-                  {anidbStatus?.isActive ? 'Active' : 'Idle'}
+                <h3 className="font-medium">Jikan Import Console</h3>
+                <Badge variant="outline" className={jikanStatus?.isActive ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-500'}>
+                  {jikanStatus?.isActive ? 'Active' : 'Idle'}
                 </Badge>
               </div>
               
               <div className="bg-gradient-to-br from-orange-900 to-orange-800 rounded-lg border border-orange-700 shadow-inner h-80 overflow-hidden">
                 <div 
-                  ref={anidbConsoleRef}
+                  ref={jikanConsoleRef}
                   className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
-                  data-testid="anidb-console"
+                  data-testid="jikan-console"
                 >
-                  {anidbConsoleMessages.length === 0 ? (
+                  {jikanConsoleMessages.length === 0 ? (
                     <div className="text-gray-400 flex items-center gap-2">
-                      <span className="text-orange-400 font-semibold">seenit@anidb:~$</span> 
-                      <span className="text-gray-500">Waiting for AniDB import activity...</span>
+                      <span className="text-orange-400 font-semibold">seenit@jikan:~$</span> 
+                      <span className="text-gray-500">Waiting for Jikan import activity...</span>
                       <span className="animate-pulse text-orange-400">▊</span>
                     </div>
                   ) : (
-                    anidbConsoleMessages.map((msg) => (
+                    jikanConsoleMessages.map((msg) => (
                       <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-orange-800/30 transition-colors duration-200">
                         <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
                         <span className={`leading-relaxed ${
@@ -799,17 +799,17 @@ function Import() {
                   )}
                   
                   {/* Live cursor */}
-                  {anidbStatus?.isActive && (
+                  {jikanStatus?.isActive && (
                     <div className="flex items-center text-orange-400 py-1 px-2 bg-orange-400/10 rounded border-l-2 border-orange-400 mt-2">
                       <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
                       <span className="text-orange-300 leading-relaxed">
                         {/* Determine current phase based on latest activity */}
-                        {anidbConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
-                          `📄 Phase 2: Processing page ${anidbStatus.currentPage}...` :
-                          anidbConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
-                          !anidbConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
+                        {jikanConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                          `📄 Phase 2: Processing page ${jikanStatus.currentPage}...` :
+                          jikanConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                          !jikanConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
                           "📋 Phase 1: Updating existing anime..." :
-                          anidbStatus.currentPage === 0 ? 
+                          jikanStatus.currentPage === 0 ? 
                           "🔄 Health check and setup..." : 
                           "🔄 Processing with migration detection..."
                         }
@@ -824,12 +824,12 @@ function Import() {
               <div className="mt-3 flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-medium">
                   <Terminal className="inline w-3 h-3 mr-1" />
-                  {anidbConsoleMessages.length} messages logged
+                  {jikanConsoleMessages.length} messages logged
                 </span>
                 <button 
-                  onClick={() => setAnidbConsoleMessages([])}
+                  onClick={() => setJikanConsoleMessages([])}
                   className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
-                  data-testid="clear-anidb-console"
+                  data-testid="clear-jikan-console"
                 >
                   Clear Console
                 </button>
@@ -858,14 +858,14 @@ function Import() {
                 <div className="text-sm text-gray-500">TMDB Movies</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-600" data-testid="stat-anidb">
-                  {anidbContent?.count || 0}
+                <div className="text-2xl font-bold text-orange-600" data-testid="stat-jikan">
+                  {jikanContent?.count || 0}
                 </div>
-                <div className="text-sm text-gray-500">AniDB Anime</div>
+                <div className="text-sm text-gray-500">Jikan Anime</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-800 dark:text-gray-200" data-testid="stat-total">
-                  {(tvmazeContent?.count || 0) + (anidbContent?.count || 0)}
+                  {(tvmazeContent?.count || 0) + (jikanContent?.count || 0)}
                 </div>
                 <div className="text-sm text-gray-500">Total Content</div>
               </div>

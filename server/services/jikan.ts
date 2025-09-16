@@ -150,7 +150,7 @@ interface ProcessedEpisode {
   episodeNumber: number;
   title: string;
   titleJapanese?: string;
-  aired?: string;
+  airdate?: string;
   score?: number;
   filler: boolean;
   recap: boolean;
@@ -226,12 +226,12 @@ export class JikanService {
     try {
       const response = await this.makeRequest<JikanResponse<JikanEpisode[]>>(`/anime/${malId}/episodes?page=${page}`);
       
-      return response.data.map(episode => ({
+      return response.data.map((episode, index) => ({
         id: episode.mal_id,
-        episodeNumber: episode.mal_id, // Episode MAL ID as unique identifier
+        episodeNumber: index + 1 + ((page - 1) * 100), // Sequential episode numbering
         title: episode.title,
         titleJapanese: episode.title_japanese,
-        aired: episode.aired,
+        airdate: episode.aired, // Map 'aired' to 'airdate' to match route expectations
         score: episode.score,
         filler: episode.filler,
         recap: episode.recap,
@@ -319,7 +319,7 @@ export class JikanService {
       episodes: anime.episodes,
       studio: studioName,
       sourceMaterial: anime.source,
-      episodeData: episodes, // Store detailed episode information
+      episodeData: { episodes }, // Store episodes in expected structure for routes
     };
   }
 
