@@ -843,9 +843,19 @@ export class JikanService {
                 .limit(1);
 
               if (!existing) {
-                const contentData = await this.convertToContent(anime);
-                await db.insert(content).values(contentData);
-                imported++;
+                try {
+                  const contentData = await this.convertToContent(anime);
+                  await db.insert(content).values(contentData);
+                  imported++;
+                } catch (error) {
+                  if (error instanceof Error && error.message.includes('NSFW content blocked')) {
+                    console.log(`[Jikan] ${error.message}`);
+                    // Skip NSFW content, continue with import
+                  } else {
+                    console.error(`[Jikan] Failed to convert anime ${anime.mal_id} (${anime.title}):`, error);
+                    errorMessages.push(`Failed to convert anime ${anime.title}: ${error}`);
+                  }
+                }
                 
                 if (imported % 10 === 0) {
                   console.log(`[Jikan] Seasonal import progress: ${imported} anime imported`);
@@ -912,9 +922,19 @@ export class JikanService {
             .limit(1);
 
           if (!existing) {
-            const contentData = await this.convertToContent(anime);
-            await db.insert(content).values(contentData);
-            imported++;
+            try {
+              const contentData = await this.convertToContent(anime);
+              await db.insert(content).values(contentData);
+              imported++;
+            } catch (error) {
+              if (error instanceof Error && error.message.includes('NSFW content blocked')) {
+                console.log(`[Jikan] ${error.message}`);
+                // Skip NSFW content, continue with import
+              } else {
+                console.error(`[Jikan] Failed to convert anime ${anime.mal_id} (${anime.title}):`, error);
+                errorMessages.push(`Failed to convert anime ${anime.title}: ${error}`);
+              }
+            }
             
             if (imported % 10 === 0) {
               console.log(`[Jikan] Top anime import progress: ${imported} imported`);
