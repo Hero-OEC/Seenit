@@ -311,6 +311,92 @@ function Import() {
     }
   }, [anilistStatus]); // Track AniList phase updates
 
+  // Watch for AniDB status changes and generate console messages
+  useEffect(() => {
+    if (!anidbStatus) return;
+    
+    const lastStatus = lastAniDBStatusRef.current;
+    lastAniDBStatusRef.current = anidbStatus;
+    
+    // Don't log on first load
+    if (!lastStatus) {
+      if (anidbStatus.isActive) {
+        addAnidbConsoleMessage("🔄 AniDB import is currently active", 'info');
+        addAnidbConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
+      } else {
+        addAnidbConsoleMessage("⏸️ AniDB import is paused", 'warning');
+      }
+      addAnidbConsoleMessage(`📊 Current status: ${anidbStatus.totalImported} anime imported`, 'info');
+      return;
+    }
+
+    // Status changed from inactive to active
+    if (!lastStatus.isActive && anidbStatus.isActive) {
+      addAnidbConsoleMessage("🚀 AniDB import started", 'success');
+      addAnidbConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+    }
+
+    // Status changed from active to inactive
+    if (lastStatus.isActive && !anidbStatus.isActive) {
+      addAnidbConsoleMessage("⏹️ AniDB import stopped", 'warning');
+    }
+
+    // Page progress - only log actual page changes for Phase 2
+    if (lastStatus.currentPage !== anidbStatus.currentPage && anidbStatus.isActive) {
+      if (anidbStatus.currentPage === 0) {
+        addAnidbConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
+      } else if (anidbStatus.currentPage > 1) {
+        addAnidbConsoleMessage(`📄 Phase 2: Processing page ${anidbStatus.currentPage} (importing new anime)`, 'info');
+      }
+    }
+
+    // Import count increased
+    if (lastStatus.totalImported < anidbStatus.totalImported) {
+      const diff = anidbStatus.totalImported - lastStatus.totalImported;
+      addAnidbConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anidbStatus.totalImported})`, 'success');
+    }
+
+    // Phase 1 progress updated
+    if (lastStatus.phase1Progress !== anidbStatus.phase1Progress && anidbStatus.phase1Progress) {
+      if (anidbStatus.phase1Progress.includes('Phase 1 Complete')) {
+        addAnidbConsoleMessage(`✅ ${anidbStatus.phase1Progress}`, 'success');
+      } else {
+        addAnidbConsoleMessage(`📋 Phase 1 Progress: ${anidbStatus.phase1Progress} anime updated`, 'info');
+      }
+    }
+
+    // Phase 2 progress updated
+    if (lastStatus.phase2Progress !== anidbStatus.phase2Progress && anidbStatus.phase2Progress) {
+      if (anidbStatus.phase2Progress.includes('Complete')) {
+        addAnidbConsoleMessage(`🎉 ${anidbStatus.phase2Progress}`, 'success');
+        addAnidbConsoleMessage(`🔄 Starting Phase 3: Migration - searching for anime in TV shows...`, 'info');
+      } else {
+        addAnidbConsoleMessage(`📄 Phase 2: ${anidbStatus.phase2Progress}`, 'info');
+      }
+    }
+
+    // Phase 3 progress updated
+    // @ts-ignore - temporary fix for type loading
+    if (lastStatus.phase3Progress !== anidbStatus.phase3Progress && anidbStatus.phase3Progress) {
+      // @ts-ignore
+      if (anidbStatus.phase3Progress.includes('Phase 3 Complete')) {
+        // @ts-ignore
+        addAnidbConsoleMessage(`✅ ${anidbStatus.phase3Progress}`, 'success');
+      } else {
+        // @ts-ignore
+        addAnidbConsoleMessage(`🔄 Phase 3: ${anidbStatus.phase3Progress}`, 'info');
+      }
+    }
+
+    // Errors
+    if (anidbStatus.errors && anidbStatus.errors.length > (lastStatus.errors?.length || 0)) {
+      const newErrors = anidbStatus.errors.slice(lastStatus.errors?.length || 0);
+      newErrors.forEach(error => {
+        addAnidbConsoleMessage(`❌ AniDB Error: ${error}`, 'error');
+      });
+    }
+  }, [anidbStatus]); // Track AniDB phase updates
+
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
@@ -887,13 +973,143 @@ function Import() {
           </CardContent>
         </Card>
 
+        {/* AniDB Controls Section */}
+        <Card className="mt-8" data-testid="card-anidb-controls">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              AniDB Import Controls
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="flex gap-2">
+                {anidbStatus?.isActive ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => pauseAniDBImport.mutate()}
+                    disabled={pauseAniDBImport.isPending}
+                    data-testid="button-pause-anidb"
+                  >
+                    <Pause className="w-4 h-4 mr-2" />
+                    Pause AniDB Import
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => startAniDBImport.mutate()}
+                    disabled={startAniDBImport.isPending || anidbStatusLoading}
+                    data-testid="button-start-anidb"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Start AniDB Import
+                  </Button>
+                )}
+                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('AniDB', () => deleteAniDBData.mutate())}
+                  disabled={deleteAniDBData.isPending || anidbStatus?.isActive}
+                  data-testid="button-delete-anidb"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete All
+                </Button>
+              </div>
+              
+              {(anidbStatus?.lastRun || anidbContent) && (
+                <div className="text-sm text-gray-500 space-y-1">
+                  <div>Last Run: {formatDate(anidbStatus?.lastRun || null)}</div>
+                  <div>Imported: {anidbContent?.count || 0} anime</div>
+                </div>
+              )}
+            </div>
+            
+            {/* AniDB Import Console */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Terminal className="w-4 h-4" />
+                <h3 className="font-medium">AniDB Import Console</h3>
+                <Badge variant="outline" className={anidbStatus?.isActive ? 'bg-orange-50 text-orange-700' : 'bg-gray-50 text-gray-500'}>
+                  {anidbStatus?.isActive ? 'Active' : 'Idle'}
+                </Badge>
+              </div>
+              
+              <div className="bg-gradient-to-br from-orange-900 to-orange-800 rounded-lg border border-orange-700 shadow-inner h-80 overflow-hidden">
+                <div 
+                  ref={anidbConsoleRef}
+                  className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
+                  data-testid="anidb-console"
+                >
+                  {anidbConsoleMessages.length === 0 ? (
+                    <div className="text-gray-400 flex items-center gap-2">
+                      <span className="text-orange-400 font-semibold">seenit@anidb:~$</span> 
+                      <span className="text-gray-500">Waiting for AniDB import activity...</span>
+                      <span className="animate-pulse text-orange-400">▊</span>
+                    </div>
+                  ) : (
+                    anidbConsoleMessages.map((msg) => (
+                      <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-orange-800/30 transition-colors duration-200">
+                        <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
+                        <span className={`leading-relaxed ${
+                          msg.type === 'success' ? 'text-orange-300' :
+                          msg.type === 'warning' ? 'text-yellow-400' :
+                          msg.type === 'error' ? 'text-red-400' :
+                          'text-gray-200'
+                        }`}>
+                          {msg.message}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Live cursor */}
+                  {anidbStatus?.isActive && (
+                    <div className="flex items-center text-orange-400 py-1 px-2 bg-orange-400/10 rounded border-l-2 border-orange-400 mt-2">
+                      <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
+                      <span className="text-orange-300 leading-relaxed">
+                        {/* Determine current phase based on latest activity */}
+                        {anidbConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
+                          `📄 Phase 2: Processing page ${anidbStatus.currentPage}...` :
+                          anidbConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
+                          !anidbConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
+                          "📋 Phase 1: Updating existing anime..." :
+                          anidbStatus.currentPage === 0 ? 
+                          "🔄 Health check and setup..." : 
+                          "🔄 Processing with migration detection..."
+                        }
+                      </span>
+                      <span className="ml-2 animate-pulse text-orange-400 font-bold">▊</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Console Controls */}
+              <div className="mt-3 flex justify-between items-center text-xs">
+                <span className="text-gray-500 font-medium">
+                  <Terminal className="inline w-3 h-3 mr-1" />
+                  {anidbConsoleMessages.length} messages logged
+                </span>
+                <button 
+                  onClick={() => setAnidbConsoleMessages([])}
+                  className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
+                  data-testid="clear-anidb-console"
+                >
+                  Clear Console
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Import Statistics */}
         <Card className="mt-6" data-testid="card-statistics">
           <CardHeader>
             <CardTitle>Import Statistics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-blue-600" data-testid="stat-tvmaze">
                   {tvmazeContent?.count || 0}
@@ -913,8 +1129,14 @@ function Import() {
                 <div className="text-sm text-gray-500">AniList Anime</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-600" data-testid="stat-total">
-                  {tvmazeContent?.count || 0}
+                <div className="text-2xl font-bold text-orange-600" data-testid="stat-anidb">
+                  {anidbContent?.count || 0}
+                </div>
+                <div className="text-sm text-gray-500">AniDB Anime</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-800 dark:text-gray-200" data-testid="stat-total">
+                  {(tvmazeContent?.count || 0) + (anilistContent?.count || 0) + (anidbContent?.count || 0)}
                 </div>
                 <div className="text-sm text-gray-500">Total Content</div>
               </div>

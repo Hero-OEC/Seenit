@@ -582,6 +582,23 @@ export class AniDBService {
     }));
   }
 
+  // Resume AniDB sync (for sync manager compatibility)
+  async resumeSync(): Promise<{ imported: number; updated: number; errors: string[] }> {
+    console.log('[AniDB] Resuming sync...');
+    return await this.importAnime();
+  }
+
+  // Pause AniDB sync (alias for compatibility)
+  async pauseSync(): Promise<void> {
+    console.log('[AniDB] Pausing sync...');
+    await this.pauseImport();
+  }
+
+  // Sync all anime (alias for sync manager compatibility)
+  async syncAllAnime(): Promise<{ imported: number; updated: number; errors: string[] }> {
+    return await this.importAnime();
+  }
+
   // Clean up and delete all AniDB data
   async deleteAllData(): Promise<void> {
     console.log('[AniDB] Deleting all AniDB data...');
@@ -597,3 +614,6 @@ export class AniDBService {
     console.log('[AniDB] All AniDB data deleted');
   }
 }
+
+// Export singleton instance
+export const anidbService = new AniDBService();

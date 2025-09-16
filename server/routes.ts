@@ -5,9 +5,8 @@ import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
 import { anilistService } from "./services/anilist";
-import { AniDBService } from "./services/anidb";
+import { anidbService } from "./services/anidb";
 
-const anidbService = new AniDBService();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Content routes

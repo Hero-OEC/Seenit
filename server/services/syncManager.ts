@@ -1,7 +1,9 @@
 import { tvmazeService } from './tvmaze';
+import { anidbService } from './anidb';
 
 class SyncManager {
   private isRunning = false;
+  private anidbIsRunning = false;
   private syncInterval: NodeJS.Timeout | null = null;
   private readonly MORNING_HOUR = 8; // 8 AM
   private readonly SYNC_CHECK_INTERVAL = 60 * 60 * 1000; // Check every hour
@@ -24,6 +26,12 @@ class SyncManager {
         await this.startMorningSync();
       } else {
         console.log(`TVmaze sync manager ready. Current status: ${status.totalImported} shows imported`);
+      }
+
+      // Initialize AniDB status checking
+      const anidbStatus = await anidbService.getImportStatus();
+      if (anidbStatus) {
+        console.log(`AniDB sync manager ready. Current status: ${anidbStatus.totalImported || 0} anime imported`);
       }
     } catch (error) {
       console.error('Error during SyncManager initialization:', error);
