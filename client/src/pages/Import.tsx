@@ -55,15 +55,30 @@ interface AniListContent {
   }>;
 }
 
+interface AniDBContent {
+  count: number;
+  content: Array<{
+    id: string;
+    title: string;
+    year: number | null;
+    rating: number | null;
+    episodes: number | null;
+    episodeCount: number; // Number of detailed episodes from AniDB
+  }>;
+}
+
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
   const [tvmazeConsoleMessages, setTvmazeConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const [anilistConsoleMessages, setAnilistConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const [anidbConsoleMessages, setAnidbConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const tvmazeConsoleRef = useRef<HTMLDivElement>(null);
   const anilistConsoleRef = useRef<HTMLDivElement>(null);
+  const anidbConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
   const lastAniListStatusRef = useRef<ImportStatus | null>(null);
+  const lastAniDBStatusRef = useRef<ImportStatus | null>(null);
 
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
@@ -75,6 +90,13 @@ function Import() {
   // Query for AniList import status
   const { data: anilistStatus, isLoading: anilistStatusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/anilist/status'],
+    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
+    staleTime: 0, // Always refetch, don't use stale data
+  });
+
+  // Query for AniDB import status
+  const { data: anidbStatus, isLoading: anidbStatusLoading } = useQuery<ImportStatus | null>({
+    queryKey: ['/api/import/anidb/status'],
     refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
     staleTime: 0, // Always refetch, don't use stale data
   });
@@ -99,6 +121,16 @@ function Import() {
     });
   };
 
+  // Add console message for AniDB
+  const addAnidbConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setAnidbConsoleMessages(prev => {
+      const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
+      // Keep only last 50 messages
+      return newMessages.slice(-50);
+    });
+  };
+
   // Auto-scroll consoles to bottom
   useEffect(() => {
     if (tvmazeConsoleRef.current) {
@@ -111,6 +143,12 @@ function Import() {
       anilistConsoleRef.current.scrollTop = anilistConsoleRef.current.scrollHeight;
     }
   }, [anilistConsoleMessages]);
+
+  useEffect(() => {
+    if (anidbConsoleRef.current) {
+      anidbConsoleRef.current.scrollTop = anidbConsoleRef.current.scrollHeight;
+    }
+  }, [anidbConsoleMessages]);
 
   // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
@@ -287,6 +325,13 @@ function Import() {
     staleTime: 5000, // Allow some stale data for content
   });
 
+  // Query for AniDB content
+  const { data: anidbContent } = useQuery<AniDBContent>({
+    queryKey: ['/api/import/anidb/content'],
+    refetchInterval: 10000, // Fixed 10s polling for content
+    staleTime: 5000, // Allow some stale data for content
+  });
+
   // Mutation to start TVmaze import
   const startImport = useMutation({
     mutationFn: () => apiRequest('POST', '/api/import/tvmaze/start'),
@@ -341,6 +386,30 @@ function Import() {
     mutationFn: () => apiRequest('DELETE', '/api/import/anilist/data'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/content'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
+      setRefreshKey(prev => prev + 1);
+    },
+  });
+
+  // AniDB mutations
+  const startAniDBImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/anidb/start'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/status'] });
+    },
+  });
+
+  const pauseAniDBImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/anidb/pause'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/status'] });
+    },
+  });
+
+  const deleteAniDBData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/anidb/data'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/anidb/content'] });
       queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
       setRefreshKey(prev => prev + 1);
     },

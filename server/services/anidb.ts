@@ -72,7 +72,7 @@ interface ProcessedEpisode {
   title: string;
   titleJapanese?: string;
   length?: number;
-  airDate?: string;
+  airdate?: string; // Fixed: use airdate to match schedule route expectations
   rating?: number;
   type: 'regular' | 'special' | 'credit' | 'trailer' | 'parody' | 'other';
 }
@@ -152,14 +152,18 @@ export class AniDBService {
       
       // Check for API errors in XML response
       if (xmlData.includes('<error>') || xmlData.includes('BANNED') || xmlData.includes('ACCESS DENIED')) {
-        console.error('[AniDB] API Error Response:', xmlData);
-        throw new Error(`AniDB API returned error: ${xmlData}`);
+        // Redact credentials from logs for security
+        const safeError = xmlData.replace(new RegExp(username, 'g'), '[REDACTED_USER]').replace(new RegExp(password, 'g'), '[REDACTED_PASS]');
+        console.error('[AniDB] API Error Response:', safeError);
+        throw new Error(`AniDB API returned error (credentials redacted for security)`);
       }
 
       return xmlData;
     } catch (error) {
-      console.error('[AniDB] Request failed:', error);
-      throw error;
+      // Ensure no credentials leak in error logs
+      const errorMsg = error instanceof Error ? error.message.replace(new RegExp(username, 'g'), '[REDACTED_USER]').replace(new RegExp(password, 'g'), '[REDACTED_PASS]') : 'Unknown error';
+      console.error('[AniDB] Request failed:', errorMsg);
+      throw new Error(errorMsg);
     }
   }
 
@@ -236,7 +240,7 @@ export class AniDBService {
           title,
           titleJapanese,
           length,
-          airDate: episode.airdate,
+          airdate: episode.airdate, // Fixed: use airdate consistently 
           rating,
           type: episodeType
         });
@@ -294,7 +298,7 @@ export class AniDBService {
       }
     }
 
-    return [...new Set(genres)]; // Remove duplicates
+    return Array.from(new Set(genres)); // Remove duplicates
   }
 
   // Map AniDB data to our content schema
@@ -481,7 +485,10 @@ export class AniDBService {
               .values(contentData);
             
             imported++;
-            console.log(`[AniDB] Imported: ${contentData.title} (${contentData.episodeData?.episodes?.length || 0} episodes)`);
+            const episodeCount = contentData.episodeData && typeof contentData.episodeData === 'object' && 'episodes' in contentData.episodeData 
+              ? (contentData.episodeData.episodes as ProcessedEpisode[]).length 
+              : 0;
+            console.log(`[AniDB] Imported: ${contentData.title} (${episodeCount} episodes)`);
           }
 
           // Update progress
