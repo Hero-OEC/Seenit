@@ -72,6 +72,8 @@ function Import() {
     action: null
   });
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tvmaze/status'],
@@ -412,17 +414,27 @@ function Import() {
       source,
       action
     });
+    // Trigger animation after state update
+    setTimeout(() => setIsModalVisible(true), 10);
   };
 
   const handleDeleteConfirm = () => {
     if (deleteDialog.action) {
       deleteDialog.action();
     }
-    setDeleteDialog({ isOpen: false, source: '', action: null });
+    closeModal();
   };
 
   const handleDeleteCancel = () => {
-    setDeleteDialog({ isOpen: false, source: '', action: null });
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    // Wait for animation to complete before hiding modal
+    setTimeout(() => {
+      setDeleteDialog({ isOpen: false, source: '', action: null });
+    }, 200);
   };
 
   return (
@@ -900,8 +912,19 @@ function Import() {
 
       {/* Delete Confirmation Modal */}
       {deleteDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" data-testid="delete-confirmation-modal">
-          <Card className="w-full max-w-md mx-4">
+        <div 
+          className={`fixed inset-0 bg-black flex items-center justify-center z-50 transition-all duration-200 ease-out ${
+            isModalVisible ? 'bg-opacity-50' : 'bg-opacity-0'
+          }`}
+          data-testid="delete-confirmation-modal"
+        >
+          <Card 
+            className={`w-full max-w-md mx-4 transition-all duration-200 ease-out ${
+              isModalVisible 
+                ? 'opacity-100 scale-100 translate-y-0' 
+                : 'opacity-0 scale-95 translate-y-4'
+            }`}
+          >
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600">
                 <AlertTriangle className="w-5 h-5" />
