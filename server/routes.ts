@@ -120,9 +120,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? JSON.parse(content.episodeData) 
               : content.episodeData;
             
-            if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
+            // Normalize episode data structure - handle both episodeData.episodes and episodeData as array
+            const episodeArray = Array.isArray(episodeData?.episodes) 
+              ? episodeData.episodes 
+              : Array.isArray(episodeData) 
+                ? episodeData 
+                : [];
+            
+            if (episodeArray.length > 0) {
               // Find episodes that air on this date
-              const dateEpisodes = episodeData.episodes
+              const dateEpisodes = episodeArray
                 .filter((ep: any) => {
                   if (!ep.airdate) return false;
                   // Handle both simple date format (TV shows) and ISO format (anime)
@@ -150,40 +157,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // If no episodes found for exact date, return recent episodes as fallback
-      if (episodes.length === 0) {
-        allContent.forEach((content: any) => {
-          if (content.episodeData && content.type === type) {
-            try {
-              const episodeData = typeof content.episodeData === 'string' 
-                ? JSON.parse(content.episodeData) 
-                : content.episodeData;
-              
-              if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
-                // Get recent episodes as fallback
-                const recentEpisodes = episodeData.episodes
-                  .filter((ep: any) => ep.airdate) // Only episodes with airdate
-                  .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
-                  .slice(0, 5)
-                  .map((ep: any) => ({
-                    ...ep,
-                    // Normalize episode number field (anime uses episodeNumber, TV uses number)
-                    number: ep.number || ep.episodeNumber,
-                    contentId: content.id,
-                    showTitle: content.title,
-                    type: content.type,
-                    status: content.status,
-                    image: content.poster ? { medium: content.poster } : null
-                  }));
-                
-                episodes.push(...recentEpisodes);
-              }
-            } catch (error) {
-              console.error('Error parsing episode data for fallback:', content.id, error);
-            }
-          }
-        });
-      }
+      // No fallback - return empty array if no episodes found for the specific date
+      // This prevents the same episodes from appearing on every day
       
       res.json(episodes); // Return all episodes for the date
     } catch (error) {
