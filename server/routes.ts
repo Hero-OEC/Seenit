@@ -5,6 +5,7 @@ import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
 import { jikanService } from "./services/jikan";
+import { tmdbService } from "./services/tmdb";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -600,6 +601,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: `Failed to delete ${req.params.source} data` });
+    }
+  });
+
+  // TMDB routes
+  app.get("/api/tmdb/search/movies", async (req, res) => {
+    try {
+      const { q, page = "1" } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Query parameter 'q' is required" });
+      }
+      
+      const pageNum = parseInt(page as string) || 1;
+      const results = await tmdbService.searchMovies(q, pageNum);
+      res.json(results);
+    } catch (error) {
+      console.error("TMDB movie search failed:", error);
+      res.status(500).json({ message: "Failed to search movies" });
+    }
+  });
+
+  app.get("/api/tmdb/search/tv", async (req, res) => {
+    try {
+      const { q, page = "1" } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.status(400).json({ message: "Query parameter 'q' is required" });
+      }
+      
+      const pageNum = parseInt(page as string) || 1;
+      const results = await tmdbService.searchTVShows(q, pageNum);
+      res.json(results);
+    } catch (error) {
+      console.error("TMDB TV search failed:", error);
+      res.status(500).json({ message: "Failed to search TV shows" });
+    }
+  });
+
+  app.get("/api/tmdb/movie/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const movieId = parseInt(id);
+      
+      if (isNaN(movieId)) {
+        return res.status(400).json({ message: "Invalid movie ID" });
+      }
+      
+      const movie = await tmdbService.getMovieDetails(movieId);
+      res.json(movie);
+    } catch (error) {
+      console.error("TMDB movie details failed:", error);
+      res.status(500).json({ message: "Failed to get movie details" });
+    }
+  });
+
+  app.get("/api/tmdb/tv/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tvId = parseInt(id);
+      
+      if (isNaN(tvId)) {
+        return res.status(400).json({ message: "Invalid TV show ID" });
+      }
+      
+      const tvShow = await tmdbService.getTVShowDetails(tvId);
+      res.json(tvShow);
+    } catch (error) {
+      console.error("TMDB TV details failed:", error);
+      res.status(500).json({ message: "Failed to get TV show details" });
+    }
+  });
+
+  app.post("/api/import/tmdb/movies", async (req, res) => {
+    try {
+      const body = z.object({
+        maxPages: z.number().min(1).max(50).default(5)
+      }).parse(req.body);
+      
+      const result = await tmdbService.importPopularMovies(body.maxPages);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request", errors: error.errors });
+      }
+      console.error("TMDB movie import failed:", error);
+      res.status(500).json({ message: "Failed to import movies" });
+    }
+  });
+
+  app.post("/api/import/tmdb/tv", async (req, res) => {
+    try {
+      const body = z.object({
+        maxPages: z.number().min(1).max(50).default(5)
+      }).parse(req.body);
+      
+      const result = await tmdbService.importPopularTVShows(body.maxPages);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request", errors: error.errors });
+      }
+      console.error("TMDB TV import failed:", error);
+      res.status(500).json({ message: "Failed to import TV shows" });
+    }
+  });
+
+  // TMDB status routes 
+  app.get("/api/import/tmdb/status", async (_req, res) => {
+    try {
+      const status = await tmdbService.getImportStatus();
+      if (!status) {
+        return res.json({
+          source: 'tmdb',
+          isActive: false,
+          totalImported: 0,
+          phase1Progress: null
+        });
+      }
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get TMDB import status" });
+    }
+  });
+
+  app.post("/api/import/tmdb/pause", async (_req, res) => {
+    try {
+      await tmdbService.pauseImport();
+      res.json({ message: "TMDB import paused" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to pause TMDB import" });
     }
   });
 
