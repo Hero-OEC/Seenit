@@ -600,6 +600,50 @@ export class JikanService {
     };
   }
 
+  // Start daily sync to update existing anime with new episodes
+  async startDailySync(): Promise<void> {
+    if (this.isSyncing) {
+      console.log('[Jikan] Daily sync already running');
+      return;
+    }
+
+    console.log('[Jikan] Starting daily sync for existing anime...');
+    this.isSyncing = true;
+
+    try {
+      // Update import status for daily sync
+      await this.updateImportStatus({
+        isActive: true,
+        phase1Progress: 'Daily sync: Updating existing anime episodes',
+        lastSyncAt: new Date()
+      });
+
+      // For daily sync, only run Phase 1 (update existing anime)
+      // This refreshes episode data for currently airing anime
+      const result = await this.updateExistingActiveAnime();
+      
+      await this.updateImportStatus({
+        phase1Progress: `Daily sync complete: ${result.updated} anime updated`,
+        totalImported: result.updated,
+        errors: result.errors
+      });
+
+      console.log('[Jikan] Daily sync completed successfully');
+
+    } catch (error) {
+      console.error('[Jikan] Daily sync failed:', error);
+      const errors = [`Daily sync error: ${error instanceof Error ? error.message : 'Unknown error'}`];
+      await this.updateImportStatus({
+        errors
+      });
+    } finally {
+      this.isSyncing = false;
+      await this.updateImportStatus({
+        isActive: false
+      });
+    }
+  }
+
   // Start comprehensive multi-phase import process
   async startImport(): Promise<void> {
     if (this.isSyncing) {
@@ -853,7 +897,7 @@ export class JikanService {
                     // Skip NSFW content, continue with import
                   } else {
                     console.error(`[Jikan] Failed to convert anime ${anime.mal_id} (${anime.title}):`, error);
-                    errorMessages.push(`Failed to convert anime ${anime.title}: ${error}`);
+                    errors.push(`Failed to convert anime ${anime.title}: ${error}`);
                   }
                 }
                 
@@ -932,7 +976,7 @@ export class JikanService {
                 // Skip NSFW content, continue with import
               } else {
                 console.error(`[Jikan] Failed to convert anime ${anime.mal_id} (${anime.title}):`, error);
-                errorMessages.push(`Failed to convert anime ${anime.title}: ${error}`);
+                errors.push(`Failed to convert anime ${anime.title}: ${error}`);
               }
             }
             

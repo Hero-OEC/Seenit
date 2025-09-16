@@ -1,9 +1,12 @@
 import { tvmazeService } from './tvmaze';
+import { jikanService } from './jikan';
 
 class SyncManager {
   private isRunning = false;
+  private jikanSyncRunning = false;
   private syncInterval: NodeJS.Timeout | null = null;
-  private readonly MORNING_HOUR = 8; // 8 AM
+  private readonly MORNING_HOUR = 8; // 8 AM for TVMaze
+  private readonly JIKAN_MORNING_HOUR = 9; // 9 AM for Jikan 
   private readonly SYNC_CHECK_INTERVAL = 60 * 60 * 1000; // Check every hour
 
   constructor() {
@@ -39,12 +42,14 @@ class SyncManager {
     // Check every hour if it's time for morning sync
     this.syncInterval = setInterval(async () => {
       await this.checkMorningSync();
+      await this.checkJikanMorningSync();
     }, this.SYNC_CHECK_INTERVAL);
 
     // Also check immediately
     this.checkMorningSync();
+    this.checkJikanMorningSync();
     
-    console.log('SyncManager scheduler started - checking every hour for morning sync');
+    console.log('SyncManager scheduler started - checking every hour for TVMaze (8 AM) and Jikan (9 AM) sync');
   }
 
   private async checkMorningSync() {
@@ -65,6 +70,29 @@ class SyncManager {
         if (!lastSync || lastSync < today) {
           console.log('Starting automatic morning TVmaze sync...');
           await this.startMorningSync();
+        }
+      }
+    }
+  }
+
+  private async checkJikanMorningSync() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // Check if it's Jikan sync time (9 AM) and we haven't synced today
+    if (currentHour === this.JIKAN_MORNING_HOUR && !this.jikanSyncRunning) {
+      const status = await jikanService.getImportStatus();
+      
+      // Only start if not already active and it's been a while since last sync
+      if (!status?.isActive) {
+        const lastSync = status?.lastSyncAt ? new Date(status.lastSyncAt) : null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Start sync if never synced or last sync was before today
+        if (!lastSync || lastSync < today) {
+          console.log('Starting automatic morning Jikan sync...');
+          await this.startJikanDailySync();
         }
       }
     }
@@ -92,6 +120,29 @@ class SyncManager {
     }
   }
 
+  private async startJikanDailySync() {
+    if (this.jikanSyncRunning) {
+      console.log('Jikan sync already running, skipping...');
+      return;
+    }
+
+    try {
+      this.jikanSyncRunning = true;
+      console.log('Starting Jikan daily sync (updating existing anime with new episodes)...');
+      
+      // For daily sync, focus on updating existing anime (Phase 1 only)
+      // This will refresh episode data for currently airing anime
+      await jikanService.startDailySync();
+      
+      // Monitor the Jikan sync progress
+      this.monitorJikanSync();
+      
+    } catch (error) {
+      console.error('Error starting Jikan daily sync:', error);
+      this.jikanSyncRunning = false;
+    }
+  }
+
   private async monitorSync() {
     const checkInterval = setInterval(async () => {
       try {
@@ -112,6 +163,30 @@ class SyncManager {
         console.error('Error monitoring sync:', error);
         clearInterval(checkInterval);
         this.isRunning = false;
+      }
+    }, 30000); // Check every 30 seconds
+  }
+
+  private async monitorJikanSync() {
+    const checkInterval = setInterval(async () => {
+      try {
+        const status = await jikanService.getImportStatus();
+        
+        if (!status?.isActive) {
+          console.log('Jikan daily sync completed or stopped');
+          clearInterval(checkInterval);
+          this.jikanSyncRunning = false;
+          
+          if (status) {
+            console.log(`Jikan daily sync summary: ${status.totalImported} anime updated, ${status.errors?.length || 0} errors`);
+          }
+        } else {
+          console.log(`Jikan sync progress: Phase ${status.phase1Progress || 'unknown'}, ${status.totalImported} anime processed`);
+        }
+      } catch (error) {
+        console.error('Error monitoring Jikan sync:', error);
+        clearInterval(checkInterval);
+        this.jikanSyncRunning = false;
       }
     }, 30000); // Check every 30 seconds
   }
