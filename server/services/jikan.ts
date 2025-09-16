@@ -323,7 +323,15 @@ export class JikanService {
 
     while (hasMore && page <= maxPages) {
       try {
-        const url = endpoint.includes('?') ? `${endpoint}&page=${page}` : `${endpoint}?page=${page}`;
+        // Ensure SFW parameter is included in all paginated requests
+        let url: string;
+        if (endpoint.includes('?')) {
+          // Endpoint already has query params, add both page and sfw
+          url = `${endpoint}&page=${page}&sfw=true`;
+        } else {
+          // No query params, add page and sfw
+          url = `${endpoint}?page=${page}&sfw=true`;
+        }
         const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(url);
         
         if (response.data && response.data.length > 0) {
@@ -350,7 +358,7 @@ export class JikanService {
   async searchAnime(query: string, page: number = 1): Promise<JikanAnime[]> {
     try {
       const encodedQuery = encodeURIComponent(query);
-      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/anime?q=${encodedQuery}&page=${page}&limit=25`);
+      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/anime?q=${encodedQuery}&page=${page}&limit=25&sfw=true`);
       return response.data || [];
     } catch (error) {
       console.error(`[Jikan] Failed to search anime with query "${query}":`, error);
@@ -361,7 +369,7 @@ export class JikanService {
   // Get seasonal anime
   async getSeasonalAnime(year: number, season: string): Promise<JikanAnime[]> {
     try {
-      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/seasons/${year}/${season}`);
+      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/seasons/${year}/${season}?sfw=true`);
       return response.data || [];
     } catch (error) {
       console.error(`[Jikan] Failed to fetch seasonal anime for ${season} ${year}:`, error);
@@ -372,7 +380,7 @@ export class JikanService {
   // Get current season anime
   async getCurrentSeasonAnime(): Promise<JikanAnime[]> {
     try {
-      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/seasons/now`);
+      const response = await this.makeRequest<JikanResponse<JikanAnime[]>>(`/seasons/now?sfw=true`);
       return response.data || [];
     } catch (error) {
       console.error('[Jikan] Failed to fetch current season anime:', error);
@@ -516,6 +524,29 @@ export class JikanService {
 
   // Convert Jikan anime to our content format
   private async convertToContent(anime: JikanAnime, includeAllEpisodes: boolean = false): Promise<InsertContent> {
+    // NSFW Content Filtering - Block adult content from entering database
+    
+    // Check rating for explicit adult content
+    const blockedRatings = ['Rx - Hentai', 'R+ - Mild Nudity'];
+    if (anime.rating && blockedRatings.some(blocked => anime.rating?.includes(blocked))) {
+      throw new Error(`[Jikan] NSFW content blocked: ${anime.title} (Rating: ${anime.rating})`);
+    }
+    
+    // Check genres and explicit_genres for adult content
+    const blockedGenres = ['Hentai', 'Ecchi', 'Adult', 'Erotica'];
+    const allGenres = [
+      ...(anime.genres?.map(g => g.name) || []),
+      ...(anime.explicit_genres?.map(g => g.name) || [])
+    ];
+    
+    for (const genre of allGenres) {
+      if (blockedGenres.some(blocked => genre.toLowerCase().includes(blocked.toLowerCase()))) {
+        throw new Error(`[Jikan] NSFW content blocked: ${anime.title} (Genre: ${genre})`);
+      }
+    }
+    
+    console.log(`[Jikan] Content validation passed for: ${anime.title} (Rating: ${anime.rating || 'None'})`);
+    
     // Get episodes - either single page or all episodes based on flag
     const episodes = includeAllEpisodes ? await this.getAllEpisodes(anime.mal_id) : await this.getAnimeEpisodes(anime.mal_id);
     
