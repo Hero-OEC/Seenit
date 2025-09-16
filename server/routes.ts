@@ -621,21 +621,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tmdb/search/tv", async (req, res) => {
-    try {
-      const { q, page = "1" } = req.query;
-      if (!q || typeof q !== 'string') {
-        return res.status(400).json({ message: "Query parameter 'q' is required" });
-      }
-      
-      const pageNum = parseInt(page as string) || 1;
-      const results = await tmdbService.searchTVShows(q, pageNum);
-      res.json(results);
-    } catch (error) {
-      console.error("TMDB TV search failed:", error);
-      res.status(500).json({ message: "Failed to search TV shows" });
-    }
-  });
 
   app.get("/api/tmdb/movie/:id", async (req, res) => {
     try {
@@ -654,22 +639,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tmdb/tv/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const tvId = parseInt(id);
-      
-      if (isNaN(tvId)) {
-        return res.status(400).json({ message: "Invalid TV show ID" });
-      }
-      
-      const tvShow = await tmdbService.getTVShowDetails(tvId);
-      res.json(tvShow);
-    } catch (error) {
-      console.error("TMDB TV details failed:", error);
-      res.status(500).json({ message: "Failed to get TV show details" });
-    }
-  });
 
   app.post("/api/import/tmdb/movies", async (req, res) => {
     try {
@@ -688,22 +657,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/import/tmdb/tv", async (req, res) => {
-    try {
-      const body = z.object({
-        maxPages: z.number().min(1).max(50).default(5)
-      }).parse(req.body);
-      
-      const result = await tmdbService.importPopularTVShows(body.maxPages);
-      res.json(result);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid request", errors: error.errors });
-      }
-      console.error("TMDB TV import failed:", error);
-      res.status(500).json({ message: "Failed to import TV shows" });
-    }
-  });
 
   // TMDB status routes 
   app.get("/api/import/tmdb/status", async (_req, res) => {

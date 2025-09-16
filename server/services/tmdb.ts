@@ -30,33 +30,6 @@ interface TMDBMovie {
   }>;
 }
 
-interface TMDBTVShow {
-  id: number;
-  name: string;
-  original_name: string;
-  overview?: string;
-  first_air_date?: string;
-  last_air_date?: string;
-  genre_ids: number[];
-  vote_average: number;
-  vote_count: number;
-  popularity: number;
-  poster_path?: string;
-  backdrop_path?: string;
-  original_language: string;
-  number_of_episodes?: number;
-  number_of_seasons?: number;
-  status?: string;
-  in_production?: boolean;
-  networks?: Array<{
-    id: number;
-    name: string;
-  }>;
-  genres?: Array<{
-    id: number;
-    name: string;
-  }>;
-}
 
 interface TMDBSearchResponse<T> {
   page: number;
@@ -87,7 +60,6 @@ export class TMDBService {
 
   // Cache for genre mappings
   private movieGenres: Map<number, string> = new Map();
-  private tvGenres: Map<number, string> = new Map();
 
   constructor() {
     // Validate API key at startup
@@ -179,11 +151,6 @@ export class TMDBService {
         this.movieGenres.set(genre.id, genre.name);
       });
 
-      // Fetch TV genres  
-      const tvGenresResponse = await this.makeRequest<{ genres: TMDBGenre[] }>('/genre/tv/list');
-      tvGenresResponse.genres.forEach(genre => {
-        this.tvGenres.set(genre.id, genre.name);
-      });
       
       console.log('[TMDB] Genre cache initialized');
     } catch (error) {
@@ -200,22 +167,12 @@ export class TMDBService {
     });
   }
 
-  async searchTVShows(query: string, page: number = 1): Promise<TMDBSearchResponse<TMDBTVShow>> {
-    return this.makeRequest<TMDBSearchResponse<TMDBTVShow>>('/search/tv', {
-      query,
-      page: page.toString(),
-      include_adult: 'false'
-    });
-  }
 
   // Detail methods
   async getMovieDetails(id: number): Promise<TMDBMovie> {
     return this.makeRequest<TMDBMovie>(`/movie/${id}`);
   }
 
-  async getTVShowDetails(id: number): Promise<TMDBTVShow> {
-    return this.makeRequest<TMDBTVShow>(`/tv/${id}`);
-  }
 
   // Discovery methods
   async discoverMovies(page: number = 1, filters: Record<string, string> = {}): Promise<TMDBSearchResponse<TMDBMovie>> {
@@ -227,14 +184,6 @@ export class TMDBService {
     });
   }
 
-  async discoverTVShows(page: number = 1, filters: Record<string, string> = {}): Promise<TMDBSearchResponse<TMDBTVShow>> {
-    return this.makeRequest<TMDBSearchResponse<TMDBTVShow>>('/discover/tv', {
-      page: page.toString(),
-      include_adult: 'false', 
-      sort_by: 'popularity.desc',
-      ...filters
-    });
-  }
 
   // Popular content methods
   async getPopularMovies(page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
@@ -243,11 +192,6 @@ export class TMDBService {
     });
   }
 
-  async getPopularTVShows(page: number = 1): Promise<TMDBSearchResponse<TMDBTVShow>> {
-    return this.makeRequest<TMDBSearchResponse<TMDBTVShow>>('/tv/popular', {
-      page: page.toString()
-    });
-  }
 
   // Conversion methods
   private convertMovieToContent(movie: TMDBMovie): InsertContent {
@@ -270,27 +214,6 @@ export class TMDBService {
     };
   }
 
-  private convertTVShowToContent(tvShow: TMDBTVShow): InsertContent {
-    const genres = tvShow.genre_ids?.map(id => this.tvGenres.get(id)).filter((genre): genre is string => Boolean(genre)) || 
-                   tvShow.genres?.map(g => g.name) || [];
-
-    return {
-      title: tvShow.name,
-      type: 'tv',
-      source: 'tmdb',
-      sourceId: tvShow.id.toString(),
-      overview: tvShow.overview,
-      genres,
-      year: tvShow.first_air_date ? new Date(tvShow.first_air_date).getFullYear() : undefined,
-      rating: tvShow.vote_average,
-      poster: tvShow.poster_path ? `${this.imageBaseUrl}${tvShow.poster_path}` : undefined,
-      backdrop: tvShow.backdrop_path ? `${this.largeImageBaseUrl}${tvShow.backdrop_path}` : undefined,
-      status: tvShow.status || (tvShow.in_production ? 'In Production' : 'Ended'),
-      episodes: tvShow.number_of_episodes,
-      totalSeasons: tvShow.number_of_seasons,
-      network: tvShow.networks?.[0]?.name
-    };
-  }
 
   // Import status tracking methods
   private async updateImportStatus(updates: Partial<{
@@ -444,107 +367,6 @@ export class TMDBService {
     return { imported, errors };
   }
 
-  async importPopularTVShows(maxPages: number = 5): Promise<{ imported: number; errors: string[] }> {
-    if (this.isSyncing) {
-      return { imported: 0, errors: ['Import already in progress'] };
-    }
-
-    this.isSyncing = true;
-    let imported = 0;
-    const errors: string[] = [];
-
-    try {
-      console.log('[TMDB] Starting popular TV shows import...');
-
-      // Initialize import status
-      await this.updateImportStatus({
-        isActive: true,
-        currentPage: 1,
-        phase1Progress: 'Starting TMDB TV shows import...',
-        errors: [],
-        lastSyncAt: new Date()
-      });
-
-      for (let page = 1; page <= maxPages; page++) {
-        // Check if import has been paused
-        const currentStatus = await this.getImportStatus();
-        if (!currentStatus?.isActive) {
-          console.log('[TMDB] TV shows import paused by user');
-          await this.updateImportStatus({
-            phase1Progress: 'TV shows import paused'
-          });
-          break;
-        }
-        try {
-          const response = await this.getPopularTVShows(page);
-          
-          for (const tvShow of response.results) {
-            try {
-              // Check if already exists
-              const [existing] = await db
-                .select()
-                .from(content)
-                .where(
-                  and(
-                    eq(content.source, 'tmdb'),
-                    eq(content.sourceId, tvShow.id.toString())
-                  )
-                )
-                .limit(1);
-
-              if (!existing) {
-                const contentData = this.convertTVShowToContent(tvShow);
-                await db.insert(content).values(contentData);
-                imported++;
-              }
-            } catch (error) {
-              const errorMsg = `Failed to import TV show ${tvShow.name}: ${error}`;
-              errors.push(errorMsg);
-              console.error(`[TMDB] ${errorMsg}`);
-            }
-          }
-
-          console.log(`[TMDB] Imported page ${page}: ${imported} TV shows total`);
-          
-          // Update progress
-          await this.updateImportStatus({
-            currentPage: page,
-            totalImported: imported,
-            totalAvailable: response.total_results,
-            phase1Progress: `TV shows import: Page ${page}/${maxPages}, ${imported} TV shows imported`
-          });
-        } catch (error) {
-          const errorMsg = `Failed to fetch TV shows page ${page}: ${error}`;
-          errors.push(errorMsg);
-          console.error(`[TMDB] ${errorMsg}`);
-        }
-      }
-
-      console.log(`[TMDB] Popular TV shows import complete: ${imported} imported, ${errors.length} errors`);
-      
-      // Mark as complete
-      await this.updateImportStatus({
-        isActive: false,
-        totalImported: imported,
-        phase1Progress: `TV shows import complete: ${imported} TV shows imported`,
-        errors,
-        lastSyncAt: new Date()
-      });
-    } catch (error) {
-      errors.push(`Import failed: ${error}`);
-      console.error('[TMDB] Import failed:', error);
-      
-      // Mark as failed
-      await this.updateImportStatus({
-        isActive: false,
-        errors: [`Import failed: ${error}`]
-      });
-    } finally {
-      this.isSyncing = false;
-    }
-
-    return { imported, errors };
-  }
 
   // Helper method to get formatted image URLs
   getImageUrl(path: string, size: 'small' | 'medium' | 'large' = 'medium'): string {
