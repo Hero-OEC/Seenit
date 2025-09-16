@@ -10,6 +10,7 @@ import Profile from "@/pages/Profile";
 import Import from "@/pages/Import";
 import SearchResults from "@/pages/SearchResults";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 
 function AppContent() {
@@ -40,7 +41,7 @@ function AppContent() {
   const showNavbar = location !== "/signin";
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       {showNavbar && (
         <Navbar
           isSignedIn={!!user}
@@ -52,7 +53,7 @@ function AppContent() {
           onSearch={handleSearch}
         />
       )}
-      <div className={showNavbar ? "pt-16" : ""}>
+      <div className={`flex-1 ${showNavbar ? "pt-16" : ""}`}>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/discover" component={Discover} />
@@ -75,7 +76,8 @@ function AppContent() {
           </Route>
         </Switch>
       </div>
-    </>
+      <Footer />
+    </div>
   );
 }
 
