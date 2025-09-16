@@ -519,6 +519,65 @@ function Import() {
             </CardContent>
           </Card>
 
+          {/* AniDB Section */}
+          <Card data-testid="card-anidb">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                AniDB (Anime)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                {getStatusBadge(
+                  anidbStatus?.isActive || false, 
+                  (anidbContent?.count || 0) > 0,
+                  anidbStatusLoading && !anidbStatus
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Last Sync:</span>
+                <span className="text-sm text-gray-500" data-testid="text-anidb-sync">
+                  {formatDate(anidbStatus?.lastSyncAt || null)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600 dark:text-gray-400">Content:</span>
+                <span className="font-medium text-orange-600" data-testid="text-anidb-count">
+                  {anidbContent?.count || 0}
+                </span>
+              </div>
+              {anidbStatus?.errors && anidbStatus.errors.length > 0 && (
+                <div className="mt-2">
+                  <details className="text-sm">
+                    <summary className="cursor-pointer text-red-600">
+                      {anidbStatus.errors.length} error(s)
+                    </summary>
+                    <div className="mt-1 text-xs text-red-500 max-h-20 overflow-y-auto">
+                      {anidbStatus.errors.slice(-3).map((error, i) => (
+                        <div key={i} className="truncate">{error}</div>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+              )}
+              <div className="pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('AniDB', () => deleteAniDBData.mutate())}
+                  disabled={deleteAniDBData.isPending || anidbStatus?.isActive}
+                  className="w-full flex items-center gap-2"
+                  data-testid="button-delete-anidb-card"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deleteAniDBData.isPending ? 'Deleting...' : 'Delete All AniDB Data'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
         </div>
 
         {/* TVmaze Controls Section */}
