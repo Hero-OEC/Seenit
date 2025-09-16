@@ -223,7 +223,7 @@ export default function ContentDetails() {
       if (!Array.isArray(episodes)) return [];
       
       // Get unique season numbers and sort them
-      const uniqueSeasons = [...new Set(episodes.map((ep: any) => ep.season))];
+      const uniqueSeasons = Array.from(new Set(episodes.map((ep: any) => ep.season)));
       return uniqueSeasons.sort((a, b) => b - a); // Newest first
     } catch (error) {
       console.error('Error parsing episode data:', content.title);
@@ -525,14 +525,14 @@ export default function ContentDetails() {
                   <div className="space-y-4">
                     {/* Episodes from database */}
                     {getEpisodesFromContent(content, selectedSeason).map((episode: any, index: number) => (
-                      <div key={index} className="border-b border-retro-200 pb-4 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number}`}>
+                      <div key={index} className="border-b border-retro-200 pb-4 last:border-b-0 last:pb-0" data-testid={`episode-${episode.number || episode.episodeNumber || index + 1}`}>
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <h4 className="text-lg font-medium text-retro-900">
-                                S{episode.season?.toString().padStart(2, '0') || selectedSeason.toString().padStart(2, '0')} E{episode.number?.toString().padStart(2, '0')} • {episode.name || episode.title}
+                                S{(episode.season || selectedSeason || 1).toString().padStart(2, '0')} E{(episode.number || episode.episodeNumber || index + 1).toString().padStart(2, '0')} • {episode.name || episode.title || `Episode ${episode.episodeNumber || index + 1}`}
                               </h4>
-                              {isEpisodeWatched(episode.season || selectedSeason, episode.number) && (
+                              {isEpisodeWatched(episode.season || selectedSeason || 1, episode.number || episode.episodeNumber || index + 1) && (
                                 <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                   <Check className="w-3 h-3" />
                                   Watched
@@ -547,17 +547,17 @@ export default function ContentDetails() {
                                 {episode.rating?.average && <span>★ {episode.rating.average}</span>}
                               </div>
                               <button 
-                                onClick={() => toggleEpisodeWatched(episode.season || selectedSeason, episode.number)}
+                                onClick={() => toggleEpisodeWatched(episode.season || selectedSeason || 1, episode.number || episode.episodeNumber || index + 1)}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                  isEpisodeWatched(episode.season || selectedSeason, episode.number)
+                                  isEpisodeWatched(episode.season || selectedSeason || 1, episode.number || episode.episodeNumber || index + 1)
                                     ? 'bg-green-500 hover:bg-green-600 text-white'
                                     : 'bg-retro-500 hover:bg-retro-600 text-white'
                                 }`}
-                                title={isEpisodeWatched(episode.season || selectedSeason, episode.number) ? "Mark as unwatched" : "Mark as watched"}
-                                data-testid={`episode-${episode.number}-watch-button`}
+                                title={isEpisodeWatched(episode.season || selectedSeason || 1, episode.number || episode.episodeNumber || index + 1) ? "Mark as unwatched" : "Mark as watched"}
+                                data-testid={`episode-${episode.number || episode.episodeNumber || index + 1}-watch-button`}
                               >
                                 <Check className="w-4 h-4" />
-                                {isEpisodeWatched(episode.season || selectedSeason, episode.number) ? 'Watched' : 'Mark as Watched'}
+                                {isEpisodeWatched(episode.season || selectedSeason || 1, episode.number || episode.episodeNumber || index + 1) ? 'Watched' : 'Mark as Watched'}
                               </button>
                             </div>
                           </div>
