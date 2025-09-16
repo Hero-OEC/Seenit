@@ -360,7 +360,7 @@ export class AniDBService {
       sourceMaterial: null, // Would need additional mapping
       runtime: null, // Average episode length could be calculated
       
-      // Episode data - this is the key improvement over AniList!
+      // Episode data - comprehensive episode tracking from AniDB!
       episodeData,
       
       // Not used for anime

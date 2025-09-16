@@ -15,7 +15,7 @@ export const content = pgTable("content", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   type: text("type").notNull(), // 'movie', 'tv', 'anime'
-  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anilist', 'manual'
+  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anidb', 'manual'
   sourceId: text("source_id").notNull(), // Original API ID
   
   // Common fields
@@ -45,7 +45,7 @@ export const content = pgTable("content", {
   airDays: text("air_days").array(), // Days of week show airs
   episodeData: jsonb("episode_data"), // Full episode details as JSON
   
-  // Anime-specific (AniList)
+  // Anime-specific (AniDB)
   episodes: integer("episodes"), // Total episodes planned
   season: integer("season"), // Current season for ongoing shows
   studio: text("studio"), // Animation studio
@@ -78,7 +78,7 @@ export const userContent = pgTable("user_content", {
 
 export const importStatus = pgTable("import_status", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anilist'
+  source: text("source").notNull(), // 'tmdb', 'tvmaze', 'anidb'
   isActive: boolean("is_active").default(false),
   lastSyncAt: timestamp("last_sync_at"),
   totalImported: integer("total_imported").default(0),

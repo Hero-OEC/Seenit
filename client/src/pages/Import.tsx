@@ -38,22 +38,6 @@ interface TVMazeContent {
   }>;
 }
 
-interface AniListContent {
-  count: number;
-  content: Array<{
-    id: string;
-    title: string;
-    type: string;
-    year: number | null;
-    rating: number | null;
-    status: string;
-    episodes: number | null;
-    season: number | null;
-    studio: string | null;
-    sourceMaterial: string | null;
-    genres: string[] | null;
-  }>;
-}
 
 interface AniDBContent {
   count: number;
@@ -71,13 +55,10 @@ function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
   const [tvmazeConsoleMessages, setTvmazeConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
-  const [anilistConsoleMessages, setAnilistConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const [anidbConsoleMessages, setAnidbConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const tvmazeConsoleRef = useRef<HTMLDivElement>(null);
-  const anilistConsoleRef = useRef<HTMLDivElement>(null);
   const anidbConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
-  const lastAniListStatusRef = useRef<ImportStatus | null>(null);
   const lastAniDBStatusRef = useRef<ImportStatus | null>(null);
 
   // Query for TVmaze import status
@@ -87,12 +68,6 @@ function Import() {
     staleTime: 0, // Always refetch, don't use stale data
   });
 
-  // Query for AniList import status
-  const { data: anilistStatus, isLoading: anilistStatusLoading } = useQuery<ImportStatus | null>({
-    queryKey: ['/api/import/anilist/status'],
-    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
-    staleTime: 0, // Always refetch, don't use stale data
-  });
 
   // Query for AniDB import status
   const { data: anidbStatus, isLoading: anidbStatusLoading } = useQuery<ImportStatus | null>({
@@ -111,15 +86,6 @@ function Import() {
     });
   };
 
-  // Add console message for AniList
-  const addAnilistConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
-    const timestamp = new Date().toLocaleTimeString();
-    setAnilistConsoleMessages(prev => {
-      const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
-      // Keep only last 50 messages
-      return newMessages.slice(-50);
-    });
-  };
 
   // Add console message for AniDB
   const addAnidbConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
@@ -138,11 +104,6 @@ function Import() {
     }
   }, [tvmazeConsoleMessages]);
 
-  useEffect(() => {
-    if (anilistConsoleRef.current) {
-      anilistConsoleRef.current.scrollTop = anilistConsoleRef.current.scrollHeight;
-    }
-  }, [anilistConsoleMessages]);
 
   useEffect(() => {
     if (anidbConsoleRef.current) {
@@ -225,91 +186,6 @@ function Import() {
 
   }, [tvmazeStatus]);
 
-  // Watch for AniList status changes and generate console messages
-  useEffect(() => {
-    if (!anilistStatus) return;
-    
-    const lastStatus = lastAniListStatusRef.current;
-    lastAniListStatusRef.current = anilistStatus;
-    
-    // Don't log on first load
-    if (!lastStatus) {
-      if (anilistStatus.isActive) {
-        addAnilistConsoleMessage("🔄 AniList import is currently active", 'info');
-        addAnilistConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
-      } else {
-        addAnilistConsoleMessage("⏸️ AniList import is paused", 'warning');
-      }
-      addAnilistConsoleMessage(`📊 Current status: ${anilistStatus.totalImported} anime imported`, 'info');
-      return;
-    }
-
-    // Status changed from inactive to active
-    if (!lastStatus.isActive && anilistStatus.isActive) {
-      addAnilistConsoleMessage("🚀 AniList import started", 'success');
-      addAnilistConsoleMessage("🔍 Running health check to verify database consistency", 'info');
-    }
-
-    // Status changed from active to inactive
-    if (lastStatus.isActive && !anilistStatus.isActive) {
-      addAnilistConsoleMessage("⏹️ AniList import stopped", 'warning');
-    }
-
-    // Page progress - only log actual page changes for Phase 2
-    if (lastStatus.currentPage !== anilistStatus.currentPage && anilistStatus.isActive) {
-      if (anilistStatus.currentPage === 0) {
-        addAnilistConsoleMessage("📋 Starting Phase 1: Updating existing anime with new episodes", 'info');
-      } else if (anilistStatus.currentPage > 1) {
-        addAnilistConsoleMessage(`📄 Phase 2: Processing page ${anilistStatus.currentPage} (importing new anime)`, 'info');
-      }
-    }
-
-    // Import count increased
-    if (lastStatus.totalImported < anilistStatus.totalImported) {
-      const diff = anilistStatus.totalImported - lastStatus.totalImported;
-      addAnilistConsoleMessage(`✅ Imported/updated ${diff} anime (Total: ${anilistStatus.totalImported})`, 'success');
-    }
-
-    // Phase 1 progress updated
-    if (lastStatus.phase1Progress !== anilistStatus.phase1Progress && anilistStatus.phase1Progress) {
-      if (anilistStatus.phase1Progress.includes('Phase 1 Complete')) {
-        addAnilistConsoleMessage(`✅ ${anilistStatus.phase1Progress}`, 'success');
-      } else {
-        addAnilistConsoleMessage(`📋 Phase 1 Progress: ${anilistStatus.phase1Progress} anime updated`, 'info');
-      }
-    }
-
-    // Phase 2 progress updated
-    if (lastStatus.phase2Progress !== anilistStatus.phase2Progress && anilistStatus.phase2Progress) {
-      if (anilistStatus.phase2Progress.includes('Complete')) {
-        addAnilistConsoleMessage(`🎉 ${anilistStatus.phase2Progress}`, 'success');
-        addAnilistConsoleMessage(`🔄 Starting Phase 3: Migration - searching for anime in TV shows...`, 'info');
-      } else {
-        addAnilistConsoleMessage(`📄 Phase 2: ${anilistStatus.phase2Progress}`, 'info');
-      }
-    }
-
-    // Phase 3 progress updated
-    // @ts-ignore - temporary fix for type loading
-    if (lastStatus.phase3Progress !== anilistStatus.phase3Progress && anilistStatus.phase3Progress) {
-      // @ts-ignore
-      if (anilistStatus.phase3Progress.includes('Phase 3 Complete')) {
-        // @ts-ignore
-        addAnilistConsoleMessage(`✅ ${anilistStatus.phase3Progress}`, 'success');
-      } else {
-        // @ts-ignore
-        addAnilistConsoleMessage(`🔄 Phase 3: ${anilistStatus.phase3Progress}`, 'info');
-      }
-    }
-
-    // Errors
-    if (anilistStatus.errors && anilistStatus.errors.length > (lastStatus.errors?.length || 0)) {
-      const newErrors = anilistStatus.errors.slice(lastStatus.errors?.length || 0);
-      newErrors.forEach(error => {
-        addAnilistConsoleMessage(`❌ AniList Error: ${error}`, 'error');
-      });
-    }
-  }, [anilistStatus]); // Track AniList phase updates
 
   // Watch for AniDB status changes and generate console messages
   useEffect(() => {
@@ -404,12 +280,6 @@ function Import() {
     staleTime: 5000, // Allow some stale data for content
   });
 
-  // Query for AniList content
-  const { data: anilistContent } = useQuery<AniListContent>({
-    queryKey: ['/api/import/anilist/content'],
-    refetchInterval: 10000, // Fixed 10s polling for content
-    staleTime: 5000, // Allow some stale data for content
-  });
 
   // Query for AniDB content
   const { data: anidbContent } = useQuery<AniDBContent>({
@@ -434,21 +304,6 @@ function Import() {
     },
   });
 
-  // Mutation to start AniList import
-  const startAniListImport = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/import/anilist/start'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
-    },
-  });
-
-  // Mutation to pause AniList import
-  const pauseAniListImport = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/import/anilist/pause'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/status'] });
-    },
-  });
 
   // Delete mutations for each API source
   const deleteTVmazeData = useMutation({
@@ -468,14 +323,6 @@ function Import() {
     },
   });
 
-  const deleteAniListData = useMutation({
-    mutationFn: () => apiRequest('DELETE', '/api/import/anilist/data'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/import/anilist/content'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
-      setRefreshKey(prev => prev + 1);
-    },
-  });
 
   // AniDB mutations
   const startAniDBImport = useMutation({
