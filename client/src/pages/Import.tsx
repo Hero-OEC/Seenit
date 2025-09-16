@@ -631,29 +631,7 @@ function Import() {
                   </details>
                 </div>
               )}
-              <div className="pt-4 border-t space-y-2">
-                <div className="flex gap-2">
-                  <Button
-                    variant={tmdbStatus?.isActive ? "secondary" : "default"}
-                    size="sm"
-                    onClick={() => tmdbStatus?.isActive ? pauseTmdbImport.mutate() : startTmdbImport.mutate({})}
-                    disabled={startTmdbImport.isPending || pauseTmdbImport.isPending}
-                    className="flex-1 flex items-center gap-2"
-                    data-testid="button-import-tmdb"
-                  >
-                    {tmdbStatus?.isActive ? (
-                      <>
-                        <Pause className="w-4 h-4" />
-                        {pauseTmdbImport.isPending ? 'Pausing...' : 'Pause'}
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4" />
-                        {startTmdbImport.isPending ? 'Starting...' : 'Start Import'}
-                      </>
-                    )}
-                  </Button>
-                </div>
+              <div className="pt-4 border-t">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -917,6 +895,136 @@ function Import() {
         </Card>
 
 
+        {/* TMDB Controls Section */}
+        <Card className="mt-8" data-testid="card-tmdb-controls">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="w-5 h-5" />
+              TMDB Import Controls
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="flex gap-2">
+                {tmdbStatus?.isActive ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => pauseTmdbImport.mutate()}
+                    disabled={pauseTmdbImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-stop-tmdb-import"
+                  >
+                    <Pause className="w-4 h-4" />
+                    {pauseTmdbImport.isPending ? 'Stopping...' : 'Stop Import'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => startTmdbImport.mutate({})}
+                    disabled={startTmdbImport.isPending}
+                    className="flex items-center gap-2"
+                    data-testid="button-start-tmdb-import"
+                  >
+                    <Play className="w-4 h-4" />
+                    {startTmdbImport.isPending ? 'Starting...' : 'Start Import'}
+                  </Button>
+                )}
+                
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => confirmDelete('TMDB', () => deleteTmdbData.mutate())}
+                  disabled={deleteTmdbData.isPending || tmdbStatus?.isActive}
+                  data-testid="button-delete-tmdb-control"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete All
+                </Button>
+              </div>
+              
+              <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>Import Schedule: Manual import of popular movies</span>
+                </div>
+                <div>Rate Limited: 40 requests per 10 seconds to respect TMDB API limits</div>
+                {tmdbStatus?.isActive && (
+                  <div className="mt-2 text-blue-600 dark:text-blue-400">
+                    Currently importing movies from TMDB API...
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Live Import Console */}
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Terminal className="w-4 h-4" />
+                <h3 className="font-medium">TMDB Import Console</h3>
+                <Badge variant="outline" className={tmdbStatus?.isActive ? 'bg-blue-50 text-blue-700' : 'bg-gray-50 text-gray-500'}>
+                  {tmdbStatus?.isActive ? 'Active' : 'Idle'}
+                </Badge>
+              </div>
+              
+              <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg border border-blue-700 shadow-inner h-80 overflow-hidden">
+                <div 
+                  ref={tmdbConsoleRef}
+                  className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
+                  data-testid="tmdb-console"
+                >
+                  {tmdbConsoleMessages.length === 0 ? (
+                    <div className="text-gray-400 flex items-center gap-2">
+                      <span className="text-blue-400 font-semibold">seenit@tmdb:~$</span> 
+                      <span className="text-gray-500">Waiting for TMDB import activity...</span>
+                      <span className="animate-pulse text-blue-400">▊</span>
+                    </div>
+                  ) : (
+                    tmdbConsoleMessages.map((msg) => (
+                      <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-blue-800/30 transition-colors duration-200">
+                        <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
+                        <span className={`leading-relaxed ${
+                          msg.type === 'success' ? 'text-blue-300' :
+                          msg.type === 'warning' ? 'text-yellow-400' :
+                          msg.type === 'error' ? 'text-red-400' :
+                          'text-gray-200'
+                        }`}>
+                          {msg.message}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Live cursor */}
+                  {tmdbStatus?.isActive && (
+                    <div className="flex items-center text-blue-400 py-1 px-2 bg-blue-400/10 rounded border-l-2 border-blue-400 mt-2">
+                      <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
+                      <span className="text-blue-300 leading-relaxed">
+                        🎬 Processing TMDB movies page {tmdbStatus.currentPage}...
+                      </span>
+                      <span className="ml-2 animate-pulse text-blue-400 font-bold">▊</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Console Controls */}
+              <div className="mt-3 flex justify-between items-center text-xs">
+                <span className="text-gray-500 font-medium">
+                  <Terminal className="inline w-3 h-3 mr-1" />
+                  {tmdbConsoleMessages.length} messages logged
+                </span>
+                <button 
+                  onClick={() => setTmdbConsoleMessages([])}
+                  className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
+                  data-testid="clear-tmdb-console"
+                >
+                  Clear Console
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
         {/* Jikan Controls Section */}
         <Card className="mt-8" data-testid="card-jikan-controls">
           <CardHeader>
@@ -1061,8 +1169,8 @@ function Import() {
                 <div className="text-sm text-gray-500">TVmaze TV Shows</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-green-600" data-testid="stat-tmdb">
-                  0
+                <div className="text-2xl font-bold text-blue-600" data-testid="stat-tmdb">
+                  {tmdbContent?.count || 0}
                 </div>
                 <div className="text-sm text-gray-500">TMDB Movies</div>
               </div>
@@ -1074,7 +1182,7 @@ function Import() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-800 dark:text-gray-200" data-testid="stat-total">
-                  {(tvmazeContent?.count || 0) + (jikanContent?.count || 0)}
+                  {(tvmazeContent?.count || 0) + (jikanContent?.count || 0) + (tmdbContent?.count || 0)}
                 </div>
                 <div className="text-sm text-gray-500">Total Content</div>
               </div>
