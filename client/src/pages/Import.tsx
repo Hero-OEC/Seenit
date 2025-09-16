@@ -519,51 +519,6 @@ function Import() {
             </CardContent>
           </Card>
 
-          {/* AniList Section */}
-          <Card data-testid="card-anilist">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="w-5 h-5" />
-                AniList (Anime)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                {getStatusBadge(
-                  anilistStatus?.isActive || false, 
-                  (anilistContent?.count || 0) > 0,
-                  anilistStatusLoading && !anilistStatus
-                )}
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Last Sync:</span>
-                <span className="text-sm text-gray-600 dark:text-gray-300" data-testid="text-anilist-sync">
-                  {formatDate(anilistStatus?.lastSyncAt || null)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 dark:text-gray-400">Content:</span>
-                <span className="font-medium text-gray-900 dark:text-white" data-testid="text-anilist-count">
-                  {anilistContent?.count || 0}
-                </span>
-              </div>
-              
-              <div className="pt-4 border-t">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => confirmDelete('AniList', () => deleteAniListData.mutate())}
-                  disabled={deleteAniListData.isPending}
-                  className="w-full flex items-center gap-2"
-                  data-testid="button-delete-anilist"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  {deleteAniListData.isPending ? 'Deleting...' : 'Delete All AniList Data'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* TVmaze Controls Section */}
@@ -693,132 +648,6 @@ function Import() {
           </CardContent>
         </Card>
 
-        {/* AniList Controls Section */}
-        <Card className="mt-8" data-testid="card-anilist-controls">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5" />
-              AniList Import Controls
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-start">
-              <div className="flex gap-2">
-                {anilistStatus?.isActive ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => pauseAniListImport.mutate()}
-                    disabled={pauseAniListImport.isPending}
-                    className="flex items-center gap-2"
-                    data-testid="button-pause-anilist"
-                  >
-                    <Pause className="w-4 h-4" />
-                    {pauseAniListImport.isPending ? 'Stopping...' : 'Stop Import'}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => startAniListImport.mutate()}
-                    disabled={startAniListImport.isPending}
-                    className="flex items-center gap-2"
-                    data-testid="button-start-anilist"
-                  >
-                    <Play className="w-4 h-4" />
-                    {startAniListImport.isPending ? 'Starting...' : 'Start Import'}
-                  </Button>
-                )}
-              </div>
-              
-              <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>Smart Import: Automatic duplicate detection and TV show migration</span>
-                </div>
-                <div>Phase 1: Updates existing anime | Phase 2: Imports new anime with migration</div>
-                {anilistStatus?.isActive && (
-                  <div className="mt-2 text-purple-600 dark:text-purple-400">
-                    Currently importing anime from AniList API with migration detection...
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* AniList Import Console */}
-            <div className="mt-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Terminal className="w-4 h-4" />
-                <h3 className="font-medium">AniList Import Console</h3>
-                <Badge variant="outline" className={anilistStatus?.isActive ? 'bg-purple-50 text-purple-700' : 'bg-gray-50 text-gray-500'}>
-                  {anilistStatus?.isActive ? 'Active' : 'Idle'}
-                </Badge>
-              </div>
-              
-              <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-lg border border-purple-700 shadow-inner h-80 overflow-hidden">
-                <div 
-                  ref={anilistConsoleRef}
-                  className="h-full overflow-y-auto space-y-1 font-mono text-sm p-4 console-scrollbar"
-                  data-testid="anilist-console"
-                >
-                  {anilistConsoleMessages.length === 0 ? (
-                    <div className="text-gray-400 flex items-center gap-2">
-                      <span className="text-purple-400 font-semibold">seenit@anilist:~$</span> 
-                      <span className="text-gray-500">Waiting for AniList import activity...</span>
-                      <span className="animate-pulse text-purple-400">▊</span>
-                    </div>
-                  ) : (
-                    anilistConsoleMessages.map((msg) => (
-                      <div key={msg.id} className="flex gap-3 py-1 px-2 rounded hover:bg-purple-800/30 transition-colors duration-200">
-                        <span className="text-gray-500 text-xs shrink-0 min-w-[65px] font-medium">{msg.timestamp}</span>
-                        <span className={`leading-relaxed ${
-                          msg.type === 'success' ? 'text-purple-300' :
-                          msg.type === 'warning' ? 'text-yellow-400' :
-                          msg.type === 'error' ? 'text-red-400' :
-                          'text-gray-200'
-                        }`}>
-                          {msg.message}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                  
-                  {/* Live cursor */}
-                  {anilistStatus?.isActive && (
-                    <div className="flex items-center text-purple-400 py-1 px-2 bg-purple-400/10 rounded border-l-2 border-purple-400 mt-2">
-                      <span className="text-gray-500 text-xs mr-3 min-w-[65px] font-medium">{new Date().toLocaleTimeString()}</span>
-                      <span className="text-purple-300 leading-relaxed">
-                        {/* Determine current phase based on latest activity */}
-                        {anilistConsoleMessages.some(msg => msg.message.includes("Phase 2")) ? 
-                          `📄 Phase 2: Processing page ${anilistStatus.currentPage}...` :
-                          anilistConsoleMessages.some(msg => msg.message.includes("Phase 1")) && 
-                          !anilistConsoleMessages.some(msg => msg.message.includes("Phase 1 Complete")) ? 
-                          "📋 Phase 1: Updating existing anime..." :
-                          anilistStatus.currentPage === 0 ? 
-                          "🔄 Health check and setup..." : 
-                          "🔄 Processing with migration detection..."
-                        }
-                      </span>
-                      <span className="ml-2 animate-pulse text-purple-400 font-bold">▊</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Console Controls */}
-              <div className="mt-3 flex justify-between items-center text-xs">
-                <span className="text-gray-500 font-medium">
-                  <Terminal className="inline w-3 h-3 mr-1" />
-                  {anilistConsoleMessages.length} messages logged
-                </span>
-                <button 
-                  onClick={() => setAnilistConsoleMessages([])}
-                  className="px-3 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors duration-200 font-medium"
-                  data-testid="clear-anilist-console"
-                >
-                  Clear Console
-                </button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* AniDB Controls Section */}
         <Card className="mt-8" data-testid="card-anidb-controls">
@@ -956,7 +785,7 @@ function Import() {
             <CardTitle>Import Statistics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-blue-600" data-testid="stat-tvmaze">
                   {tvmazeContent?.count || 0}
@@ -970,12 +799,6 @@ function Import() {
                 <div className="text-sm text-gray-500">TMDB Movies</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-600" data-testid="stat-anilist">
-                  {anilistContent?.count || 0}
-                </div>
-                <div className="text-sm text-gray-500">AniList Anime</div>
-              </div>
-              <div>
                 <div className="text-2xl font-bold text-orange-600" data-testid="stat-anidb">
                   {anidbContent?.count || 0}
                 </div>
@@ -983,7 +806,7 @@ function Import() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-800 dark:text-gray-200" data-testid="stat-total">
-                  {(tvmazeContent?.count || 0) + (anilistContent?.count || 0) + (anidbContent?.count || 0)}
+                  {(tvmazeContent?.count || 0) + (anidbContent?.count || 0)}
                 </div>
                 <div className="text-sm text-gray-500">Total Content</div>
               </div>
