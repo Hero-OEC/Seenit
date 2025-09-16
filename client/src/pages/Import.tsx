@@ -178,8 +178,8 @@ function Import() {
     }
 
     // Errors detected
-    if (tvmazeStatus.errors.length > lastStatus.errors.length) {
-      const newErrors = tvmazeStatus.errors.slice(lastStatus.errors.length);
+    if (tvmazeStatus.errors && tvmazeStatus.errors.length > (lastStatus.errors?.length || 0)) {
+      const newErrors = tvmazeStatus.errors.slice(lastStatus.errors?.length || 0);
       newErrors.forEach(error => {
         addTvmazeConsoleMessage(`❌ Error: ${error}`, 'error');
       });
