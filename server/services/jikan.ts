@@ -162,7 +162,7 @@ export class JikanService {
   private baseUrl = 'https://api.jikan.moe/v4';
   private isSyncing = false;
   private lastRequestTime = 0;
-  private readonly RATE_LIMIT_MS = 1000; // 1 second between requests (60/minute)
+  private readonly RATE_LIMIT_MS = 334; // ~333ms between requests (3 requests/second)
 
   constructor() {
     console.log('[Jikan] Service initialized');
