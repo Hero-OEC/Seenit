@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
-import { anidbService } from "./services/anidb";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -534,76 +533,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // Import routes for AniDB
-  app.get("/api/import/anidb/status", async (_req, res) => {
-    try {
-      const status = await anidbService.getImportStatus();
-      res.json(status);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get AniDB import status" });
-    }
-  });
-
-  app.post("/api/import/anidb/start", async (_req, res) => {
-    try {
-      // Start async import (don't await completion)
-      anidbService.startImport().catch(error => {
-        console.error('AniDB import failed:', error);
-      });
-      res.json({ message: "AniDB import started" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to start AniDB import" });
-    }
-  });
-
-  app.post("/api/import/anidb/pause", async (_req, res) => {
-    try {
-      await anidbService.pauseImport();
-      res.json({ message: "AniDB import paused" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to pause AniDB import" });
-    }
-  });
-
-  app.get("/api/import/anidb/content", async (_req, res) => {
-    try {
-      const count = await anidbService.getContentCount();
-      const content = await anidbService.getSampleContent(20);
-      res.json({
-        count,
-        content: content.map(item => ({
-          id: item.id,
-          title: item.title,
-          year: item.year,
-          rating: item.rating,
-          episodes: item.episodes,
-          episodeCount: item.episodeCount // Number of detailed episodes from AniDB
-        }))
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get AniDB content" });
-    }
-  });
-
-  app.delete("/api/import/anidb/data", async (_req, res) => {
-    try {
-      await anidbService.deleteAllData();
-      res.json({ 
-        message: "Deleted all AniDB records and reset import status",
-        deletedCount: await anidbService.getContentCount()
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete AniDB data" });
-    }
-  });
 
   app.delete("/api/import/:source/data", async (req, res) => {
     try {
       const { source } = req.params;
-      const validSources = ['tvmaze', 'tmdb', 'anidb', 'manual'];
+      const validSources = ['tvmaze', 'tmdb', 'jikan', 'manual'];
       
       if (!validSources.includes(source)) {
-        return res.status(400).json({ message: "Invalid source. Must be one of: tvmaze, tmdb, anidb, manual" });
+        return res.status(400).json({ message: "Invalid source. Must be one of: tvmaze, tmdb, jikan, manual" });
       }
       
       const deletedCount = await storage.deleteContentBySource(source);
