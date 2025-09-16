@@ -539,11 +539,22 @@ export default function ContentDetails() {
                                 </div>
                               )}
                             </div>
-                            <p className="text-sm text-retro-500 mb-3">{episode.airdate || episode.aired || 'TBA'}</p>
-                            <p className="text-retro-700 leading-relaxed mb-4">{episode.summary || episode.description || 'No description available.'}</p>
+                            <p className="text-sm text-retro-500 mb-3">
+                              {(() => {
+                                const airdate = episode.airdate || episode.aired;
+                                if (!airdate || airdate === 'TBA') return 'TBA';
+                                // Extract date part from ISO format (remove time)
+                                return airdate.includes('T') ? airdate.split('T')[0] : airdate;
+                              })()}
+                            </p>
+                            {(episode.summary || episode.description) && (
+                              <p className="text-retro-700 leading-relaxed mb-4">{episode.summary || episode.description}</p>
+                            )}
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4 text-sm text-retro-500">
-                                <span>{episode.runtime || episode.duration || 'TBA'} min</span>
+                                {(episode.runtime || episode.duration) && episode.runtime !== 'TBA' && episode.duration !== 'TBA' && (
+                                  <span>{episode.runtime || episode.duration} min</span>
+                                )}
                                 {episode.rating?.average && <span>★ {episode.rating.average}</span>}
                               </div>
                               <button 
