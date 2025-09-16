@@ -134,13 +134,15 @@ export class AniDBService {
     const url = `${this.baseUrl}?${requestParams.toString()}`;
     
     console.log(`[AniDB] Making request: ${params.request} (AID: ${params.aid || 'N/A'})`);
+    console.log(`[AniDB] Request URL (credentials redacted): ${url.replace(/user=[^&]*/, 'user=[REDACTED]').replace(/pass=[^&]*/, 'pass=[REDACTED]')}`);
 
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'User-Agent': `${clientName}/${clientVersion}`,
-          'Accept': 'application/xml, text/xml'
+          'Accept': 'application/xml, text/xml',
+          'Accept-Encoding': 'gzip, deflate'
         }
       });
 
@@ -149,6 +151,8 @@ export class AniDBService {
       }
 
       const xmlData = await response.text();
+      console.log(`[AniDB] Response length: ${xmlData.length} characters`);
+      console.log(`[AniDB] Response preview: ${xmlData.substring(0, 200)}...`);
       
       // Check for API errors in XML response
       if (xmlData.includes('<error>') || xmlData.includes('BANNED') || xmlData.includes('ACCESS DENIED')) {
