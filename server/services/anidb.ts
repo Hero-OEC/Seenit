@@ -155,7 +155,7 @@ export class AniDBService {
         // Redact credentials from logs for security
         const safeError = xmlData.replace(new RegExp(username, 'g'), '[REDACTED_USER]').replace(new RegExp(password, 'g'), '[REDACTED_PASS]');
         console.error('[AniDB] API Error Response:', safeError);
-        throw new Error(`AniDB API returned error (credentials redacted for security)`);
+        throw new Error(`AniDB API returned error: ${safeError.substring(0, 200)}...`);
       }
 
       return xmlData;
@@ -163,6 +163,7 @@ export class AniDBService {
       // Ensure no credentials leak in error logs
       const errorMsg = error instanceof Error ? error.message.replace(new RegExp(username, 'g'), '[REDACTED_USER]').replace(new RegExp(password, 'g'), '[REDACTED_PASS]') : 'Unknown error';
       console.error('[AniDB] Request failed:', errorMsg);
+      console.error('[AniDB] Original error:', error);
       throw new Error(errorMsg);
     }
   }
@@ -183,7 +184,9 @@ export class AniDBService {
 
       return null;
     } catch (error) {
-      console.error(`[AniDB] Failed to fetch anime ${aid}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`[AniDB] Failed to fetch anime ${aid}:`, errorMessage);
+      console.error(`[AniDB] Full error details:`, error);
       return null;
     }
   }
