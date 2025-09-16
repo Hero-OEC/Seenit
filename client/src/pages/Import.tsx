@@ -51,15 +51,30 @@ interface JikanContent {
   }>;
 }
 
+interface TMDBContent {
+  count: number;
+  content: Array<{
+    id: string;
+    title: string;
+    type: string;
+    year: number | null;
+    rating: number | null;
+    genres: string[] | null;
+  }>;
+}
+
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
   const [tvmazeConsoleMessages, setTvmazeConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const [jikanConsoleMessages, setJikanConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
+  const [tmdbConsoleMessages, setTmdbConsoleMessages] = useState<Array<{id: number, timestamp: string, message: string, type: 'info' | 'success' | 'warning' | 'error'}>>([]);
   const tvmazeConsoleRef = useRef<HTMLDivElement>(null);
   const jikanConsoleRef = useRef<HTMLDivElement>(null);
+  const tmdbConsoleRef = useRef<HTMLDivElement>(null);
   const lastStatusRef = useRef<ImportStatus | null>(null);
   const lastJikanStatusRef = useRef<ImportStatus | null>(null);
+  const lastTmdbStatusRef = useRef<ImportStatus | null>(null);
   
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -89,6 +104,13 @@ function Import() {
     staleTime: 0, // Always refetch, don't use stale data
   });
 
+  // Query for TMDB import status
+  const { data: tmdbStatus, isLoading: tmdbStatusLoading } = useQuery<ImportStatus | null>({
+    queryKey: ['/api/import/tmdb/status'],
+    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
+    staleTime: 0, // Always refetch, don't use stale data
+  });
+
   // Add console message for TVmaze
   const addTvmazeConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
@@ -110,6 +132,16 @@ function Import() {
     });
   };
 
+  // Add console message for TMDB
+  const addTmdbConsoleMessage = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setTmdbConsoleMessages(prev => {
+      const newMessages = [...prev, { id: Date.now() + Math.random(), timestamp, message, type }];
+      // Keep only last 50 messages
+      return newMessages.slice(-50);
+    });
+  };
+
   // Auto-scroll consoles to bottom
   useEffect(() => {
     if (tvmazeConsoleRef.current) {
@@ -123,6 +155,12 @@ function Import() {
       jikanConsoleRef.current.scrollTop = jikanConsoleRef.current.scrollHeight;
     }
   }, [jikanConsoleMessages]);
+
+  useEffect(() => {
+    if (tmdbConsoleRef.current) {
+      tmdbConsoleRef.current.scrollTop = tmdbConsoleRef.current.scrollHeight;
+    }
+  }, [tmdbConsoleMessages]);
 
   // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
@@ -286,6 +324,65 @@ function Import() {
     }
   }, [jikanStatus]); // Track Jikan phase updates
 
+  // Watch for TMDB status changes and generate console messages
+  useEffect(() => {
+    if (!tmdbStatus) return;
+    
+    const lastStatus = lastTmdbStatusRef.current;
+    lastTmdbStatusRef.current = tmdbStatus;
+    
+    // Don't log on first load
+    if (!lastStatus) {
+      if (tmdbStatus.isActive) {
+        addTmdbConsoleMessage("🔄 TMDB import is currently active", 'info');
+        addTmdbConsoleMessage("🎬 Importing popular movies from TMDB", 'info');
+      } else {
+        addTmdbConsoleMessage("⏸️ TMDB import is paused", 'warning');
+      }
+      addTmdbConsoleMessage(`📊 Current status: ${tmdbStatus.totalImported} movies imported`, 'info');
+      return;
+    }
+
+    // Status changed from inactive to active
+    if (!lastStatus.isActive && tmdbStatus.isActive) {
+      addTmdbConsoleMessage("🚀 TMDB import started", 'success');
+      addTmdbConsoleMessage("🔍 Running health check to verify database consistency", 'info');
+    }
+
+    // Status changed from active to inactive
+    if (lastStatus.isActive && !tmdbStatus.isActive) {
+      addTmdbConsoleMessage("⏹️ TMDB import stopped", 'warning');
+    }
+
+    // Page progress
+    if (lastStatus.currentPage !== tmdbStatus.currentPage && tmdbStatus.isActive) {
+      addTmdbConsoleMessage(`📄 Processing page ${tmdbStatus.currentPage} (importing movies)`, 'info');
+    }
+
+    // Import count increased
+    if (lastStatus.totalImported < tmdbStatus.totalImported) {
+      const diff = tmdbStatus.totalImported - lastStatus.totalImported;
+      addTmdbConsoleMessage(`✅ Imported ${diff} movies (Total: ${tmdbStatus.totalImported})`, 'success');
+    }
+
+    // Phase 1 progress updated
+    if (lastStatus.phase1Progress !== tmdbStatus.phase1Progress && tmdbStatus.phase1Progress) {
+      if (tmdbStatus.phase1Progress.includes('complete')) {
+        addTmdbConsoleMessage(`✅ ${tmdbStatus.phase1Progress}`, 'success');
+      } else {
+        addTmdbConsoleMessage(`🎬 ${tmdbStatus.phase1Progress}`, 'info');
+      }
+    }
+
+    // Errors
+    if (tmdbStatus.errors && tmdbStatus.errors.length > (lastStatus.errors?.length || 0)) {
+      const newErrors = tmdbStatus.errors.slice(lastStatus.errors?.length || 0);
+      newErrors.forEach(error => {
+        addTmdbConsoleMessage(`❌ TMDB Error: ${error}`, 'error');
+      });
+    }
+  }, [tmdbStatus]);
+
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
@@ -297,6 +394,13 @@ function Import() {
   // Query for Jikan content
   const { data: jikanContent } = useQuery<JikanContent>({
     queryKey: ['/api/import/jikan/content'],
+    refetchInterval: 10000, // Fixed 10s polling for content
+    staleTime: 5000, // Allow some stale data for content
+  });
+
+  // Query for TMDB content
+  const { data: tmdbContent } = useQuery<TMDBContent>({
+    queryKey: ['/api/content/type/movie'],
     refetchInterval: 10000, // Fixed 10s polling for content
     staleTime: 5000, // Allow some stale data for content
   });
@@ -357,6 +461,29 @@ function Import() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/content'] });
       queryClient.invalidateQueries({ queryKey: ['/api/content/type/anime'] });
+      setRefreshKey(prev => prev + 1);
+    },
+  });
+
+  // TMDB mutations
+  const startTmdbImport = useMutation({
+    mutationFn: (data?: { maxPages?: number }) => apiRequest('POST', '/api/import/tmdb/movies', data || { maxPages: 5 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/tmdb/status'] });
+    },
+  });
+
+  const pauseTmdbImport = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/import/tmdb/pause'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/tmdb/status'] });
+    },
+  });
+
+  const deleteTmdbData = useMutation({
+    mutationFn: () => apiRequest('DELETE', '/api/import/tmdb/data'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/content/type/movie'] });
       setRefreshKey(prev => prev + 1);
     },
   });
@@ -450,6 +577,8 @@ function Import() {
               queryClient.invalidateQueries({ queryKey: ['/api/import/tvmaze/content'] });
               queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/status'] });
               queryClient.invalidateQueries({ queryKey: ['/api/import/jikan/content'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/import/tmdb/status'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/content/type/movie'] });
             }}
             data-testid="button-refresh"
           >
@@ -470,27 +599,71 @@ function Import() {
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                <Badge className="bg-gray-100 text-gray-800" data-testid="status-tmdb">Not Configured</Badge>
+                {getStatusBadge(
+                  tmdbStatus?.isActive || false, 
+                  (tmdbContent?.count || 0) > 0,
+                  tmdbStatusLoading && !tmdbStatus
+                )}
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Last Sync:</span>
-                <span className="text-gray-400" data-testid="text-tmdb-sync">Never</span>
+                <span className="text-sm text-gray-500" data-testid="text-tmdb-sync">
+                  {formatDate(tmdbStatus?.lastSyncAt || null)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Content:</span>
-                <span className="text-gray-400" data-testid="text-tmdb-count">0</span>
+                <span className="font-medium text-blue-600" data-testid="text-tmdb-count">
+                  {tmdbContent?.count || 0}
+                </span>
               </div>
-              <div className="pt-4 border-t">
+              {tmdbStatus?.errors && tmdbStatus.errors.length > 0 && (
+                <div className="mt-2">
+                  <details className="text-sm">
+                    <summary className="cursor-pointer text-red-600">
+                      {tmdbStatus.errors.length} error(s)
+                    </summary>
+                    <div className="mt-1 text-xs text-red-500 max-h-20 overflow-y-auto">
+                      {tmdbStatus.errors.slice(-3).map((error, i) => (
+                        <div key={i} className="truncate">{error}</div>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+              )}
+              <div className="pt-4 border-t space-y-2">
+                <div className="flex gap-2">
+                  <Button
+                    variant={tmdbStatus?.isActive ? "secondary" : "default"}
+                    size="sm"
+                    onClick={() => tmdbStatus?.isActive ? pauseTmdbImport.mutate() : startTmdbImport.mutate()}
+                    disabled={startTmdbImport.isPending || pauseTmdbImport.isPending}
+                    className="flex-1 flex items-center gap-2"
+                    data-testid="button-import-tmdb"
+                  >
+                    {tmdbStatus?.isActive ? (
+                      <>
+                        <Pause className="w-4 h-4" />
+                        {pauseTmdbImport.isPending ? 'Pausing...' : 'Pause'}
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4" />
+                        {startTmdbImport.isPending ? 'Starting...' : 'Start Import'}
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => confirmDelete('TMDB', () => deleteTMDBData.mutate())}
-                  disabled={deleteTMDBData.isPending}
+                  onClick={() => confirmDelete('TMDB', () => deleteTmdbData.mutate())}
+                  disabled={deleteTmdbData.isPending || tmdbStatus?.isActive}
                   className="w-full flex items-center gap-2"
                   data-testid="button-delete-tmdb"
                 >
                   <Trash2 className="w-4 h-4" />
-                  {deleteTMDBData.isPending ? 'Deleting...' : 'Delete All TMDB Data'}
+                  {deleteTmdbData.isPending ? 'Deleting...' : 'Delete All TMDB Data'}
                 </Button>
               </div>
             </CardContent>
