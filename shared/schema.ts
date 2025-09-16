@@ -51,6 +51,12 @@ export const content = pgTable("content", {
   studio: text("studio"), // Animation studio
   sourceMaterial: text("source_material"), // 'manga', 'light_novel', 'original', etc.
   
+  // Series grouping fields (for anime seasons)
+  seriesKey: text("series_key"), // e.g., "jikan:series:ROOT_MAL_ID" for grouping seasons
+  seriesRootSourceId: text("series_root_source_id"), // Root anime's MAL ID as string
+  seasonNumber: integer("season_number"), // 1-based order in sequel chain (1 = first season)
+  seasonTitle: text("season_title"), // e.g., "Season 6", "Final Season", null for first season
+  
   // Content availability
   streamingPlatforms: text("streaming_platforms").array(),
   affiliateLinks: text("affiliate_links").array(),

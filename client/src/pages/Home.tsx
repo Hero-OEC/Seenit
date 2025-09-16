@@ -6,6 +6,8 @@ import SidePanel, { type SidePanelItem } from "@/components/SidePanel";
 import HomeContent from "@/components/HomeContent";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
+import { groupAnimeIntoSeries, seriesToContentItems } from "@/lib/animeGrouping";
+import type { Content } from "@shared/schema";
 
 export default function Home() {
   const { isSignedIn, user, signOut } = useAuth();
@@ -66,10 +68,14 @@ export default function Home() {
 
   // Fetch popular anime from database
   const { data: animeData } = useQuery<any>({
-    queryKey: ["/api/content/type/anime?limit=6"],
+    queryKey: ["/api/content/type/anime?limit=12"], // Fetch more to account for series grouping
     enabled: true,
   });
-  const popularAnime = animeData?.content || [];
+  const rawAnimeData = animeData?.content || [];
+  
+  // Group anime by series and get representative items
+  const groupedAnimeSeries = groupAnimeIntoSeries(rawAnimeData);
+  const popularAnime = seriesToContentItems(groupedAnimeSeries).slice(0, 6);
 
   // Fetch recent episodes from database
   const { data: newEpisodes = [] } = useQuery<any[]>({

@@ -6,6 +6,7 @@ import type { Content } from "@shared/schema";
 import ContentDisplay from "@/components/ContentDisplay";
 import StatusUpdateButton from "@/components/StatusUpdateButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { getSeriesSeasons, formatSeasonTitle } from "@/lib/animeGrouping";
 
 export default function ContentDetails() {
   const [, params] = useRoute("/content/:id");
@@ -28,6 +29,19 @@ export default function ContentDetails() {
     queryKey: [`/api/content/${params?.id}/recommendations`],
     enabled: !!params?.id,
   });
+
+  // Fetch all seasons for anime series
+  const { data: allAnimeContent } = useQuery<Content[]>({
+    queryKey: ["/api/content/type/anime?limit=100"], // Get more anime to find all seasons
+    enabled: content?.type === 'anime' && !!content?.seriesKey,
+  });
+
+  // Get seasons for this anime series if it's anime
+  const seriesSeasons = content?.type === 'anime' && content?.seriesKey && allAnimeContent
+    ? getSeriesSeasons(allAnimeContent, content.seriesKey)
+    : [];
+
+  const hasMultipleSeasons = seriesSeasons.length > 1;
 
   // Initialize empty watched episodes state and set default season
   useEffect(() => {
@@ -388,6 +402,31 @@ export default function ContentDetails() {
               )}
             </div>
 
+            {/* Season Navigation for Anime Series */}
+            {hasMultipleSeasons && content.type === 'anime' && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-retro-900 mb-3">Seasons</h3>
+                <div className="flex flex-wrap gap-2">
+                  {seriesSeasons.map((season, index) => (
+                    <button
+                      key={season.id}
+                      onClick={() => navigate(`/content/${season.id}`)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border-2 ${
+                        season.id === content.id
+                          ? 'bg-retro-500 text-white border-retro-500 shadow-md'
+                          : 'bg-white text-retro-700 border-retro-200 hover:bg-retro-50 hover:border-retro-300'
+                      }`}
+                      data-testid={`season-${season.seasonNumber || index + 1}`}
+                    >
+                      {formatSeasonTitle(season)}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-sm text-retro-600">
+                  Currently viewing: <span className="font-medium">{formatSeasonTitle(content)}</span>
+                </div>
+              </div>
+            )}
 
             {/* Ratings */}
             {(content.imdbRating || content.rottenTomatoesRating || content.malRating || content.rating) && (

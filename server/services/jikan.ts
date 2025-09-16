@@ -158,11 +158,40 @@ interface ProcessedEpisode {
   forumUrl?: string;
 }
 
+// Jikan Relations API types
+interface JikanRelationEntry {
+  mal_id: number;
+  type: string; // "anime", "manga"
+  name: string;
+  url: string;
+}
+
+interface JikanRelationGroup {
+  relation: string; // "Sequel", "Prequel", "Side story", "Alternative version", etc.
+  entry: JikanRelationEntry[];
+}
+
+interface JikanRelationsResponse {
+  data: JikanRelationGroup[];
+}
+
+// Series info for grouping seasons
+export interface AnimeSeriesInfo {
+  seriesKey: string;
+  seriesRootSourceId: string;
+  seasonNumber: number;
+  seasonTitle: string | null;
+}
+
 export class JikanService {
   private baseUrl = 'https://api.jikan.moe/v4';
   private isSyncing = false;
   private lastRequestTime = 0;
   private readonly RATE_LIMIT_MS = 334; // ~333ms between requests (3 requests/second)
+  
+  // Memoization cache for relations data to avoid repeated API calls during imports
+  private relationsCache = new Map<number, JikanRelationGroup[]>();
+  private seriesInfoCache = new Map<number, AnimeSeriesInfo>();
 
   constructor() {
     console.log('[Jikan] Service initialized');
@@ -351,10 +380,147 @@ export class JikanService {
     }
   }
 
+  // Get anime relations from Jikan API
+  async getAnimeRelations(malId: number): Promise<JikanRelationGroup[]> {
+    // Check cache first
+    if (this.relationsCache.has(malId)) {
+      console.log(`[Jikan] Relations cache hit for anime ${malId}`);
+      return this.relationsCache.get(malId)!;
+    }
+
+    try {
+      console.log(`[Jikan] Fetching relations for anime ${malId}`);
+      const response = await this.makeRequest<JikanRelationsResponse>(`/anime/${malId}/relations`);
+      
+      // Cache the result
+      this.relationsCache.set(malId, response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`[Jikan] Failed to fetch relations for anime ${malId}:`, error);
+      // Cache empty result to avoid repeated failures
+      this.relationsCache.set(malId, []);
+      return [];
+    }
+  }
+
+  // Get series info by traversing prequel chain to find root anime
+  async getSeriesInfo(malId: number): Promise<AnimeSeriesInfo> {
+    // Check cache first
+    if (this.seriesInfoCache.has(malId)) {
+      console.log(`[Jikan] Series info cache hit for anime ${malId}`);
+      return this.seriesInfoCache.get(malId)!;
+    }
+
+    console.log(`[Jikan] Calculating series info for anime ${malId}`);
+    
+    try {
+      // Traverse prequel chain to find root
+      const visitedIds = new Set<number>();
+      let currentId = malId;
+      let seasonNumber = 1;
+      
+      // Build the chain by following prequels
+      const chainFromCurrent: number[] = [];
+      
+      while (!visitedIds.has(currentId)) {
+        visitedIds.add(currentId);
+        chainFromCurrent.push(currentId);
+        
+        // Get relations for current anime
+        const relations = await this.getAnimeRelations(currentId);
+        
+        // Look for prequel relation
+        const prequelGroup = relations.find(group => group.relation.toLowerCase() === 'prequel');
+        if (!prequelGroup || prequelGroup.entry.length === 0) {
+          // No prequel found, this is the root
+          break;
+        }
+        
+        // Find anime prequel (not manga)
+        const animePrequel = prequelGroup.entry.find(entry => entry.type === 'anime');
+        if (!animePrequel) {
+          // No anime prequel, this is the root
+          break;
+        }
+        
+        currentId = animePrequel.mal_id;
+      }
+      
+      // The last currentId is the root
+      const rootId = currentId;
+      
+      // Now calculate season number by position in chain
+      // chainFromCurrent goes from target -> ... -> root, so reverse it
+      const chainFromRoot = chainFromCurrent.reverse();
+      const targetSeasonNumber = chainFromRoot.indexOf(malId) + 1;
+      
+      // Generate season title based on season number
+      let seasonTitle: string | null = null;
+      if (targetSeasonNumber > 1) {
+        // Try to extract season info from the anime title itself
+        const anime = await this.getAnimeById(malId);
+        const title = anime?.title || '';
+        
+        // Common patterns for season titles
+        if (title.includes('Final')) {
+          seasonTitle = 'Final Season';
+        } else if (title.includes('Season')) {
+          const match = title.match(/Season\s+(\d+|[IVX]+)/i);
+          if (match) {
+            seasonTitle = `Season ${match[1]}`;
+          } else {
+            seasonTitle = `Season ${targetSeasonNumber}`;
+          }
+        } else if (title.match(/\b([IVX]+|[0-9]+)(st|nd|rd|th)?\s*(Season|Series|Part)/i)) {
+          const match = title.match(/\b([IVX]+|[0-9]+)(st|nd|rd|th)?\s*(Season|Series|Part)/i);
+          if (match) {
+            seasonTitle = `${match[3]} ${match[1]}`;
+          } else {
+            seasonTitle = `Season ${targetSeasonNumber}`;
+          }
+        } else {
+          // Generic season title
+          seasonTitle = `Season ${targetSeasonNumber}`;
+        }
+      }
+      
+      const seriesInfo: AnimeSeriesInfo = {
+        seriesKey: `jikan:series:${rootId}`,
+        seriesRootSourceId: rootId.toString(),
+        seasonNumber: targetSeasonNumber,
+        seasonTitle
+      };
+      
+      // Cache the result
+      this.seriesInfoCache.set(malId, seriesInfo);
+      
+      console.log(`[Jikan] Series info for ${malId}: root=${rootId}, season=${targetSeasonNumber}, title="${seasonTitle}"`);
+      return seriesInfo;
+      
+    } catch (error) {
+      console.error(`[Jikan] Failed to calculate series info for anime ${malId}:`, error);
+      
+      // Fallback: treat as standalone anime
+      const fallbackInfo: AnimeSeriesInfo = {
+        seriesKey: `jikan:series:${malId}`,
+        seriesRootSourceId: malId.toString(),
+        seasonNumber: 1,
+        seasonTitle: null
+      };
+      
+      // Cache the fallback
+      this.seriesInfoCache.set(malId, fallbackInfo);
+      return fallbackInfo;
+    }
+  }
+
   // Convert Jikan anime to our content format
   private async convertToContent(anime: JikanAnime, includeAllEpisodes: boolean = false): Promise<InsertContent> {
     // Get episodes - either single page or all episodes based on flag
     const episodes = includeAllEpisodes ? await this.getAllEpisodes(anime.mal_id) : await this.getAnimeEpisodes(anime.mal_id);
+    
+    // Get series information for season grouping
+    const seriesInfo = await this.getSeriesInfo(anime.mal_id);
     
     // Extract studio name
     const studioName = anime.studios?.[0]?.name || null;
@@ -392,6 +558,13 @@ export class JikanService {
       episodes: anime.episodes,
       studio: studioName,
       sourceMaterial: anime.source,
+      
+      // Series grouping fields
+      seriesKey: seriesInfo.seriesKey,
+      seriesRootSourceId: seriesInfo.seriesRootSourceId,
+      seasonNumber: seriesInfo.seasonNumber,
+      seasonTitle: seriesInfo.seasonTitle,
+      
       episodeData: { episodes }, // Store episodes in expected structure for routes
     };
   }
@@ -467,11 +640,26 @@ export class JikanService {
         importedCount += result.imported;
         errorMessages.push(...result.errors);
         
-        cursor = { phase: 4, step: 'complete' };
+        cursor = { phase: 4, step: 'start', page: 0, offset: 0 };
         await this.updateImportStatus({
           cursor,
           totalImported: (existingStatus?.totalImported || 0) + importedCount,
-          phase3Progress: `Phase 3 Complete: ${result.imported} top anime imported`
+          phase3Progress: `Phase 3 Complete: ${result.imported} top anime imported`,
+          phase4Progress: 'Starting series enrichment backfill...'
+        });
+      }
+
+      // PHASE 4: Series enrichment backfill (backfill existing anime with series info)
+      if (cursor.phase <= 4) {
+        console.log('[Jikan] Phase 4: Backfilling existing anime with series info...');
+        const result = await this.backfillSeriesInfo(cursor);
+        updatedCount += result.updated;
+        errorMessages.push(...result.errors);
+        
+        cursor = { phase: 5, step: 'complete' };
+        await this.updateImportStatus({
+          cursor,
+          phase4Progress: `Phase 4 Complete: ${result.updated} anime enriched with series info`
         });
       }
 
@@ -721,6 +909,113 @@ export class JikanService {
     return { imported, errors };
   }
 
+  // PHASE 4: Backfill existing anime with series info
+  private async backfillSeriesInfo(cursor: any): Promise<{ updated: number; errors: string[] }> {
+    console.log('[Jikan] Starting series info backfill for existing anime...');
+    
+    const BATCH_SIZE = 50; // Process in smaller batches to manage rate limits
+    let updated = 0;
+    const errors: string[] = [];
+    let offset = cursor.offset || 0;
+
+    try {
+      while (true) {
+        // Check if sync is still active
+        const [currentStatus] = await db
+          .select()
+          .from(importStatus)
+          .where(eq(importStatus.source, 'jikan'))
+          .limit(1);
+        
+        if (!currentStatus?.isActive) {
+          console.log('[Jikan] Sync paused during series info backfill');
+          break;
+        }
+
+        // Get existing anime that need series info enrichment (missing seriesKey)
+        const existingAnime = await db
+          .select()
+          .from(content)
+          .where(
+            and(
+              eq(content.source, 'jikan'),
+              eq(content.type, 'anime'),
+              // Only get anime that don't have series info yet
+              or(
+                eq(content.seriesKey, null),
+                eq(content.seriesKey, '')
+              )
+            )
+          )
+          .limit(BATCH_SIZE)
+          .offset(offset);
+
+        if (existingAnime.length === 0) {
+          console.log('[Jikan] No more anime to process for series enrichment');
+          break;
+        }
+
+        console.log(`[Jikan] Processing batch: ${existingAnime.length} anime (offset: ${offset})`);
+
+        // Process each anime in the batch
+        for (const anime of existingAnime) {
+          try {
+            const malId = parseInt(anime.sourceId);
+            if (isNaN(malId)) {
+              console.warn(`[Jikan] Invalid MAL ID for anime: ${anime.sourceId}`);
+              continue;
+            }
+
+            // Get series info for this anime
+            const seriesInfo = await this.getSeriesInfo(malId);
+            
+            // Update the anime record with series info
+            await db
+              .update(content)
+              .set({
+                seriesKey: seriesInfo.seriesKey,
+                seriesRootSourceId: seriesInfo.seriesRootSourceId,
+                seasonNumber: seriesInfo.seasonNumber,
+                seasonTitle: seriesInfo.seasonTitle,
+                lastUpdated: new Date()
+              })
+              .where(eq(content.id, anime.id));
+
+            updated++;
+            
+            console.log(`[Jikan] Enriched ${anime.title} with series info: ${seriesInfo.seriesKey} (Season ${seriesInfo.seasonNumber})`);
+
+          } catch (error) {
+            const errorMsg = `Failed to enrich anime ${anime.title}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            console.error(`[Jikan] ${errorMsg}`);
+            errors.push(errorMsg);
+          }
+        }
+
+        // Update progress and cursor
+        offset += BATCH_SIZE;
+        await this.updateImportStatus({
+          cursor: { phase: 4, step: 'backfill', offset },
+          phase4Progress: `Processed ${updated} anime for series enrichment (offset: ${offset})`
+        });
+
+        // If we got less than BATCH_SIZE, we've processed all available anime
+        if (existingAnime.length < BATCH_SIZE) {
+          break;
+        }
+      }
+
+      console.log(`[Jikan] Series enrichment backfill complete: ${updated} anime updated`);
+      return { updated, errors };
+
+    } catch (error) {
+      const errorMsg = `Series enrichment backfill failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      console.error(`[Jikan] ${errorMsg}`);
+      errors.push(errorMsg);
+      return { updated, errors };
+    }
+  }
+
   // Pause import
   async pauseImport(): Promise<void> {
     this.isSyncing = false;
@@ -740,6 +1035,7 @@ export class JikanService {
     phase1Progress: string;
     phase2Progress: string;
     phase3Progress: string;
+    phase4Progress: string;
     errors: string[];
     cursor: any;
     lastSyncAt: Date | null;
