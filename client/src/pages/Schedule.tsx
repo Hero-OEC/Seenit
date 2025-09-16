@@ -203,7 +203,7 @@ export default function Schedule() {
                 type={activeContentType}
                 status={getContentStatus()}
                 year={episode.airdate ? new Date(episode.airdate).getFullYear() : undefined}
-                season={episode.season}
+                season={episode.season || 1}
                 episode={episode.number}
                 episodeTitle={episode.name}
                 airDate={episode.airdate}

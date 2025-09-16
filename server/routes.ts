@@ -123,9 +123,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
               // Find episodes that air on this date
               const dateEpisodes = episodeData.episodes
-                .filter((ep: any) => ep.airdate === date)
+                .filter((ep: any) => {
+                  if (!ep.airdate) return false;
+                  // Handle both simple date format (TV shows) and ISO format (anime)
+                  const episodeDate = ep.airdate.includes('T') 
+                    ? ep.airdate.split('T')[0]  // Extract date part from ISO format
+                    : ep.airdate;
+                  return episodeDate === date;
+                })
                 .map((ep: any) => ({
                   ...ep,
+                  // Normalize episode number field (anime uses episodeNumber, TV uses number)
+                  number: ep.number || ep.episodeNumber,
                   contentId: content.id,
                   showTitle: content.title,
                   type: content.type,
@@ -153,10 +162,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (episodeData && episodeData.episodes && Array.isArray(episodeData.episodes)) {
                 // Get recent episodes as fallback
                 const recentEpisodes = episodeData.episodes
+                  .filter((ep: any) => ep.airdate) // Only episodes with airdate
                   .sort((a: any, b: any) => new Date(b.airdate).getTime() - new Date(a.airdate).getTime())
                   .slice(0, 5)
                   .map((ep: any) => ({
                     ...ep,
+                    // Normalize episode number field (anime uses episodeNumber, TV uses number)
+                    number: ep.number || ep.episodeNumber,
                     contentId: content.id,
                     showTitle: content.title,
                     type: content.type,
