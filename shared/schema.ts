@@ -88,6 +88,7 @@ export const importStatus = pgTable("import_status", {
   phase2Progress: text("phase2_progress"),
   phase3Progress: text("phase3_progress"),
   errors: text("errors").array(),
+  cursor: jsonb("cursor"), // JSON cursor for multi-phase resume state (phase, year, season, page, type, etc.)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
