@@ -636,7 +636,7 @@ function Import() {
                   <Button
                     variant={tmdbStatus?.isActive ? "secondary" : "default"}
                     size="sm"
-                    onClick={() => tmdbStatus?.isActive ? pauseTmdbImport.mutate() : startTmdbImport.mutate()}
+                    onClick={() => tmdbStatus?.isActive ? pauseTmdbImport.mutate() : startTmdbImport.mutate({})}
                     disabled={startTmdbImport.isPending || pauseTmdbImport.isPending}
                     className="flex-1 flex items-center gap-2"
                     data-testid="button-import-tmdb"
