@@ -400,7 +400,7 @@ function Import() {
 
   // Query for TMDB content
   const { data: tmdbContent } = useQuery<TMDBContent>({
-    queryKey: ['/api/content/type/movie'],
+    queryKey: ['/api/import/tmdb/content'],
     refetchInterval: 10000, // Fixed 10s polling for content
     staleTime: 5000, // Allow some stale data for content
   });
