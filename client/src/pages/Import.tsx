@@ -467,7 +467,14 @@ function Import() {
 
   // TMDB mutations
   const startTmdbImport = useMutation({
-    mutationFn: (data?: { maxPages?: number }) => apiRequest('POST', '/api/import/tmdb/movies', data || { maxPages: 5 }),
+    mutationFn: (data?: { maxPages?: number }) => apiRequest('POST', '/api/import/tmdb/movies', data || { maxPages: 50 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/import/tmdb/status'] });
+    },
+  });
+
+  const startComprehensiveImport = useMutation({
+    mutationFn: (data?: { maxPages?: number }) => apiRequest('POST', '/api/import/tmdb/comprehensive', data || { maxPages: 200 }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/import/tmdb/status'] });
     },
@@ -918,15 +925,27 @@ function Import() {
                     {pauseTmdbImport.isPending ? 'Stopping...' : 'Stop Import'}
                   </Button>
                 ) : (
-                  <Button
-                    onClick={() => startTmdbImport.mutate({})}
-                    disabled={startTmdbImport.isPending}
-                    className="flex items-center gap-2"
-                    data-testid="button-start-tmdb-import"
-                  >
-                    <Play className="w-4 h-4" />
-                    {startTmdbImport.isPending ? 'Starting...' : 'Start Import'}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => startTmdbImport.mutate({ maxPages: 50 })}
+                      disabled={startTmdbImport.isPending}
+                      className="flex items-center gap-2"
+                      data-testid="button-start-tmdb-import"
+                    >
+                      <Play className="w-4 h-4" />
+                      {startTmdbImport.isPending ? 'Starting...' : 'Quick Import (50 pages)'}
+                    </Button>
+                    <Button
+                      onClick={() => startComprehensiveImport.mutate({ maxPages: 200 })}
+                      disabled={startComprehensiveImport.isPending}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                      data-testid="button-comprehensive-tmdb-import"
+                    >
+                      <Database className="w-4 h-4" />
+                      {startComprehensiveImport.isPending ? 'Starting...' : 'Full Import (200 pages)'}
+                    </Button>
+                  </>
                 )}
                 
                 <Button
@@ -944,9 +963,10 @@ function Import() {
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar className="w-4 h-4" />
-                  <span>Import Schedule: Manual import of popular movies</span>
+                  <span>Import Options: Quick (popular movies) or Full (popular + top rated + recent)</span>
                 </div>
-                <div>Rate Limited: 40 requests per 10 seconds to respect TMDB API limits</div>
+                <div>Rate Limited: 35 requests per 10 seconds to respect TMDB API limits</div>
+                <div className="text-xs mt-1">Quick Import: ~1,000 movies | Full Import: ~4,000+ movies</div>
                 {tmdbStatus?.isActive && (
                   <div className="mt-2 text-blue-600 dark:text-blue-400">
                     Currently importing movies from TMDB API...

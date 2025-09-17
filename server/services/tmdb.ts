@@ -48,7 +48,7 @@ export class TMDBService {
   private apiKey = process.env.TMDB_API_KEY!;
   private imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
   private largeImageBaseUrl = 'https://image.tmdb.org/t/p/original';
-  
+
   // TMDB has generous rate limits (~40 req/sec), but let's be conservative
   private rateLimitQueue: Array<() => Promise<any>> = [];
   private isProcessingQueue = false;
@@ -67,7 +67,7 @@ export class TMDBService {
       console.error('[TMDB] TMDB_API_KEY environment variable is not set');
       throw new Error('TMDB_API_KEY is required');
     }
-    
+
     this.initializeGenres();
   }
 
@@ -77,7 +77,7 @@ export class TMDBService {
         try {
           const url = new URL(`${this.baseUrl}${endpoint}`);
           url.searchParams.append('api_key', this.apiKey);
-          
+
           // Add additional parameters
           Object.entries(params).forEach(([key, value]) => {
             url.searchParams.append(key, value);
@@ -87,7 +87,7 @@ export class TMDBService {
           if (!response.ok) {
             throw new Error(`TMDB API error: ${response.status} ${response.statusText}`);
           }
-          
+
           const data = await response.json();
           resolve(data);
         } catch (error) {
@@ -109,7 +109,7 @@ export class TMDBService {
     try {
       while (this.rateLimitQueue.length > 0) {
         const now = Date.now();
-        
+
         // Reset window if 1 second has passed
         if (now - this.windowStart >= this.windowMs) {
           this.requestCount = 0;
@@ -151,7 +151,7 @@ export class TMDBService {
         this.movieGenres.set(genre.id, genre.name);
       });
 
-      
+
       console.log('[TMDB] Genre cache initialized');
     } catch (error) {
       console.error('[TMDB] Failed to initialize genres:', error);
@@ -295,10 +295,10 @@ export class TMDBService {
           });
           break;
         }
-        
+
         try {
           const response = await this.getPopularMovies(page);
-          
+
           for (const movie of response.results) {
             try {
               // Check if already exists
@@ -326,7 +326,7 @@ export class TMDBService {
           }
 
           console.log(`[TMDB] Imported page ${page}: ${imported} movies total`);
-          
+
           // Update progress
           await this.updateImportStatus({
             currentPage: page,
@@ -342,7 +342,7 @@ export class TMDBService {
       }
 
       console.log(`[TMDB] Popular movies import complete: ${imported} imported, ${errors.length} errors`);
-      
+
       // Mark as complete
       await this.updateImportStatus({
         isActive: false,
@@ -354,7 +354,7 @@ export class TMDBService {
     } catch (error) {
       errors.push(`Import failed: ${error}`);
       console.error('[TMDB] Import failed:', error);
-      
+
       // Mark as failed
       await this.updateImportStatus({
         isActive: false,
@@ -382,7 +382,7 @@ export class TMDBService {
   }
 
   // Import recent/new movies (now playing + upcoming)
-  async importRecentMovies(maxPages: number = 10): Promise<{ imported: number; errors: string[] }> {
+  async importRecentMovies(maxPages: number = 50): Promise<{ imported: number; errors: string[] }> {
     if (this.isSyncing) {
       return { imported: 0, errors: ['Import already in progress'] };
     }
@@ -410,11 +410,11 @@ export class TMDBService {
           console.log('[TMDB] Recent movies import paused by user');
           break;
         }
-        
+
         try {
           const response = await this.getNowPlayingMovies(page);
           imported += await this.processMoviePage(response.results, `now playing page ${page}`);
-          
+
           await this.updateImportStatus({
             currentPage: page,
             totalImported: imported,
@@ -434,11 +434,11 @@ export class TMDBService {
           console.log('[TMDB] Recent movies import paused by user');
           break;
         }
-        
+
         try {
           const response = await this.getUpcomingMovies(page);
           imported += await this.processMoviePage(response.results, `upcoming page ${page}`);
-          
+
           await this.updateImportStatus({
             currentPage: page,
             totalImported: imported,
@@ -452,7 +452,7 @@ export class TMDBService {
       }
 
       console.log(`[TMDB] Recent movies import complete: ${imported} imported, ${errors.length} errors`);
-      
+
       await this.updateImportStatus({
         isActive: false,
         totalImported: imported,
@@ -463,7 +463,7 @@ export class TMDBService {
     } catch (error) {
       errors.push(`Recent import failed: ${error}`);
       console.error('[TMDB] Recent import failed:', error);
-      
+
       await this.updateImportStatus({
         isActive: false,
         errors: [`Recent import failed: ${error}`]
@@ -501,7 +501,7 @@ export class TMDBService {
       allErrors.push(...recentResult.errors);
 
       console.log(`[TMDB] Hybrid import complete: ${totalImported} total movies imported`);
-      
+
     } catch (error) {
       console.error('[TMDB] Hybrid import failed:', error);
       allErrors.push(`Hybrid import failed: ${error}`);
@@ -513,7 +513,7 @@ export class TMDBService {
   // Helper method to process a page of movies (reduces duplication)
   private async processMoviePage(movies: TMDBMovie[], source: string): Promise<number> {
     let imported = 0;
-    
+
     for (const movie of movies) {
       try {
         // Check if already exists
@@ -537,7 +537,7 @@ export class TMDBService {
         console.error(`[TMDB] Failed to import movie ${movie.title} from ${source}: ${error}`);
       }
     }
-    
+
     return imported;
   }
 
@@ -549,7 +549,7 @@ export class TMDBService {
       medium: 'https://image.tmdb.org/t/p/w500', 
       large: 'https://image.tmdb.org/t/p/original'
     };
-    
+
     return `${baseUrls[size]}${path}`;
   }
 }

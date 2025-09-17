@@ -692,6 +692,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/import/tmdb/comprehensive", async (req, res) => {
+    try {
+      const body = z.object({
+        maxPages: z.number().min(1).max(500).default(100)
+      }).parse(req.body);
+      
+      const result = await tmdbService.importComprehensive(body.maxPages);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request", errors: error.errors });
+      }
+      console.error("TMDB comprehensive import failed:", error);
+      res.status(500).json({ message: "Failed to import movies comprehensively" });
+    }
+  });
+
 
   // TMDB status routes 
   app.get("/api/import/tmdb/status", async (_req, res) => {
