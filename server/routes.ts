@@ -685,6 +685,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/import/tmdb/content", async (_req, res) => {
+    try {
+      const content = await storage.getContentBySource('tmdb');
+      res.json({
+        count: content.length,
+        content: content.slice(0, 20).map(item => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          year: item.year,
+          rating: item.rating,
+          status: item.status,
+          runtime: item.runtime,
+          releaseDate: item.releaseDate,
+          genres: item.genres
+        })) // Return first 20 for preview with full details
+      });
+    } catch (error) {
+      console.error("Failed to get TMDB content:", error);
+      res.status(500).json({ message: "Failed to get TMDB content" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
