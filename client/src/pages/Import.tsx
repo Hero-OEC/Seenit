@@ -75,7 +75,7 @@ function Import() {
   const lastStatusRef = useRef<ImportStatus | null>(null);
   const lastJikanStatusRef = useRef<ImportStatus | null>(null);
   const lastTmdbStatusRef = useRef<ImportStatus | null>(null);
-  
+
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -165,10 +165,10 @@ function Import() {
   // Watch for TVmaze status changes and generate console messages
   useEffect(() => {
     if (!tvmazeStatus) return;
-    
+
     const lastStatus = lastStatusRef.current;
     lastStatusRef.current = tvmazeStatus;
-    
+
     // Don't log on first load
     if (!lastStatus) {
       if (tvmazeStatus.isActive) {
@@ -241,10 +241,10 @@ function Import() {
   // Watch for Jikan status changes and generate console messages
   useEffect(() => {
     if (!jikanStatus) return;
-    
+
     const lastStatus = lastJikanStatusRef.current;
     lastJikanStatusRef.current = jikanStatus;
-    
+
     // Don't log on first load
     if (!lastStatus) {
       if (jikanStatus.isActive) {
@@ -327,10 +327,10 @@ function Import() {
   // Watch for TMDB status changes and generate console messages
   useEffect(() => {
     if (!tmdbStatus) return;
-    
+
     const lastStatus = lastTmdbStatusRef.current;
     lastTmdbStatusRef.current = tmdbStatus;
-    
+
     // Don't log on first load
     if (!lastStatus) {
       if (tmdbStatus.isActive) {
@@ -498,13 +498,13 @@ function Import() {
   // Auto-start import only once on initial page load, not after deletions
   const [hasAutoStarted, setHasAutoStarted] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  
+
   useEffect(() => {
     if (tvmazeContent !== undefined) {
       setIsFirstLoad(false);
     }
   }, [tvmazeContent]);
-  
+
   useEffect(() => {
     if (!hasAutoStarted && 
         isFirstLoad &&
@@ -593,7 +593,7 @@ function Import() {
             Refresh
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* TMDB Section */}
           <Card data-testid="card-tmdb">
@@ -808,7 +808,7 @@ function Import() {
                   </Button>
                 )}
               </div>
-              
+
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar className="w-4 h-4" />
@@ -822,7 +822,7 @@ function Import() {
                 )}
               </div>
             </div>
-            
+
             {/* Live Import Console */}
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
@@ -832,7 +832,7 @@ function Import() {
                   {tvmazeStatus?.isActive ? 'Active' : 'Idle'}
                 </Badge>
               </div>
-              
+
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg border border-gray-700 shadow-inner h-80 overflow-hidden">
                 <div 
                   ref={tvmazeConsoleRef}
@@ -860,7 +860,7 @@ function Import() {
                       </div>
                     ))
                   )}
-                  
+
                   {/* Live cursor */}
                   {tvmazeStatus?.isActive && (
                     <div className="flex items-center text-green-400 py-1 px-2 bg-green-400/10 rounded border-l-2 border-green-400 mt-2">
@@ -882,7 +882,7 @@ function Import() {
                   )}
                 </div>
               </div>
-              
+
               {/* Console Controls */}
               <div className="mt-3 flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-medium">
@@ -935,7 +935,7 @@ function Import() {
                     {startComprehensiveImport.isPending ? 'Starting...' : 'Import Movies'}
                   </Button>
                 )}
-                
+
                 <Button
                   variant="destructive"
                   size="sm"
@@ -947,14 +947,14 @@ function Import() {
                   Delete All
                 </Button>
               </div>
-              
+
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <Calendar className="w-4 h-4" />
                   <span>Comprehensive Import: Popular + Top Rated + Recent movies</span>
                 </div>
-                <div>Rate Limited: 35 requests per 10 seconds to respect TMDB API limits</div>
-                <div className="text-xs mt-1">Imports ~10,000+ movies from multiple TMDB categories</div>
+                <div>Rate Limited: 45 requests per second, 950 requests per day (TMDB Free Tier)</div>
+                <div className="text-xs mt-1">Imports ~940 movies per day (Free tier: 1,000 daily requests)</div>
                 {tmdbStatus?.isActive && (
                   <div className="mt-2 text-blue-600 dark:text-blue-400">
                     Currently importing movies from TMDB API...
@@ -962,7 +962,7 @@ function Import() {
                 )}
               </div>
             </div>
-            
+
             {/* Live Import Console */}
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
@@ -972,7 +972,7 @@ function Import() {
                   {tmdbStatus?.isActive ? 'Active' : 'Idle'}
                 </Badge>
               </div>
-              
+
               <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-lg border border-blue-700 shadow-inner h-80 overflow-hidden">
                 <div 
                   ref={tmdbConsoleRef}
@@ -1000,7 +1000,7 @@ function Import() {
                       </div>
                     ))
                   )}
-                  
+
                   {/* Live cursor */}
                   {tmdbStatus?.isActive && (
                     <div className="flex items-center text-blue-400 py-1 px-2 bg-blue-400/10 rounded border-l-2 border-blue-400 mt-2">
@@ -1013,7 +1013,7 @@ function Import() {
                   )}
                 </div>
               </div>
-              
+
               {/* Console Controls */}
               <div className="mt-3 flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-medium">
@@ -1064,7 +1064,7 @@ function Import() {
                     Start Jikan Import
                   </Button>
                 )}
-                
+
                 <Button
                   variant="destructive"
                   size="sm"
@@ -1076,7 +1076,7 @@ function Import() {
                   Delete All
                 </Button>
               </div>
-              
+
               {(jikanStatus?.lastSyncAt || jikanContent) && (
                 <div className="text-sm text-gray-500 space-y-1">
                   <div>Last Run: {formatDate(jikanStatus?.lastSyncAt || null)}</div>
@@ -1084,7 +1084,7 @@ function Import() {
                 </div>
               )}
             </div>
-            
+
             {/* Jikan Import Console */}
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
@@ -1094,7 +1094,7 @@ function Import() {
                   {jikanStatus?.isActive ? 'Active' : 'Idle'}
                 </Badge>
               </div>
-              
+
               <div className="bg-gradient-to-br from-orange-900 to-orange-800 rounded-lg border border-orange-700 shadow-inner h-80 overflow-hidden">
                 <div 
                   ref={jikanConsoleRef}
@@ -1122,7 +1122,7 @@ function Import() {
                       </div>
                     ))
                   )}
-                  
+
                   {/* Live cursor */}
                   {jikanStatus?.isActive && (
                     <div className="flex items-center text-orange-400 py-1 px-2 bg-orange-400/10 rounded border-l-2 border-orange-400 mt-2">
@@ -1144,7 +1144,7 @@ function Import() {
                   )}
                 </div>
               </div>
-              
+
               {/* Console Controls */}
               <div className="mt-3 flex justify-between items-center text-xs">
                 <span className="text-gray-500 font-medium">

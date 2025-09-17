@@ -510,6 +510,82 @@ export class TMDBService {
     return { imported: totalImported, errors: allErrors };
   }
 
+  // Import comprehensive: All movies (paginated) - Optimized for free tier
+  async importComprehensive(maxPages: number = 47): Promise<{ imported: number; errors: string[] }> {
+    if (this.isSyncing) {
+      return { imported: 0, errors: ['Import already in progress'] };
+    }
+
+    this.isSyncing = true;
+    let imported = 0;
+    const errors: string[] = [];
+
+    try {
+      console.log('[TMDB] Starting comprehensive movies import...');
+
+      // Initialize import status
+      await this.updateImportStatus({
+        isActive: true,
+        currentPage: 1,
+        phase1Progress: 'Starting TMDB comprehensive movies import...',
+        errors: [],
+        lastSyncAt: new Date()
+      });
+
+      // TMDB has ~1000 requests per day for free tier.
+      // We'll fetch ~47 pages to be safe, leaving room for other requests.
+      for (let page = 1; page <= maxPages; page++) {
+        const currentStatus = await this.getImportStatus();
+        if (!currentStatus?.isActive) {
+          console.log('[TMDB] Comprehensive movies import paused by user');
+          await this.updateImportStatus({
+            phase1Progress: 'Comprehensive movies import paused'
+          });
+          break;
+        }
+
+        try {
+          const response = await this.discoverMovies(page); // Use discover to get broader range
+          imported += await this.processMoviePage(response.results, `discover page ${page}`);
+
+          await this.updateImportStatus({
+            currentPage: page,
+            totalImported: imported,
+            totalAvailable: response.total_results,
+            phase1Progress: `Comprehensive movies: Page ${page}/${maxPages}, ${imported} movies imported`
+          });
+        } catch (error) {
+          const errorMsg = `Failed to fetch discover movies page ${page}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[TMDB] ${errorMsg}`);
+        }
+      }
+
+      console.log(`[TMDB] Comprehensive movies import complete: ${imported} imported, ${errors.length} errors`);
+
+      await this.updateImportStatus({
+        isActive: false,
+        totalImported: imported,
+        phase1Progress: `Comprehensive movies import complete: ${imported} movies imported`,
+        errors,
+        lastSyncAt: new Date()
+      });
+    } catch (error) {
+      errors.push(`Comprehensive import failed: ${error}`);
+      console.error('[TMDB] Comprehensive import failed:', error);
+
+      await this.updateImportStatus({
+        isActive: false,
+        errors: [`Comprehensive import failed: ${error}`]
+      });
+    } finally {
+      this.isSyncing = false;
+    }
+
+    return { imported, errors };
+  }
+
+
   // Helper method to process a page of movies (reduces duplication)
   private async processMoviePage(movies: TMDBMovie[], source: string): Promise<number> {
     let imported = 0;
