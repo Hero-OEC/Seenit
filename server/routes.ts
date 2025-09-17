@@ -643,7 +643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/import/tmdb/movies", async (req, res) => {
     try {
       const body = z.object({
-        maxPages: z.number().min(1).max(50).default(5)
+        maxPages: z.number().min(1).max(500).default(20)
       }).parse(req.body);
       
       const result = await tmdbService.importPopularMovies(body.maxPages);
@@ -654,6 +654,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("TMDB movie import failed:", error);
       res.status(500).json({ message: "Failed to import movies" });
+    }
+  });
+
+  app.post("/api/import/tmdb/recent", async (req, res) => {
+    try {
+      const body = z.object({
+        maxPages: z.number().min(1).max(100).default(10)
+      }).parse(req.body);
+      
+      const result = await tmdbService.importRecentMovies(body.maxPages);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request", errors: error.errors });
+      }
+      console.error("TMDB recent movie import failed:", error);
+      res.status(500).json({ message: "Failed to import recent movies" });
+    }
+  });
+
+  app.post("/api/import/tmdb/hybrid", async (req, res) => {
+    try {
+      const body = z.object({
+        popularPages: z.number().min(1).max(500).default(20),
+        recentPages: z.number().min(1).max(100).default(10)
+      }).parse(req.body);
+      
+      const result = await tmdbService.importHybrid(body.popularPages, body.recentPages);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request", errors: error.errors });
+      }
+      console.error("TMDB hybrid import failed:", error);
+      res.status(500).json({ message: "Failed to import movies via hybrid approach" });
     }
   });
 

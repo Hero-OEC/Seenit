@@ -264,7 +264,7 @@ export class TMDBService {
   }
 
   // Import methods for populating database
-  async importPopularMovies(maxPages: number = 5): Promise<{ imported: number; errors: string[] }> {
+  async importPopularMovies(maxPages: number = 20): Promise<{ imported: number; errors: string[] }> {
     if (this.isSyncing) {
       return { imported: 0, errors: ['Import already in progress'] };
     }
@@ -365,6 +365,180 @@ export class TMDBService {
     }
 
     return { imported, errors };
+  }
+
+  // Get now playing movies (recent releases)
+  async getNowPlayingMovies(page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
+    return this.makeRequest<TMDBSearchResponse<TMDBMovie>>('/movie/now_playing', {
+      page: page.toString()
+    });
+  }
+
+  // Get upcoming movies
+  async getUpcomingMovies(page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
+    return this.makeRequest<TMDBSearchResponse<TMDBMovie>>('/movie/upcoming', {
+      page: page.toString()
+    });
+  }
+
+  // Import recent/new movies (now playing + upcoming)
+  async importRecentMovies(maxPages: number = 10): Promise<{ imported: number; errors: string[] }> {
+    if (this.isSyncing) {
+      return { imported: 0, errors: ['Import already in progress'] };
+    }
+
+    this.isSyncing = true;
+    let imported = 0;
+    const errors: string[] = [];
+
+    try {
+      console.log('[TMDB] Starting recent movies import (now playing + upcoming)...');
+
+      // Initialize import status
+      await this.updateImportStatus({
+        isActive: true,
+        currentPage: 1,
+        phase1Progress: 'Starting TMDB recent movies import...',
+        errors: [],
+        lastSyncAt: new Date()
+      });
+
+      // Import now playing movies
+      for (let page = 1; page <= Math.ceil(maxPages / 2); page++) {
+        const currentStatus = await this.getImportStatus();
+        if (!currentStatus?.isActive) {
+          console.log('[TMDB] Recent movies import paused by user');
+          break;
+        }
+        
+        try {
+          const response = await this.getNowPlayingMovies(page);
+          imported += await this.processMoviePage(response.results, `now playing page ${page}`);
+          
+          await this.updateImportStatus({
+            currentPage: page,
+            totalImported: imported,
+            phase1Progress: `Now playing movies: Page ${page}, ${imported} movies imported`
+          });
+        } catch (error) {
+          const errorMsg = `Failed to fetch now playing movies page ${page}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[TMDB] ${errorMsg}`);
+        }
+      }
+
+      // Import upcoming movies
+      for (let page = 1; page <= Math.floor(maxPages / 2); page++) {
+        const currentStatus = await this.getImportStatus();
+        if (!currentStatus?.isActive) {
+          console.log('[TMDB] Recent movies import paused by user');
+          break;
+        }
+        
+        try {
+          const response = await this.getUpcomingMovies(page);
+          imported += await this.processMoviePage(response.results, `upcoming page ${page}`);
+          
+          await this.updateImportStatus({
+            currentPage: page,
+            totalImported: imported,
+            phase1Progress: `Upcoming movies: Page ${page}, ${imported} movies imported`
+          });
+        } catch (error) {
+          const errorMsg = `Failed to fetch upcoming movies page ${page}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[TMDB] ${errorMsg}`);
+        }
+      }
+
+      console.log(`[TMDB] Recent movies import complete: ${imported} imported, ${errors.length} errors`);
+      
+      await this.updateImportStatus({
+        isActive: false,
+        totalImported: imported,
+        phase1Progress: `Recent movies import complete: ${imported} movies imported`,
+        errors,
+        lastSyncAt: new Date()
+      });
+    } catch (error) {
+      errors.push(`Recent import failed: ${error}`);
+      console.error('[TMDB] Recent import failed:', error);
+      
+      await this.updateImportStatus({
+        isActive: false,
+        errors: [`Recent import failed: ${error}`]
+      });
+    } finally {
+      this.isSyncing = false;
+    }
+
+    return { imported, errors };
+  }
+
+  // Hybrid import: popular + recent, then comprehensive (future)
+  async importHybrid(popularPages: number = 20, recentPages: number = 10): Promise<{ imported: number; errors: string[] }> {
+    if (this.isSyncing) {
+      return { imported: 0, errors: ['Import already in progress'] };
+    }
+
+    let totalImported = 0;
+    const allErrors: string[] = [];
+
+    try {
+      console.log('[TMDB] Starting hybrid import: popular + recent movies...');
+
+      // Phase 1: Import popular movies
+      const popularResult = await this.importPopularMovies(popularPages);
+      totalImported += popularResult.imported;
+      allErrors.push(...popularResult.errors);
+
+      // Short delay between phases
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Phase 2: Import recent movies (always run unless specifically paused by user)
+      const recentResult = await this.importRecentMovies(recentPages);
+      totalImported += recentResult.imported;
+      allErrors.push(...recentResult.errors);
+
+      console.log(`[TMDB] Hybrid import complete: ${totalImported} total movies imported`);
+      
+    } catch (error) {
+      console.error('[TMDB] Hybrid import failed:', error);
+      allErrors.push(`Hybrid import failed: ${error}`);
+    }
+
+    return { imported: totalImported, errors: allErrors };
+  }
+
+  // Helper method to process a page of movies (reduces duplication)
+  private async processMoviePage(movies: TMDBMovie[], source: string): Promise<number> {
+    let imported = 0;
+    
+    for (const movie of movies) {
+      try {
+        // Check if already exists
+        const [existing] = await db
+          .select()
+          .from(content)
+          .where(
+            and(
+              eq(content.source, 'tmdb'),
+              eq(content.sourceId, movie.id.toString())
+            )
+          )
+          .limit(1);
+
+        if (!existing) {
+          const contentData = this.convertMovieToContent(movie);
+          await db.insert(content).values(contentData);
+          imported++;
+        }
+      } catch (error) {
+        console.error(`[TMDB] Failed to import movie ${movie.title} from ${source}: ${error}`);
+      }
+    }
+    
+    return imported;
   }
 
 
