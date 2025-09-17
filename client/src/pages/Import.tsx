@@ -92,23 +92,23 @@ function Import() {
   // Query for TVmaze import status
   const { data: tvmazeStatus, isLoading: statusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tvmaze/status'],
-    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
-    staleTime: 0, // Always refetch, don't use stale data
+    refetchInterval: 5000, // Slower polling to reduce load
+    staleTime: 2000, // Allow some stale data to reduce requests
   });
 
 
   // Query for Jikan import status
   const { data: jikanStatus, isLoading: jikanStatusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/jikan/status'],
-    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
-    staleTime: 0, // Always refetch, don't use stale data
+    refetchInterval: 5000, // Slower polling to reduce load
+    staleTime: 2000, // Allow some stale data to reduce requests
   });
 
   // Query for TMDB import status
   const { data: tmdbStatus, isLoading: tmdbStatusLoading } = useQuery<ImportStatus | null>({
     queryKey: ['/api/import/tmdb/status'],
-    refetchInterval: 3000, // Fixed 3s polling to ensure consistent updates
-    staleTime: 0, // Always refetch, don't use stale data
+    refetchInterval: 5000, // Slower polling to reduce load
+    staleTime: 2000, // Allow some stale data to reduce requests
   });
 
   // Add console message for TVmaze
@@ -167,10 +167,10 @@ function Import() {
     if (!tvmazeStatus) return;
 
     const lastStatus = lastStatusRef.current;
-    lastStatusRef.current = tvmazeStatus;
-
-    // Don't log on first load
+    
+    // Don't log on first load or if status hasn't meaningfully changed
     if (!lastStatus) {
+      lastStatusRef.current = tvmazeStatus;
       if (tvmazeStatus.isActive) {
         addTvmazeConsoleMessage("🔄 TVmaze import is currently active", 'info');
         // Since page 26 is stuck from previous sync, assume Phase 1 on first load when active
@@ -181,6 +181,20 @@ function Import() {
       addTvmazeConsoleMessage(`📊 Current status: ${tvmazeStatus.totalImported} shows imported`, 'info');
       return;
     }
+
+    // Only update ref and process changes if there are actual meaningful changes
+    const hasStatusChange = lastStatus.isActive !== tvmazeStatus.isActive;
+    const hasPageChange = lastStatus.currentPage !== tvmazeStatus.currentPage;
+    const hasCountChange = lastStatus.totalImported !== tvmazeStatus.totalImported;
+    const hasPhase1Change = lastStatus.phase1Progress !== tvmazeStatus.phase1Progress;
+    const hasPhase2Change = lastStatus.phase2Progress !== tvmazeStatus.phase2Progress;
+    const hasNewErrors = tvmazeStatus.errors && tvmazeStatus.errors.length > (lastStatus.errors?.length || 0);
+
+    if (!hasStatusChange && !hasPageChange && !hasCountChange && !hasPhase1Change && !hasPhase2Change && !hasNewErrors) {
+      return; // No meaningful changes, skip processing
+    }
+
+    lastStatusRef.current = tvmazeStatus;
 
     // Status changed from inactive to active
     if (!lastStatus.isActive && tvmazeStatus.isActive) {
@@ -243,10 +257,10 @@ function Import() {
     if (!jikanStatus) return;
 
     const lastStatus = lastJikanStatusRef.current;
-    lastJikanStatusRef.current = jikanStatus;
-
-    // Don't log on first load
+    
+    // Don't log on first load or if status hasn't meaningfully changed
     if (!lastStatus) {
+      lastJikanStatusRef.current = jikanStatus;
       if (jikanStatus.isActive) {
         addJikanConsoleMessage("🔄 Jikan import is currently active", 'info');
         addJikanConsoleMessage("📋 Phase 1: Updating existing anime with new episodes", 'info');
@@ -256,6 +270,21 @@ function Import() {
       addJikanConsoleMessage(`📊 Current status: ${jikanStatus.totalImported} anime imported`, 'info');
       return;
     }
+
+    // Only update ref and process changes if there are actual meaningful changes
+    const hasStatusChange = lastStatus.isActive !== jikanStatus.isActive;
+    const hasPageChange = lastStatus.currentPage !== jikanStatus.currentPage;
+    const hasCountChange = lastStatus.totalImported !== jikanStatus.totalImported;
+    const hasPhase1Change = lastStatus.phase1Progress !== jikanStatus.phase1Progress;
+    const hasPhase2Change = lastStatus.phase2Progress !== jikanStatus.phase2Progress;
+    const hasPhase3Change = (lastStatus as any).phase3Progress !== (jikanStatus as any).phase3Progress;
+    const hasNewErrors = jikanStatus.errors && jikanStatus.errors.length > (lastStatus.errors?.length || 0);
+
+    if (!hasStatusChange && !hasPageChange && !hasCountChange && !hasPhase1Change && !hasPhase2Change && !hasPhase3Change && !hasNewErrors) {
+      return; // No meaningful changes, skip processing
+    }
+
+    lastJikanStatusRef.current = jikanStatus;
 
     // Status changed from inactive to active
     if (!lastStatus.isActive && jikanStatus.isActive) {
@@ -329,10 +358,10 @@ function Import() {
     if (!tmdbStatus) return;
 
     const lastStatus = lastTmdbStatusRef.current;
-    lastTmdbStatusRef.current = tmdbStatus;
-
-    // Don't log on first load
+    
+    // Don't log on first load or if status hasn't meaningfully changed
     if (!lastStatus) {
+      lastTmdbStatusRef.current = tmdbStatus;
       if (tmdbStatus.isActive) {
         addTmdbConsoleMessage("🔄 TMDB import is currently active", 'info');
         addTmdbConsoleMessage("🎬 Importing popular movies from TMDB", 'info');
@@ -342,6 +371,19 @@ function Import() {
       addTmdbConsoleMessage(`📊 Current status: ${tmdbStatus.totalImported} movies imported`, 'info');
       return;
     }
+
+    // Only update ref and process changes if there are actual meaningful changes
+    const hasStatusChange = lastStatus.isActive !== tmdbStatus.isActive;
+    const hasPageChange = lastStatus.currentPage !== tmdbStatus.currentPage;
+    const hasCountChange = lastStatus.totalImported !== tmdbStatus.totalImported;
+    const hasPhase1Change = lastStatus.phase1Progress !== tmdbStatus.phase1Progress;
+    const hasNewErrors = tmdbStatus.errors && tmdbStatus.errors.length > (lastStatus.errors?.length || 0);
+
+    if (!hasStatusChange && !hasPageChange && !hasCountChange && !hasPhase1Change && !hasNewErrors) {
+      return; // No meaningful changes, skip processing
+    }
+
+    lastTmdbStatusRef.current = tmdbStatus;
 
     // Status changed from inactive to active
     if (!lastStatus.isActive && tmdbStatus.isActive) {
@@ -386,23 +428,23 @@ function Import() {
   // Query for TVmaze content stats
   const { data: tvmazeContent } = useQuery<TVMazeContent>({
     queryKey: ['/api/import/tvmaze/content'],
-    refetchInterval: 10000, // Fixed 10s polling for content
-    staleTime: 5000, // Allow some stale data for content
+    refetchInterval: 15000, // Slower polling for content stats
+    staleTime: 10000, // Allow more stale data for content
   });
 
 
   // Query for Jikan content
   const { data: jikanContent } = useQuery<JikanContent>({
     queryKey: ['/api/import/jikan/content'],
-    refetchInterval: 10000, // Fixed 10s polling for content
-    staleTime: 5000, // Allow some stale data for content
+    refetchInterval: 15000, // Slower polling for content stats
+    staleTime: 10000, // Allow more stale data for content
   });
 
   // Query for TMDB content
   const { data: tmdbContent } = useQuery<TMDBContent>({
     queryKey: ['/api/import/tmdb/content'],
-    refetchInterval: 10000, // Fixed 10s polling for content
-    staleTime: 5000, // Allow some stale data for content
+    refetchInterval: 15000, // Slower polling for content stats
+    staleTime: 10000, // Allow more stale data for content
   });
 
   // Mutation to start TVmaze import

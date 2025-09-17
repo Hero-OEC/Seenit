@@ -187,7 +187,7 @@ export class JikanService {
   private baseUrl = 'https://api.jikan.moe/v4';
   private isSyncing = false;
   private lastRequestTime = 0;
-  private readonly RATE_LIMIT_MS = 334; // ~333ms between requests (3 requests/second)
+  private readonly RATE_LIMIT_MS = 500; // 500ms between requests (2 requests/second) to prevent 429 errors
   
   // Memoization cache for relations data to avoid repeated API calls during imports
   private relationsCache = new Map<number, JikanRelationGroup[]>();
