@@ -527,8 +527,9 @@ export class TVMazeService {
       })
       .where(eq(importStatus.source, 'tvmaze'));
     
-    // Note: We don't reset this.isSyncing here because the sync process
-    // should handle its own cleanup in the finally block
+    // Reset the instance lock immediately to allow restart
+    this.isSyncing = false;
+    console.log('TVmaze sync paused - instance lock released');
   }
 
   async resumeSync(): Promise<void> {
