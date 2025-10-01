@@ -8,39 +8,33 @@ export interface IStorage {
   getContent(id: string): Promise<Content | undefined>;
   createContent(insertContent: InsertContent): Promise<Content>;
   updateContent(id: string, updates: Partial<Content>): Promise<Content>;
-  deleteContent(id: string): Promise<boolean>;
   
   // Content filtering and search
-  getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number}): Promise<Content[]>;
+  getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number, sort?: string}): Promise<Content[]>;
   getContentCountByType(type: string, options?: {genre?: string}): Promise<number>;
   getContentByScheduleDate(date: string, type: string): Promise<Content[]>;
   searchContent(query: string): Promise<Content[]>;
   getContentBySource(source: string): Promise<Content[]>;
   
   // User management
-  getAllUsers(): Promise<User[]>;
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(insertUser: InsertUser): Promise<User>;
-  updateUser(id: string, updates: Partial<User>): Promise<User>;
-  deleteUser(id: string): Promise<boolean>;
   
   // User-Content relationship management
-  getAllUserContent(): Promise<UserContent[]>;
-  getUserContent(id: string): Promise<UserContent | undefined>;
-  getUserContentByUserId(userId: string): Promise<UserContent[]>;
-  getUserContentByContentId(contentId: string): Promise<UserContent[]>;
-  createUserContent(insertUserContent: InsertUserContent): Promise<UserContent>;
+  getUserContent(userId: string): Promise<UserContent[]>;
+  getUserContentByStatus(userId: string, status: string): Promise<UserContent[]>;
+  getUserContentByContentId(userId: string, contentId: string): Promise<UserContent | undefined>;
+  addUserContent(insertUserContent: InsertUserContent): Promise<UserContent>;
   updateUserContent(id: string, updates: Partial<UserContent>): Promise<UserContent>;
-  deleteUserContent(id: string): Promise<boolean>;
+  removeUserContent(id: string): Promise<void>;
+  deleteContentBySource(source: string): Promise<number>;
   
   // Import status management
-  getAllImportStatus(): Promise<ImportStatus[]>;
-  getImportStatus(id: string): Promise<ImportStatus | undefined>;
+  getImportStatus(source: string): Promise<ImportStatus | undefined>;
   createImportStatus(insertImportStatus: InsertImportStatus): Promise<ImportStatus>;
   updateImportStatus(id: string, updates: Partial<ImportStatus>): Promise<ImportStatus>;
-  deleteImportStatus(id: string): Promise<boolean>;
 }
 
 // Memory storage implementation (no longer using static content)
@@ -98,7 +92,11 @@ export class MemStorage implements IStorage {
       voteCount: insertContent.voteCount ?? null,
       streamingPlatforms: insertContent.streamingPlatforms ?? null,
       affiliateLinks: insertContent.affiliateLinks ?? null,
-      episodeData: insertContent.episodeData ?? null
+      episodeData: insertContent.episodeData ?? null,
+      seriesKey: insertContent.seriesKey ?? null,
+      seriesRootSourceId: insertContent.seriesRootSourceId ?? null,
+      seasonNumber: insertContent.seasonNumber ?? null,
+      seasonTitle: insertContent.seasonTitle ?? null
     };
     this.content.set(id, content);
     return content;
@@ -242,19 +240,23 @@ export class MemStorage implements IStorage {
     return Array.from(this.userContent.values());
   }
 
-  async getUserContent(id: string): Promise<UserContent | undefined> {
-    return this.userContent.get(id);
-  }
-
-  async getUserContentByUserId(userId: string): Promise<UserContent[]> {
+  async getUserContent(userId: string): Promise<UserContent[]> {
     return Array.from(this.userContent.values()).filter(uc => uc.userId === userId);
   }
 
-  async getUserContentByContentId(contentId: string): Promise<UserContent[]> {
-    return Array.from(this.userContent.values()).filter(uc => uc.contentId === contentId);
+  async getUserContentByStatus(userId: string, status: string): Promise<UserContent[]> {
+    return Array.from(this.userContent.values()).filter(
+      uc => uc.userId === userId && uc.status === status
+    );
   }
 
-  async createUserContent(insertUserContent: InsertUserContent): Promise<UserContent> {
+  async getUserContentByContentId(userId: string, contentId: string): Promise<UserContent | undefined> {
+    return Array.from(this.userContent.values()).find(
+      uc => uc.userId === userId && uc.contentId === contentId
+    );
+  }
+
+  async addUserContent(insertUserContent: InsertUserContent): Promise<UserContent> {
     const id = randomUUID();
     const userContent: UserContent = { 
       ...insertUserContent, 
@@ -282,17 +284,19 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteUserContent(id: string): Promise<boolean> {
-    return this.userContent.delete(id);
+  async removeUserContent(id: string): Promise<void> {
+    this.userContent.delete(id);
+  }
+
+  async deleteContentBySource(source: string): Promise<number> {
+    const toDelete = Array.from(this.content.values()).filter(c => c.source === source);
+    toDelete.forEach(c => this.content.delete(c.id));
+    return toDelete.length;
   }
 
   // Import status management methods
-  async getAllImportStatus(): Promise<ImportStatus[]> {
-    return Array.from(this.importStatus.values());
-  }
-
-  async getImportStatus(id: string): Promise<ImportStatus | undefined> {
-    return this.importStatus.get(id);
+  async getImportStatus(source: string): Promise<ImportStatus | undefined> {
+    return Array.from(this.importStatus.values()).find(s => s.source === source);
   }
 
   async createImportStatus(insertImportStatus: InsertImportStatus): Promise<ImportStatus> {
@@ -305,7 +309,11 @@ export class MemStorage implements IStorage {
       totalImported: insertImportStatus.totalImported ?? null,
       totalAvailable: insertImportStatus.totalAvailable ?? null,
       currentPage: insertImportStatus.currentPage ?? null,
+      phase1Progress: insertImportStatus.phase1Progress ?? null,
+      phase2Progress: insertImportStatus.phase2Progress ?? null,
+      phase3Progress: insertImportStatus.phase3Progress ?? null,
       errors: insertImportStatus.errors ?? null,
+      cursor: insertImportStatus.cursor ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -325,10 +333,6 @@ export class MemStorage implements IStorage {
     };
     this.importStatus.set(id, updated);
     return updated;
-  }
-
-  async deleteImportStatus(id: string): Promise<boolean> {
-    return this.importStatus.delete(id);
   }
 }
 

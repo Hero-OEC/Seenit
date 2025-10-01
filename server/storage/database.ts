@@ -48,34 +48,32 @@ export class DatabaseStorage implements IStorage {
       conditions.push(sql`${content.genres}::text ILIKE ${`%${options.genre}%`}`);
     }
 
-    let query = db.select().from(content).where(and(...conditions));
-
-    // Add sorting
+    // Determine sort column - use any to allow different column types
+    let sortColumn: any = content.createdAt;
     if (options?.sort) {
       switch (options.sort) {
         case 'new':
         case 'release_date':
-          query = query.orderBy(desc(content.year));
+          sortColumn = content.year;
           break;
         case 'reviews':
         case 'popular':
-          query = query.orderBy(desc(content.rating));
+          sortColumn = content.rating;
           break;
         case 'air_date':
-          query = query.orderBy(desc(content.releaseDate));
+          sortColumn = content.releaseDate;
           break;
-        default:
-          query = query.orderBy(desc(content.createdAt));
       }
     }
 
-    // Add pagination
-    if (options?.offset !== undefined) {
-      query = query.offset(options.offset);
-    }
-    if (options?.limit !== undefined) {
-      query = query.limit(options.limit);
-    }
+    // Build complete query with all clauses
+    const query = db
+      .select()
+      .from(content)
+      .where(and(...conditions))
+      .orderBy(desc(sortColumn))
+      .offset(options?.offset ?? 0)
+      .limit(options?.limit ?? 1000);
 
     return await query;
   }
