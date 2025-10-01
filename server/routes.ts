@@ -835,6 +835,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rating status endpoint - shows rating statistics and OMDb quota
+  app.get("/api/ratings/status", async (req, res) => {
+    try {
+      const { ratingBackfillManager } = await import("./services/ratingBackfillManager");
+      const status = await ratingBackfillManager.getStatus();
+      
+      // Get rated counts by type
+      const [movieRated] = await db.select({count: sql`count(*)`}).from(content).where(
+        and(eq(content.type, 'movie'), sql`${content.imdbRating} IS NOT NULL`)
+      );
+      const [movieTotal] = await db.select({count: sql`count(*)`}).from(content).where(eq(content.type, 'movie'));
+      
+      const [tvRated] = await db.select({count: sql`count(*)`}).from(content).where(
+        and(eq(content.type, 'tv'), sql`${content.imdbRating} IS NOT NULL`)
+      );
+      const [tvTotal] = await db.select({count: sql`count(*)`}).from(content).where(eq(content.type, 'tv'));
+      
+      const [animeRated] = await db.select({count: sql`count(*)`}).from(content).where(
+        and(eq(content.type, 'anime'), sql`${content.malRating} IS NOT NULL`)
+      );
+      const [animeTotal] = await db.select({count: sql`count(*)`}).from(content).where(eq(content.type, 'anime'));
+
+      res.json({
+        countsByType: {
+          movie: {
+            total: Number(movieTotal.count),
+            rated: Number(movieRated.count),
+            unrated: Number(movieTotal.count) - Number(movieRated.count),
+          },
+          tv: {
+            total: Number(tvTotal.count),
+            rated: Number(tvRated.count),
+            unrated: Number(tvTotal.count) - Number(tvRated.count),
+          },
+          anime: {
+            total: Number(animeTotal.count),
+            rated: Number(animeRated.count),
+            unrated: Number(animeTotal.count) - Number(animeRated.count),
+          },
+        },
+        omdb: {
+          used: status.omdbQuota.used,
+          remaining: status.omdbQuota.remaining,
+          limit: status.omdbQuota.limit,
+          nextReset: status.omdbQuota.nextReset,
+          isExhausted: status.omdbQuota.isExhausted,
+          exhaustedUntil: status.omdbQuota.exhaustedUntil,
+        },
+        backfill: {
+          isRunning: status.isRunning,
+          lastRun: status.lastRun,
+          lastError: status.lastError,
+          nextRunIn: status.nextRunIn,
+          unratedCounts: status.unratedCounts,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to get rating status:", error);
+      res.status(500).json({ message: "Failed to get rating status" });
+    }
+  });
+
   // OMDb rating update endpoint - updates existing content with IMDb ratings
   // Protected with admin secret for security
   app.post("/api/ratings/update", async (req, res) => {
