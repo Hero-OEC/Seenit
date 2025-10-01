@@ -505,24 +505,22 @@ export default function ContentDetails() {
                 </p>
                 
                 {/* Genres */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {content.genres && content.genres.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {content.genres.map((genre, index) => (
-                          <span 
-                            key={index}
-                            className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
-                            data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
-                          >
-                            {genre}
-                          </span>
-                        ))}
-                      </div>
+                {content.genres && content.genres.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-retro-900 mb-3">Genres</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {content.genres.map((genre, index) => (
+                        <span 
+                          key={index}
+                          className="px-4 py-2 bg-retro-100 text-retro-700 rounded-full text-sm font-medium hover:bg-retro-200 transition-colors cursor-pointer border border-retro-200"
+                          data-testid={`synopsis-genre-tag-${genre.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {genre}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
