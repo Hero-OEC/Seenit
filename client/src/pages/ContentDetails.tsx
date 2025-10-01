@@ -621,8 +621,8 @@ export default function ContentDetails() {
 
             {/* Trailer Section - Only for movies and anime, not TV shows */}
             {content.type !== 'tv' && (
-              <div className="bg-white rounded-lg p-6 shadow-md mb-8">
-                <h2 className="text-2xl font-bold text-retro-900 mb-6">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-retro-900 mb-4">
                   {content.type === 'movie' ? 'Movie' : 'Anime'} Trailer
                 </h2>
                 
