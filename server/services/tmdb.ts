@@ -237,14 +237,16 @@ export class TMDBService {
   // Popular content methods
   async getPopularMovies(page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
     return this.makeRequest<TMDBSearchResponse<TMDBMovie>>('/movie/popular', {
-      page: page.toString()
+      page: page.toString(),
+      include_adult: 'false'
     });
   }
 
   // Trending content methods
   async getTrendingMovies(timeWindow: 'day' | 'week' = 'week', page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
     return this.makeRequest<TMDBSearchResponse<TMDBMovie>>(`/trending/movie/${timeWindow}`, {
-      page: page.toString()
+      page: page.toString(),
+      include_adult: 'false'
     });
   }
 
