@@ -337,7 +337,8 @@ export default function Home() {
               type: show.type,
               status: show.status,
               year: show.year,
-              season: show.season
+              season: show.season,
+              episode: show.episode
             }))}
             contentType="tv"
             onViewAll={() => handleBrowse("TV Shows")}
@@ -356,7 +357,8 @@ export default function Home() {
               type: anime.type,
               status: anime.status,
               year: anime.year,
-              season: anime.season
+              season: anime.season,
+              episode: anime.episode
             }))}
             contentType="anime"
             onViewAll={() => handleBrowse("Anime")}
@@ -387,7 +389,8 @@ export default function Home() {
                   type: item.type,
                   status: item.status,
                   year: item.year,
-                  season: item.season
+                  season: item.season,
+                  episode: item.episode
                 }))}
               contentType="mixed"
               onViewAll={() => navigate("/discover?genre=action")}

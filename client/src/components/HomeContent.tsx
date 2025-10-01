@@ -8,6 +8,7 @@ interface ContentItem {
   status: "coming-soon" | "ongoing" | "finished" | "canceled";
   year?: number;
   season?: number;
+  episode?: number;
 }
 
 export interface HomeContentProps {
@@ -94,6 +95,7 @@ export default function HomeContent({
             status={item.status}
             year={item.year}
             season={item.season}
+            episode={item.episode}
             size="small"
             onClick={() => onItemClick(item)}
             data-testid={`content-display-${item.id}`}

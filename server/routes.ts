@@ -31,24 +31,54 @@ function computeSeasonEpisodeInfo(content: any): { season: number | undefined, e
           ? JSON.parse(content.episodeData) 
           : content.episodeData;
         
-        const episodeArray = episodeData?.episodes || [];
-        if (Array.isArray(episodeArray) && episodeArray.length > 0) {
-          // Find the highest season number
-          const maxSeason = Math.max(...episodeArray.map((ep: any) => ep.season || 0));
-          // Count episodes in the highest season
-          const latestSeasonEpisodes = episodeArray.filter((ep: any) => ep.season === maxSeason);
-          episode = latestSeasonEpisodes.length || undefined;
+        // Normalize episode data structure - handle both episodeData.episodes and episodeData as array
+        const episodeArray = Array.isArray(episodeData?.episodes) 
+          ? episodeData.episodes 
+          : Array.isArray(episodeData) 
+            ? episodeData 
+            : [];
+        
+        if (episodeArray.length > 0) {
+          // Get all season numbers, filtering out season 0 (specials) and invalid values
+          const seasons = episodeArray.map((ep: any) => Number(ep.season) || 0).filter((s: number) => s > 0);
+          
+          if (seasons.length > 0) {
+            const maxSeason = Math.max(...seasons);
+            // Count episodes in the highest season
+            const latestSeasonEpisodes = episodeArray.filter((ep: any) => (Number(ep.season) || 0) === maxSeason);
+            episode = latestSeasonEpisodes.length || undefined;
+          } else {
+            // No valid seasons found, fallback to total episodes or array length
+            episode = content.totalEpisodes || episodeArray.length || undefined;
+          }
         }
+      }
+      
+      // Fallback to totalEpisodes if episodeData didn't provide episode count
+      if (!episode && content.totalEpisodes) {
+        episode = content.totalEpisodes;
       }
       
       return { season, episode };
     }
     
-    // For anime: use totalEpisodes
+    // For anime: use totalEpisodes with fallback to episodeData length
     if (content.type === 'anime') {
+      let episode = content.totalEpisodes;
+      
+      // Fallback to episodeData length if totalEpisodes is missing
+      if (!episode && content.episodeData) {
+        const episodeData = typeof content.episodeData === 'string' 
+          ? JSON.parse(content.episodeData) 
+          : content.episodeData;
+        
+        const episodeArray = Array.isArray(episodeData) ? episodeData : [];
+        episode = episodeArray.length || undefined;
+      }
+      
       return {
         season: 1,
-        episode: content.totalEpisodes || undefined
+        episode
       };
     }
   } catch (error) {
