@@ -43,6 +43,22 @@ interface TMDBGenre {
   name: string;
 }
 
+interface TMDBVideo {
+  id: string;
+  iso_639_1: string;
+  iso_3166_1: string;
+  key: string; // YouTube video key
+  name: string;
+  site: string; // "YouTube" or "Vimeo"
+  size: number;
+  type: string; // "Trailer", "Teaser", "Clip", etc.
+}
+
+interface TMDBVideosResponse {
+  id: number;
+  results: TMDBVideo[];
+}
+
 export class TMDBService {
   private baseUrl = 'https://api.themoviedb.org/3';
   private apiKey = process.env.TMDB_API_KEY!;
@@ -173,6 +189,39 @@ export class TMDBService {
     return this.makeRequest<TMDBMovie>(`/movie/${id}`);
   }
 
+  // Fetch videos/trailers for a movie
+  async getMovieVideos(id: number): Promise<TMDBVideosResponse> {
+    return this.makeRequest<TMDBVideosResponse>(`/movie/${id}/videos`);
+  }
+
+  // Get the primary trailer (YouTube trailer preferred)
+  async getMovieTrailerKey(id: number): Promise<string | null> {
+    try {
+      const videos = await this.getMovieVideos(id);
+      
+      // Filter for YouTube trailers
+      const youtubeTrailers = videos.results.filter(
+        video => video.site === 'YouTube' && video.type === 'Trailer'
+      );
+      
+      // Return the first official trailer, or the first video if no trailer exists
+      if (youtubeTrailers.length > 0) {
+        return youtubeTrailers[0].key;
+      }
+      
+      // Fallback to any YouTube video
+      const youtubeVideos = videos.results.filter(video => video.site === 'YouTube');
+      if (youtubeVideos.length > 0) {
+        return youtubeVideos[0].key;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(`[TMDB] Failed to fetch trailer for movie ${id}:`, error);
+      return null;
+    }
+  }
+
 
   // Discovery methods
   async discoverMovies(page: number = 1, filters: Record<string, string> = {}): Promise<TMDBSearchResponse<TMDBMovie>> {
@@ -194,9 +243,12 @@ export class TMDBService {
 
 
   // Conversion methods
-  private convertMovieToContent(movie: TMDBMovie): InsertContent {
+  private async convertMovieToContent(movie: TMDBMovie): Promise<InsertContent> {
     const genres = movie.genre_ids?.map(id => this.movieGenres.get(id)).filter((genre): genre is string => Boolean(genre)) || 
                    movie.genres?.map(g => g.name) || [];
+
+    // Fetch trailer key for the movie
+    const trailerKey = await this.getMovieTrailerKey(movie.id);
 
     return {
       title: movie.title,
@@ -210,7 +262,8 @@ export class TMDBService {
       poster: movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : undefined,
       backdrop: movie.backdrop_path ? `${this.largeImageBaseUrl}${movie.backdrop_path}` : undefined,
       status: movie.status || 'Released',
-      runtime: movie.runtime
+      runtime: movie.runtime,
+      trailerKey: trailerKey || undefined
     };
   }
 
@@ -314,7 +367,7 @@ export class TMDBService {
                 .limit(1);
 
               if (!existing) {
-                const contentData = this.convertMovieToContent(movie);
+                const contentData = await this.convertMovieToContent(movie);
                 await db.insert(content).values(contentData);
                 imported++;
               }
@@ -605,7 +658,7 @@ export class TMDBService {
           .limit(1);
 
         if (!existing) {
-          const contentData = this.convertMovieToContent(movie);
+          const contentData = await this.convertMovieToContent(movie);
           await db.insert(content).values(contentData);
           imported++;
         }
