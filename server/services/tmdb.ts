@@ -241,9 +241,16 @@ export class TMDBService {
     });
   }
 
+  // Trending content methods
+  async getTrendingMovies(timeWindow: 'day' | 'week' = 'week', page: number = 1): Promise<TMDBSearchResponse<TMDBMovie>> {
+    return this.makeRequest<TMDBSearchResponse<TMDBMovie>>(`/trending/movie/${timeWindow}`, {
+      page: page.toString()
+    });
+  }
+
 
   // Conversion methods
-  private async convertMovieToContent(movie: TMDBMovie): Promise<InsertContent> {
+  async convertMovieToContent(movie: TMDBMovie): Promise<InsertContent> {
     const genres = movie.genre_ids?.map(id => this.movieGenres.get(id)).filter((genre): genre is string => Boolean(genre)) || 
                    movie.genres?.map(g => g.name) || [];
 

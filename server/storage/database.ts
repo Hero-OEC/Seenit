@@ -157,6 +157,24 @@ export class DatabaseStorage implements IStorage {
     return contentRecord;
   }
 
+  async getContentBySourceId(source: string, sourceId: string): Promise<Content | undefined> {
+    const [result] = await db
+      .select()
+      .from(content)
+      .where(and(eq(content.source, source), eq(content.sourceId, sourceId)))
+      .limit(1);
+    return result;
+  }
+
+  async getMoviesWithTrailers(limit: number = 5): Promise<Content[]> {
+    return await db
+      .select()
+      .from(content)
+      .where(and(eq(content.type, 'movie'), sql`${content.trailerKey} IS NOT NULL`))
+      .orderBy(desc(content.rating))
+      .limit(limit);
+  }
+
   async updateContent(id: string, updates: Partial<Content>): Promise<Content> {
     const [updated] = await db
       .update(content)
