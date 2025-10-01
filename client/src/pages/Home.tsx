@@ -309,6 +309,24 @@ export default function Home() {
         {/* Content sections below hero - only show for non-signed-in users */}
         {!isSignedIn && (
         <div className="bg-retro-50">
+          {/* Popular Movies Section */}
+          <HomeContent
+            title="Popular Movies"
+            items={popularMovies.map(movie => ({
+              id: movie.id,
+              posterUrl: movie.poster,
+              title: movie.title,
+              type: movie.type,
+              status: movie.status,
+              year: movie.year
+            }))}
+            contentType="movie"
+            onViewAll={() => handleBrowse("Movies")}
+            onItemClick={(item) => navigate(`/content/${item.id}`)}
+            variant="expanded"
+            testId="popular-movies-section"
+          />
+
           {/* Popular TV Shows Section */}
           <HomeContent
             title="Popular TV Shows"
@@ -328,49 +346,54 @@ export default function Home() {
             testId="popular-tv-section"
           />
 
-          {/* Featured Drama Section */}
-          {popularTVShows.filter(show => show.genres?.some((g: string) => g.toLowerCase().includes("drama"))).length > 0 && (
-            <HomeContent
-              title="Popular Drama"
-              items={popularTVShows.filter(show => 
-                show.genres?.some((g: string) => g.toLowerCase().includes("drama"))
-              ).slice(0, 6).map(show => ({
-                id: show.id,
-                posterUrl: show.poster,
-                title: show.title,
-                type: show.type,
-                status: show.status,
-                year: show.year,
-                season: show.season
-              }))}
-              contentType="tv"
-              onViewAll={() => handleBrowse("Drama")}
-              onItemClick={(show) => navigate(`/content/${show.id}`)}
-              variant="expanded"
-              testId="popular-drama-section"
-            />
-          )}
+          {/* Popular Anime Section */}
+          <HomeContent
+            title="Popular Anime"
+            items={popularAnime.map(anime => ({
+              id: anime.id,
+              posterUrl: anime.poster,
+              title: anime.title,
+              type: anime.type,
+              status: anime.status,
+              year: anime.year,
+              season: anime.season
+            }))}
+            contentType="anime"
+            onViewAll={() => handleBrowse("Anime")}
+            onItemClick={(item) => navigate(`/content/${item.id}`)}
+            variant="expanded"
+            testId="popular-anime-section"
+          />
 
-          {/* Featured Comedy Section */}
-          {popularTVShows.filter(show => show.genres?.some((g: string) => g.toLowerCase().includes("comedy"))).length > 0 && (
+          {/* Trending Action & Adventure - Mixed Content */}
+          {[...popularMovies, ...popularTVShows, ...popularAnime].filter(item => 
+            item.genres?.some((g: string) => 
+              g.toLowerCase().includes("action") || g.toLowerCase().includes("adventure")
+            )
+          ).length > 0 && (
             <HomeContent
-              title="Popular Comedy"
-              items={popularTVShows.filter(show => 
-                show.genres?.some((g: string) => g.toLowerCase().includes("comedy"))
-              ).slice(0, 6).map(show => ({
-                id: show.id,
-                posterUrl: show.poster,
-                title: show.title,
-                type: show.type,
-                status: show.status,
-                year: show.year,
-                season: show.season
-              }))}
-              contentType="tv"
-              onViewAll={() => handleBrowse("Comedy")}
-              onItemClick={(show) => navigate(`/content/${show.id}`)}
+              title="Trending Action & Adventure"
+              items={[...popularMovies, ...popularTVShows, ...popularAnime]
+                .filter(item => 
+                  item.genres?.some((g: string) => 
+                    g.toLowerCase().includes("action") || g.toLowerCase().includes("adventure")
+                  )
+                )
+                .slice(0, 6)
+                .map(item => ({
+                  id: item.id,
+                  posterUrl: item.poster,
+                  title: item.title,
+                  type: item.type,
+                  status: item.status,
+                  year: item.year,
+                  season: item.season
+                }))}
+              contentType="mixed"
+              onViewAll={() => navigate("/discover?genre=action")}
+              onItemClick={(item) => navigate(`/content/${item.id}`)}
               variant="expanded"
-              testId="popular-comedy-section"
+              testId="action-adventure-section"
             />
           )}
 
@@ -391,7 +414,7 @@ export default function Home() {
                 <EpisodeDisplay
                   key={episode.id || `${episode.contentId}-${episode.season}-${episode.number}`}
                   thumbnailUrl={episode.image?.medium || "/api/placeholder/120/180"}
-                  showTitle={episode.showTitle}
+                  showTitle={episode.showTitle || episode.title}
                   episodeTitle={episode.name}
                   type={episode.type}
                   status={episode.status}
