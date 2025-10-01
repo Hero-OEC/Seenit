@@ -36,6 +36,7 @@ export const content = pgTable("content", {
   // Movie-specific (TMDB)
   runtime: integer("runtime"), // Duration in minutes
   releaseDate: date("release_date"), // Movie release date
+  trailerKey: text("trailer_key"), // YouTube video key for trailer
   
   // TV-specific (TVmaze)
   totalSeasons: integer("total_seasons"),
