@@ -589,6 +589,7 @@ export class JikanService {
       episodes: anime.episodes,
       studio: studioName,
       sourceMaterial: anime.source,
+      animeType: anime.type, // 'TV', 'Movie', 'OVA', 'Special', 'ONA', 'Music'
       
       // Series grouping fields
       seriesKey: seriesInfo.seriesKey,

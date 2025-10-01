@@ -52,6 +52,7 @@ export const content = pgTable("content", {
   season: integer("season"), // Current season for ongoing shows
   studio: text("studio"), // Animation studio
   sourceMaterial: text("source_material"), // 'manga', 'light_novel', 'original', etc.
+  animeType: text("anime_type"), // 'TV', 'Movie', 'OVA', 'Special', 'ONA', 'Music' from MAL
   
   // Series grouping fields (for anime seasons)
   seriesKey: text("series_key"), // e.g., "jikan:series:ROOT_MAL_ID" for grouping seasons
