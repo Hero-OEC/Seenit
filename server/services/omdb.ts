@@ -1,4 +1,5 @@
 import type { InsertContent } from "@shared/schema";
+import { QuotaProvider } from "./quotaProvider";
 
 interface OMDbResponse {
   Title: string;
@@ -35,33 +36,18 @@ interface OMDbResponse {
 class OMDbService {
   private apiKey: string;
   private baseUrl = 'https://www.omdbapi.com/';
-  private requestCount = 0;
-  private dailyLimit = 1000;
-  private lastResetDate: string;
+  private quotaProvider: QuotaProvider;
 
   constructor() {
     this.apiKey = process.env.OMDB_API_KEY || '';
     if (!this.apiKey) {
       console.warn('[OMDb] API key not configured. Rating updates will be skipped.');
     }
-    this.lastResetDate = new Date().toDateString();
+    this.quotaProvider = new QuotaProvider(1000); // 1000 requests per day
   }
 
-  private checkDailyLimit(): boolean {
-    const currentDate = new Date().toDateString();
-    
-    // Reset counter if it's a new day
-    if (currentDate !== this.lastResetDate) {
-      this.requestCount = 0;
-      this.lastResetDate = currentDate;
-    }
-
-    if (this.requestCount >= this.dailyLimit) {
-      console.warn('[OMDb] Daily API limit reached. Skipping request.');
-      return false;
-    }
-
-    return true;
+  async isExhausted(): Promise<boolean> {
+    return await this.quotaProvider.isExhausted();
   }
 
   async getByImdbId(imdbId: string): Promise<OMDbResponse | null> {
@@ -69,7 +55,10 @@ class OMDbService {
       return null;
     }
 
-    if (!this.checkDailyLimit()) {
+    // Check if quota is exhausted
+    if (await this.quotaProvider.isExhausted()) {
+      const stats = await this.quotaProvider.getStats();
+      console.warn(`[OMDb] Daily API limit reached. Next reset: ${stats.nextReset}`);
       return null;
     }
 
@@ -77,8 +66,10 @@ class OMDbService {
       const url = `${this.baseUrl}?apikey=${this.apiKey}&i=${imdbId}&plot=full`;
       const response = await fetch(url);
       
-      this.requestCount++;
-      console.log(`[OMDb] Request ${this.requestCount}/${this.dailyLimit} for IMDb ID: ${imdbId}`);
+      // Increment quota counter
+      const used = await this.quotaProvider.increment();
+      const remaining = await this.quotaProvider.getRemaining();
+      console.log(`[OMDb] Request ${used}/1000 for IMDb ID: ${imdbId} (${remaining} remaining)`);
 
       if (!response.ok) {
         console.error(`[OMDb] HTTP error: ${response.status}`);
@@ -119,12 +110,17 @@ class OMDbService {
     return { rating, votes };
   }
 
-  getRemainingRequests(): number {
-    return Math.max(0, this.dailyLimit - this.requestCount);
+  async getQuotaStats() {
+    return await this.quotaProvider.getStats();
   }
 
-  getRequestCount(): number {
-    return this.requestCount;
+  async getRemainingRequests(): Promise<number> {
+    return await this.quotaProvider.getRemaining();
+  }
+
+  async getRequestCount(): Promise<number> {
+    const stats = await this.quotaProvider.getStats();
+    return stats.used;
   }
 }
 
