@@ -181,13 +181,11 @@ export default function ContentDisplay({
                 </span>
                 {year && <span data-testid="content-year-list">{year}</span>}
               </div>
-              {/* Season/Episode Info for TV Shows and Anime */}
-              {(type === "tv" || type === "anime") && (season !== undefined || episode !== undefined) && (
+              {/* Season/Episode Info for TV Shows and Anime - Always show */}
+              {(type === "tv" || type === "anime") && (
                 <div className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-retro-500 text-white font-semibold shadow-sm border border-retro-600 mt-1" data-testid="content-episode-info-list">
                   <Play className="w-2.5 h-2.5 fill-white" />
-                  {season !== undefined && `S${season}`}
-                  {season !== undefined && episode !== undefined && " • "}
-                  {episode !== undefined && `E${episode}`}
+                  S{season ?? 1} • E{episode ?? 1}
                 </div>
               )}
             </div>
@@ -269,14 +267,14 @@ export default function ContentDisplay({
             {year || 'Year not available'}
           </p>
 
-          {/* Current episode info if available */}
-          {(type === "tv" || type === "anime") && episode !== undefined && (
+          {/* Current episode info - Always show for TV and anime */}
+          {(type === "tv" || type === "anime") && (
             <div 
               className={`inline-flex items-center gap-1 ${isSmall ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} rounded-full bg-retro-500 text-white font-semibold shadow-md border border-retro-600`} 
               data-testid="content-episode-info"
             >
               <Play className={`${isSmall ? 'w-2.5 h-2.5' : 'w-3 h-3'} fill-white`} />
-              {season !== undefined && `S${season} • `}E{episode}
+              S{season ?? 1} • E{episode ?? 1}
             </div>
           )}
         </div>
