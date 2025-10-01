@@ -168,9 +168,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get trending movies with trailers for homepage hero section
+  // NOTE: This route must come BEFORE /api/content/:id to avoid being caught by the :id parameter
+  app.get("/api/content/trending-movies-with-trailers", async (req, res) => {
+    try {
+      const { limit = "5" } = req.query;
+      let limitNum = parseInt(limit as string) || 5;
+      
+      // Validate and cap limit to prevent abuse
+      if (limitNum < 1) limitNum = 1;
+      if (limitNum > 20) limitNum = 20;
+      
+      const trendingMoviesWithTrailers: any[] = [];
+      const seenSourceKeys = new Set<string>(); // Track source:sourceId to prevent duplicates
+      let page = 1;
+      const maxPages = 5; // Limit how many TMDB pages we check
+      
+      // Iterate through trending movies to find ones with trailers
+      while (trendingMoviesWithTrailers.length < limitNum && page <= maxPages) {
+        const trending = await tmdbService.getTrendingMovies('week', page);
+        
+        for (const movie of trending.results) {
+          const sourceKey = `tmdb:${movie.id}`;
+          
+          // Skip if we already processed this movie
+          if (seenSourceKeys.has(sourceKey)) continue;
+          seenSourceKeys.add(sourceKey);
+          
+          if (trendingMoviesWithTrailers.length >= limitNum) break;
+          
+          // Check if already exists in DB
+          let existing = await storage.getContentBySourceId('tmdb', movie.id.toString());
+          
+          if (existing) {
+            // If it has a trailer, add it to results
+            if (existing.trailerKey) {
+              trendingMoviesWithTrailers.push(existing);
+            }
+          } else {
+            // Import the movie with trailer
+            const contentData = await tmdbService.convertMovieToContent(movie);
+            if (contentData.trailerKey) {
+              const newContent = await storage.createContent(contentData);
+              trendingMoviesWithTrailers.push(newContent);
+            }
+          }
+        }
+        
+        page++;
+      }
+      
+      // If we still don't have enough, supplement with other movies with trailers from DB
+      if (trendingMoviesWithTrailers.length < limitNum) {
+        const needed = limitNum - trendingMoviesWithTrailers.length;
+        const dbMovies = await storage.getMoviesWithTrailers(needed * 2); // Get extra to account for duplicates
+        
+        // Only add movies we haven't already included (check by source:sourceId)
+        for (const movie of dbMovies) {
+          if (trendingMoviesWithTrailers.length >= limitNum) break;
+          const sourceKey = `${movie.source}:${movie.sourceId}`;
+          if (!seenSourceKeys.has(sourceKey)) {
+            seenSourceKeys.add(sourceKey);
+            trendingMoviesWithTrailers.push(movie);
+          }
+        }
+      }
+      
+      res.json(trendingMoviesWithTrailers.slice(0, limitNum));
+    } catch (error) {
+      console.error("Failed to get trending movies with trailers:", error);
+      res.status(500).json({ message: "Failed to get trending movies" });
+    }
+  });
+
   app.get("/api/content/:id", async (req, res) => {
     try {
-      const { id } = req.params;
+      const { id} = req.params;
       const content = await storage.getContent(id);
       if (!content) {
         return res.status(404).json({ message: "Content not found" });
@@ -636,78 +709,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("TMDB movie details failed:", error);
       res.status(500).json({ message: "Failed to get movie details" });
-    }
-  });
-
-  // Get trending movies with trailers for homepage hero section
-  app.get("/api/content/trending-movies-with-trailers", async (req, res) => {
-    try {
-      const { limit = "5" } = req.query;
-      let limitNum = parseInt(limit as string) || 5;
-      
-      // Validate and cap limit to prevent abuse
-      if (limitNum < 1) limitNum = 1;
-      if (limitNum > 20) limitNum = 20;
-      
-      const trendingMoviesWithTrailers: any[] = [];
-      const seenSourceKeys = new Set<string>(); // Track source:sourceId to prevent duplicates
-      let page = 1;
-      const maxPages = 5; // Limit how many TMDB pages we check
-      
-      // Iterate through trending movies to find ones with trailers
-      while (trendingMoviesWithTrailers.length < limitNum && page <= maxPages) {
-        const trending = await tmdbService.getTrendingMovies('week', page);
-        
-        for (const movie of trending.results) {
-          const sourceKey = `tmdb:${movie.id}`;
-          
-          // Skip if we already processed this movie
-          if (seenSourceKeys.has(sourceKey)) continue;
-          seenSourceKeys.add(sourceKey);
-          
-          if (trendingMoviesWithTrailers.length >= limitNum) break;
-          
-          // Check if already exists in DB
-          let existing = await storage.getContentBySourceId('tmdb', movie.id.toString());
-          
-          if (existing) {
-            // If it has a trailer, add it to results
-            if (existing.trailerKey) {
-              trendingMoviesWithTrailers.push(existing);
-            }
-          } else {
-            // Import the movie with trailer
-            const contentData = await tmdbService.convertMovieToContent(movie);
-            if (contentData.trailerKey) {
-              const newContent = await storage.createContent(contentData);
-              trendingMoviesWithTrailers.push(newContent);
-            }
-          }
-        }
-        
-        page++;
-      }
-      
-      // If we still don't have enough, supplement with other movies with trailers from DB
-      if (trendingMoviesWithTrailers.length < limitNum) {
-        const needed = limitNum - trendingMoviesWithTrailers.length;
-        const dbMovies = await storage.getMoviesWithTrailers(needed * 2); // Get extra to account for duplicates
-        
-        // Only add movies we haven't already included (check by source:sourceId)
-        for (const movie of dbMovies) {
-          if (trendingMoviesWithTrailers.length >= limitNum) break;
-          const sourceKey = `${movie.source}:${movie.sourceId}`;
-          if (!seenSourceKeys.has(sourceKey)) {
-            seenSourceKeys.add(sourceKey);
-            trendingMoviesWithTrailers.push(movie);
-          }
-        }
-      }
-      
-      res.json(trendingMoviesWithTrailers.slice(0, limitNum));
-    } catch (error) {
-      console.error("Failed to get trending movies with trailers:", error);
-      res.status(500).json({ message: "Failed to get trending movies" });
     }
   });
 
