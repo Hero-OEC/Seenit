@@ -1,11 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertContentSchema, insertUserContentSchema } from "@shared/schema";
+import { insertUserSchema, insertContentSchema, insertUserContentSchema, content } from "@shared/schema";
 import { z } from "zod";
 import { tvmazeService } from "./services/tvmaze";
 import { jikanService } from "./services/jikan";
 import { tmdbService } from "./services/tmdb";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -830,6 +832,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get TMDB content:", error);
       res.status(500).json({ message: "Failed to get TMDB content" });
+    }
+  });
+
+  // OMDb rating update endpoint - updates existing content with IMDb ratings
+  // Protected with admin secret for security
+  app.post("/api/ratings/update", async (req, res) => {
+    try {
+      // Basic authentication - require admin secret
+      const adminSecret = process.env.ADMIN_SECRET || 'dev-secret-change-in-production';
+      const providedSecret = req.headers['x-admin-secret'] || req.query.secret;
+      
+      if (providedSecret !== adminSecret) {
+        return res.status(401).json({ message: "Unauthorized - Admin secret required" });
+      }
+
+      const { limit = 100 } = req.query;
+      const limitNum = Math.min(parseInt(limit as string) || 100, 1000); // Max 1000 per request
+      
+      // Get content without imdbId (needs rating update)
+      const allContent = await storage.getAllContent();
+      const needsUpdate = allContent.filter(item => 
+        (item.type === 'movie' || item.type === 'tv') && !item.imdbId
+      ).slice(0, limitNum);
+
+      let updated = 0;
+      let failed = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      for (const item of needsUpdate) {
+        try {
+          let imdbId = null;
+
+          // Get IMDb ID based on source
+          if (item.source === 'tmdb' && item.type === 'movie') {
+            const externalIds = await tmdbService.getMovieExternalIds(parseInt(item.sourceId));
+            imdbId = externalIds.imdb_id;
+          } else if (item.source === 'tvmaze' && item.type === 'tv') {
+            // Use TVMaze service to respect rate limiting
+            const tvmazeId = parseInt(item.sourceId);
+            const show = await tvmazeService.getShowById(tvmazeId);
+            imdbId = show.externals?.imdb || null;
+          }
+
+          if (!imdbId) {
+            console.warn(`[Rating Update] No IMDb ID found for ${item.title}`);
+            // Still update to mark that we checked (store null imdbId)
+            await db.update(content)
+              .set({
+                imdbId: null,
+                lastUpdated: new Date()
+              })
+              .where(eq(content.id, item.id));
+            skipped++;
+            continue;
+          }
+
+          // Fetch IMDb rating from OMDb
+          const { omdbService } = await import("./services/omdb");
+          const omdbData = await omdbService.getImdbRating(imdbId);
+          
+          // Always store imdbId even if rating is null
+          const updateData: any = {
+            imdbId: imdbId,
+            lastUpdated: new Date()
+          };
+
+          if (omdbData.rating !== null) {
+            updateData.rating = omdbData.rating;
+            updateData.imdbRating = omdbData.rating;
+            updateData.voteCount = omdbData.votes;
+            console.log(`[Rating Update] Updated "${item.title}" with IMDb rating: ${omdbData.rating}`);
+          } else {
+            console.warn(`[Rating Update] No IMDb rating available for "${item.title}" (${imdbId})`);
+          }
+
+          await db.update(content)
+            .set(updateData)
+            .where(eq(content.id, item.id));
+          
+          updated++;
+        } catch (error) {
+          failed++;
+          const errorMsg = `Failed to update ${item.title}: ${error}`;
+          errors.push(errorMsg);
+          console.error(`[Rating Update] ${errorMsg}`);
+        }
+      }
+
+      // Recompute remaining count after updates
+      const updatedContent = await storage.getAllContent();
+      const remaining = updatedContent.filter(item => 
+        (item.type === 'movie' || item.type === 'tv') && !item.imdbId
+      ).length;
+
+      res.json({
+        message: "Rating update completed",
+        updated,
+        skipped,
+        failed,
+        total: needsUpdate.length,
+        remaining,
+        errors: errors.slice(0, 10) // Return first 10 errors
+      });
+    } catch (error) {
+      console.error("Rating update failed:", error);
+      res.status(500).json({ message: "Failed to update ratings" });
     }
   });
 

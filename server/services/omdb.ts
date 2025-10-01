@@ -34,7 +34,7 @@ interface OMDbResponse {
 
 class OMDbService {
   private apiKey: string;
-  private baseUrl = 'http://www.omdbapi.com/';
+  private baseUrl = 'https://www.omdbapi.com/';
   private requestCount = 0;
   private dailyLimit = 1000;
   private lastResetDate: string;
