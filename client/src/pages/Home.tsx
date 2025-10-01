@@ -191,7 +191,7 @@ export default function Home() {
                   contentType="movie"
                   onViewAll={() => handleBrowse("Movies")}
                   onItemClick={(movie) => navigate(`/content/${movie.id}`)}
-                  maxItems={4}
+                  maxItems={6}
                   variant="compact"
                 />
 
@@ -259,7 +259,7 @@ export default function Home() {
                   items={[
                     ...popularMovies.filter(movie => 
                       movie.genres?.some((g: string) => g.toLowerCase().includes("sci-fi") || g.toLowerCase().includes("science"))
-                    ).slice(0, 2).map(movie => ({
+                    ).slice(0, 3).map(movie => ({
                       id: movie.id,
                       posterUrl: movie.poster,
                       title: movie.title,
@@ -269,7 +269,7 @@ export default function Home() {
                     })),
                     ...popularAnime.filter(anime => 
                       anime.genres?.some((g: string) => g.toLowerCase().includes("sci-fi") || g.toLowerCase().includes("science"))
-                    ).slice(0, 2).map(anime => ({
+                    ).slice(0, 3).map(anime => ({
                       id: anime.id,
                       posterUrl: anime.poster,
                       title: anime.title,
@@ -283,7 +283,7 @@ export default function Home() {
                   contentType="genre"
                   onViewAll={() => navigate("/discover?genre=sci-fi")}
                   onItemClick={(item) => navigate(`/content/${item.id}`)}
-                  maxItems={4}
+                  maxItems={6}
                   variant="compact"
                   testId="sci-fi-recommendations-section"
                 />

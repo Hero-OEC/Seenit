@@ -37,7 +37,7 @@ export default function HomeContent({
   contentType = "genre",
   onViewAll,
   onItemClick,
-  maxItems = 4,
+  maxItems = 6,
   variant = "compact",
   className = "",
   testId
