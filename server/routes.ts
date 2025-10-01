@@ -9,6 +9,74 @@ import { tmdbService } from "./services/tmdb";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
 
+/**
+ * Helper function to compute season and episode info from episodeData
+ * Option 1: Returns total seasons + episode count of the latest season
+ * For TV shows: { season: totalSeasons, episode: latestSeasonEpisodeCount }
+ * For anime: { season: 1, episode: totalEpisodeCount }
+ */
+function computeSeasonEpisodeInfo(content: any): { season: number | undefined, episode: number | undefined } {
+  if (!content.episodeData || (content.type !== 'tv' && content.type !== 'anime')) {
+    return { season: undefined, episode: undefined };
+  }
+
+  try {
+    const episodeData = typeof content.episodeData === 'string' 
+      ? JSON.parse(content.episodeData) 
+      : content.episodeData;
+    
+    // For TV shows: episodeData.episodes array with season and number fields
+    if (content.type === 'tv') {
+      const episodeArray = episodeData?.episodes || [];
+      if (!Array.isArray(episodeArray) || episodeArray.length === 0) {
+        return { season: undefined, episode: undefined };
+      }
+      
+      // Find the highest season number
+      const maxSeason = Math.max(...episodeArray.map((ep: any) => ep.season || 0));
+      
+      // Count episodes in the highest season
+      const latestSeasonEpisodes = episodeArray.filter((ep: any) => ep.season === maxSeason);
+      
+      return {
+        season: maxSeason,
+        episode: latestSeasonEpisodes.length
+      };
+    }
+    
+    // For anime: episodeData is an array with episodeNumber field
+    if (content.type === 'anime') {
+      const episodeArray = Array.isArray(episodeData) ? episodeData : [];
+      if (episodeArray.length === 0) {
+        return { season: undefined, episode: undefined };
+      }
+      
+      // Total episode count for anime
+      return {
+        season: 1,
+        episode: episodeArray.length
+      };
+    }
+  } catch (error) {
+    console.error('Error computing season/episode info for content:', content.id, error);
+  }
+  
+  return { season: undefined, episode: undefined };
+}
+
+/**
+ * Enriches content items with computed season/episode information
+ */
+function enrichContentWithSeasonInfo(contentItems: any[]): any[] {
+  return contentItems.map(content => {
+    const { season, episode } = computeSeasonEpisodeInfo(content);
+    return {
+      ...content,
+      ...(season !== undefined && { season }),
+      ...(episode !== undefined && { episode })
+    };
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Content routes
