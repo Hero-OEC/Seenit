@@ -567,9 +567,12 @@ function Import() {
     },
   });
 
-  // Rating backfill mutation - manual trigger
+  // Rating backfill mutation - manual trigger (uses all remaining quota)
   const triggerRatingUpdate = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/ratings/update?limit=100&secret=dev-secret-change-in-production'),
+    mutationFn: () => {
+      const remaining = ratingStatus?.omdb.remaining || 100;
+      return apiRequest('POST', `/api/ratings/update?limit=${remaining}&secret=dev-secret-change-in-production`);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/ratings/status'] });
     },
@@ -1423,7 +1426,7 @@ function Import() {
                       ) : (
                         <>
                           <Play className="w-4 h-4 mr-2" />
-                          Manual Update (100 items)
+                          Use All Remaining Quota ({ratingStatus?.omdb.remaining || 0} items)
                         </>
                       )}
                     </Button>
