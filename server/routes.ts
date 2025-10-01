@@ -10,51 +10,45 @@ import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
 
 /**
- * Helper function to compute season and episode info from episodeData
- * Option 1: Returns total seasons + episode count of the latest season
+ * Helper function to compute season and episode info
  * For TV shows: { season: totalSeasons, episode: latestSeasonEpisodeCount }
  * For anime: { season: 1, episode: totalEpisodeCount }
  */
 function computeSeasonEpisodeInfo(content: any): { season: number | undefined, episode: number | undefined } {
-  if (!content.episodeData || (content.type !== 'tv' && content.type !== 'anime')) {
+  if (content.type !== 'tv' && content.type !== 'anime') {
     return { season: undefined, episode: undefined };
   }
 
   try {
-    const episodeData = typeof content.episodeData === 'string' 
-      ? JSON.parse(content.episodeData) 
-      : content.episodeData;
-    
-    // For TV shows: episodeData.episodes array with season and number fields
+    // For TV shows: use totalSeasons and compute latest season episode count from episodeData
     if (content.type === 'tv') {
-      const episodeArray = episodeData?.episodes || [];
-      if (!Array.isArray(episodeArray) || episodeArray.length === 0) {
-        return { season: undefined, episode: undefined };
+      const season = content.totalSeasons || undefined;
+      let episode = undefined;
+      
+      // Try to get latest season episode count from episodeData
+      if (content.episodeData) {
+        const episodeData = typeof content.episodeData === 'string' 
+          ? JSON.parse(content.episodeData) 
+          : content.episodeData;
+        
+        const episodeArray = episodeData?.episodes || [];
+        if (Array.isArray(episodeArray) && episodeArray.length > 0) {
+          // Find the highest season number
+          const maxSeason = Math.max(...episodeArray.map((ep: any) => ep.season || 0));
+          // Count episodes in the highest season
+          const latestSeasonEpisodes = episodeArray.filter((ep: any) => ep.season === maxSeason);
+          episode = latestSeasonEpisodes.length || undefined;
+        }
       }
       
-      // Find the highest season number
-      const maxSeason = Math.max(...episodeArray.map((ep: any) => ep.season || 0));
-      
-      // Count episodes in the highest season
-      const latestSeasonEpisodes = episodeArray.filter((ep: any) => ep.season === maxSeason);
-      
-      return {
-        season: maxSeason,
-        episode: latestSeasonEpisodes.length
-      };
+      return { season, episode };
     }
     
-    // For anime: episodeData is an array with episodeNumber field
+    // For anime: use totalEpisodes
     if (content.type === 'anime') {
-      const episodeArray = Array.isArray(episodeData) ? episodeData : [];
-      if (episodeArray.length === 0) {
-        return { season: undefined, episode: undefined };
-      }
-      
-      // Total episode count for anime
       return {
         season: 1,
-        episode: episodeArray.length
+        episode: content.totalEpisodes || undefined
       };
     }
   } catch (error) {
