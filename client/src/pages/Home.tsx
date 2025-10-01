@@ -52,23 +52,23 @@ export default function Home() {
     console.log(`Search: ${query}`);
   };
 
-  // Fetch popular movies from database  
+  // Fetch popular movies from database (sorted by rating)
   const { data: movieData } = useQuery<any>({
-    queryKey: ["/api/content/type/movie?limit=6"],
+    queryKey: ["/api/content/type/movie?limit=6&sort=popular"],
     enabled: true,
   });
   const popularMovies = movieData?.content || [];
 
-  // Fetch popular TV shows from database
+  // Fetch popular TV shows from database (sorted by rating)
   const { data: tvData } = useQuery<any>({
-    queryKey: ["/api/content/type/tv?limit=6"],
+    queryKey: ["/api/content/type/tv?limit=6&sort=popular"],
     enabled: true,
   });
   const popularTVShows = tvData?.content || [];
 
-  // Fetch popular anime from database
+  // Fetch popular anime from database (sorted by rating)
   const { data: animeData } = useQuery<any>({
-    queryKey: ["/api/content/type/anime?limit=12"], // Fetch more to account for series grouping
+    queryKey: ["/api/content/type/anime?limit=12&sort=popular"], // Fetch more to account for series grouping
     enabled: true,
   });
   const rawAnimeData = animeData?.content || [];
