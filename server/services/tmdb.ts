@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { content, importStatus, type Content, type InsertContent, type ImportStatus } from "@shared/schema";
 import { eq, and, or } from "drizzle-orm";
+import { omdbService } from "./omdb";
 
 // TMDB API types based on official documentation
 interface TMDBMovie {
@@ -57,6 +58,13 @@ interface TMDBVideo {
 interface TMDBVideosResponse {
   id: number;
   results: TMDBVideo[];
+}
+
+interface TMDBExternalIds {
+  imdb_id: string | null;
+  facebook_id: string | null;
+  instagram_id: string | null;
+  twitter_id: string | null;
 }
 
 export class TMDBService {
@@ -194,6 +202,11 @@ export class TMDBService {
     return this.makeRequest<TMDBVideosResponse>(`/movie/${id}/videos`);
   }
 
+  // Fetch external IDs (IMDb, Facebook, etc.)
+  async getMovieExternalIds(id: number): Promise<TMDBExternalIds> {
+    return this.makeRequest<TMDBExternalIds>(`/movie/${id}/external_ids`);
+  }
+
   // Get the primary trailer (YouTube trailer preferred)
   async getMovieTrailerKey(id: number): Promise<string | null> {
     try {
@@ -259,6 +272,30 @@ export class TMDBService {
     // Fetch trailer key for the movie
     const trailerKey = await this.getMovieTrailerKey(movie.id);
 
+    // Fetch IMDb rating via OMDb using external IDs
+    let imdbRating = null;
+    let imdbId = null;
+    let imdbVotes = null;
+
+    try {
+      const externalIds = await this.getMovieExternalIds(movie.id);
+      if (externalIds.imdb_id) {
+        imdbId = externalIds.imdb_id;
+        const omdbData = await omdbService.getImdbRating(externalIds.imdb_id);
+        if (omdbData.rating !== null) {
+          imdbRating = omdbData.rating;
+          imdbVotes = omdbData.votes;
+          console.log(`[TMDB] Got IMDb rating for "${movie.title}": ${imdbRating} (${imdbVotes} votes)`);
+        } else {
+          console.warn(`[TMDB] No IMDb rating available for "${movie.title}" (${imdbId})`);
+        }
+      } else {
+        console.warn(`[TMDB] No IMDb ID found for "${movie.title}"`);
+      }
+    } catch (error) {
+      console.error(`[TMDB] Error fetching IMDb rating for "${movie.title}":`, error);
+    }
+
     return {
       title: movie.title,
       type: 'movie',
@@ -267,12 +304,14 @@ export class TMDBService {
       overview: movie.overview,
       genres,
       year: movie.release_date ? new Date(movie.release_date).getFullYear() : undefined,
-      rating: movie.vote_average,
+      rating: imdbRating, // Use IMDb rating from OMDb instead of TMDB rating
       poster: movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : undefined,
       backdrop: movie.backdrop_path ? `${this.largeImageBaseUrl}${movie.backdrop_path}` : undefined,
       status: movie.status || 'Released',
       runtime: movie.runtime,
-      trailerKey: trailerKey || undefined
+      trailerKey: trailerKey || undefined,
+      imdbId: imdbId || undefined,
+      voteCount: imdbVotes || undefined
     };
   }
 

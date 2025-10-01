@@ -29,6 +29,7 @@ export const content = pgTable("content", {
   status: text("status"), // 'finished', 'ongoing', 'upcoming', 'airing', 'completed', 'canceled'
   
   // Multiple rating sources
+  imdbId: text("imdb_id"), // IMDb ID for cross-referencing (e.g., "tt0111161")
   imdbRating: real("imdb_rating"), // IMDb rating as decimal
   rottenTomatoesRating: integer("rotten_tomatoes_rating"), // RT rating as percentage
   malRating: real("mal_rating"), // MyAnimeList rating for anime
