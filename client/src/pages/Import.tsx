@@ -63,6 +63,29 @@ interface TMDBContent {
   }>;
 }
 
+interface RatingStatus {
+  countsByType: {
+    movie: { total: number; rated: number; unrated: number; };
+    tv: { total: number; rated: number; unrated: number; };
+    anime: { total: number; rated: number; unrated: number; };
+  };
+  omdb: {
+    used: number;
+    remaining: number;
+    limit: number;
+    nextReset: string;
+    isExhausted: boolean;
+    exhaustedUntil: string | null;
+  };
+  backfill: {
+    isRunning: boolean;
+    lastRun: string | null;
+    lastError: string | null;
+    nextRunIn: string | null;
+    unratedCounts: { movie: number; tv: number; anime: number; };
+  };
+}
+
 function Import() {
   const queryClient = useQueryClient();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -447,6 +470,13 @@ function Import() {
     staleTime: 10000, // Allow more stale data for content
   });
 
+  // Query for rating backfill status
+  const { data: ratingStatus } = useQuery<RatingStatus>({
+    queryKey: ['/api/ratings/status'],
+    refetchInterval: 10000, // Poll every 10 seconds
+    staleTime: 5000,
+  });
+
   // Mutation to start TVmaze import
   const startImport = useMutation({
     mutationFn: () => apiRequest('POST', '/api/import/tvmaze/start'),
@@ -534,6 +564,14 @@ function Import() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/content/type/movie'] });
       setRefreshKey(prev => prev + 1);
+    },
+  });
+
+  // Rating backfill mutation - manual trigger
+  const triggerRatingUpdate = useMutation({
+    mutationFn: () => apiRequest('POST', '/api/ratings/update?limit=100&secret=dev-secret-change-in-production'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ratings/status'] });
     },
   });
 
@@ -1200,6 +1238,203 @@ function Import() {
                 >
                   Clear Console
                 </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Rating Backfill Dashboard */}
+        <Card className="mt-6" data-testid="card-rating-backfill">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Rating Backfill Manager
+              </CardTitle>
+              {ratingStatus?.backfill.isRunning && (
+                <Badge className="bg-green-100 text-green-800">Active</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Rating Statistics by Type */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Rating Coverage</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Movies */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Movies (IMDb)</div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-blue-600">
+                        {ratingStatus?.countsByType.movie.rated || 0}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        / {ratingStatus?.countsByType.movie.total || 0}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={ratingStatus?.countsByType.movie.total ? 
+                        (ratingStatus.countsByType.movie.rated / ratingStatus.countsByType.movie.total) * 100 : 0
+                      } 
+                      className="mt-2 h-2"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {ratingStatus?.countsByType.movie.unrated || 0} unrated
+                    </div>
+                  </div>
+
+                  {/* TV Shows */}
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">TV Shows (IMDb)</div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-purple-600">
+                        {ratingStatus?.countsByType.tv.rated || 0}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        / {ratingStatus?.countsByType.tv.total || 0}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={ratingStatus?.countsByType.tv.total ? 
+                        (ratingStatus.countsByType.tv.rated / ratingStatus.countsByType.tv.total) * 100 : 0
+                      } 
+                      className="mt-2 h-2"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {ratingStatus?.countsByType.tv.unrated || 0} unrated
+                    </div>
+                  </div>
+
+                  {/* Anime */}
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Anime (MAL)</div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-orange-600">
+                        {ratingStatus?.countsByType.anime.rated || 0}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        / {ratingStatus?.countsByType.anime.total || 0}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={ratingStatus?.countsByType.anime.total ? 
+                        (ratingStatus.countsByType.anime.rated / ratingStatus.countsByType.anime.total) * 100 : 0
+                      } 
+                      className="mt-2 h-2"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      {ratingStatus?.countsByType.anime.unrated || 0} unrated
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* OMDb Quota Status */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">OMDb API Quota</h3>
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                    <div>
+                      <div className="text-xs text-gray-500">Used Today</div>
+                      <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        {ratingStatus?.omdb.used || 0}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Remaining</div>
+                      <div className="text-lg font-bold text-green-600">
+                        {ratingStatus?.omdb.remaining || 0}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Daily Limit</div>
+                      <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        {ratingStatus?.omdb.limit || 0}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Resets At</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {ratingStatus?.omdb.nextReset ? 
+                          new Date(ratingStatus.omdb.nextReset).toLocaleTimeString() : 
+                          'Unknown'
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <Progress 
+                    value={ratingStatus?.omdb.limit ? 
+                      (ratingStatus.omdb.used / ratingStatus.omdb.limit) * 100 : 0
+                    } 
+                    className="h-2"
+                  />
+                  {ratingStatus?.omdb.isExhausted && (
+                    <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium">
+                      ⚠️ Quota exhausted until {ratingStatus.omdb.exhaustedUntil ? 
+                        new Date(ratingStatus.omdb.exhaustedUntil).toLocaleString() : 
+                        'reset time'
+                      }
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Backfill Status & Controls */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Backfill Status</h3>
+                <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Last Run</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {ratingStatus?.backfill.lastRun ? 
+                          new Date(ratingStatus.backfill.lastRun).toLocaleString() : 
+                          'Never'
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Next Run</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {ratingStatus?.backfill.nextRunIn || 'Calculating...'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {ratingStatus?.backfill.lastError && (
+                    <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded">
+                      Error: {ratingStatus.backfill.lastError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      onClick={() => triggerRatingUpdate.mutate()}
+                      disabled={triggerRatingUpdate.isPending || ratingStatus?.omdb.isExhausted || ratingStatus?.backfill.isRunning}
+                      size="sm"
+                      className="flex-1"
+                    >
+                      {triggerRatingUpdate.isPending ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Manual Update (100 items)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {ratingStatus?.omdb.isExhausted && (
+                    <div className="text-xs text-gray-500 italic">
+                      Manual updates are disabled when quota is exhausted
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

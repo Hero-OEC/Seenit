@@ -7,7 +7,7 @@ import { tvmazeService } from "./services/tvmaze";
 import { jikanService } from "./services/jikan";
 import { tmdbService } from "./services/tmdb";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {

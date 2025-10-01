@@ -188,13 +188,18 @@ export class TVMazeService {
     if (show.externals?.imdb) {
       imdbId = show.externals.imdb;
       try {
-        const omdbData = await omdbService.getImdbRating(imdbId);
-        if (omdbData.rating !== null) {
-          imdbRating = omdbData.rating;
-          imdbVotes = omdbData.votes;
-          console.log(`[TVMaze] Got IMDb rating for "${show.name}": ${imdbRating} (${imdbVotes} votes)`);
+        // Check if OMDb quota is exhausted before making request
+        if (await omdbService.isExhausted()) {
+          console.log(`[TVMaze] OMDb quota exhausted, will rate "${show.name}" later via backfill`);
         } else {
-          console.warn(`[TVMaze] No IMDb rating available for "${show.name}" (${imdbId})`);
+          const omdbData = await omdbService.getImdbRating(imdbId);
+          if (omdbData.rating !== null) {
+            imdbRating = omdbData.rating;
+            imdbVotes = omdbData.votes;
+            console.log(`[TVMaze] Got IMDb rating for "${show.name}": ${imdbRating} (${imdbVotes} votes)`);
+          } else {
+            console.warn(`[TVMaze] No IMDb rating available for "${show.name}" (${imdbId})`);
+          }
         }
       } catch (error) {
         console.error(`[TVMaze] Error fetching IMDb rating for "${show.name}":`, error);

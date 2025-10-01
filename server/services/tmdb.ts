@@ -281,13 +281,19 @@ export class TMDBService {
       const externalIds = await this.getMovieExternalIds(movie.id);
       if (externalIds.imdb_id) {
         imdbId = externalIds.imdb_id;
-        const omdbData = await omdbService.getImdbRating(externalIds.imdb_id);
-        if (omdbData.rating !== null) {
-          imdbRating = omdbData.rating;
-          imdbVotes = omdbData.votes;
-          console.log(`[TMDB] Got IMDb rating for "${movie.title}": ${imdbRating} (${imdbVotes} votes)`);
+        
+        // Check if OMDb quota is exhausted before making request
+        if (await omdbService.isExhausted()) {
+          console.log(`[TMDB] OMDb quota exhausted, will rate "${movie.title}" later via backfill`);
         } else {
-          console.warn(`[TMDB] No IMDb rating available for "${movie.title}" (${imdbId})`);
+          const omdbData = await omdbService.getImdbRating(externalIds.imdb_id);
+          if (omdbData.rating !== null) {
+            imdbRating = omdbData.rating;
+            imdbVotes = omdbData.votes;
+            console.log(`[TMDB] Got IMDb rating for "${movie.title}": ${imdbRating} (${imdbVotes} votes)`);
+          } else {
+            console.warn(`[TMDB] No IMDb rating available for "${movie.title}" (${imdbId})`);
+          }
         }
       } else {
         console.warn(`[TMDB] No IMDb ID found for "${movie.title}"`);
