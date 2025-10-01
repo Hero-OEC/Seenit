@@ -62,22 +62,39 @@ function computeSeasonEpisodeInfo(content: any): { season: number | undefined, e
       return { season, episode };
     }
     
-    // For anime: use totalEpisodes with fallback to episodeData length
+    // For anime: handle movies vs TV shows differently
     if (content.type === 'anime') {
-      let episode = content.totalEpisodes;
+      // Skip season/episode display for anime movies, OVAs, and Specials
+      // Only show for TV and ONA (Original Net Animation) types
+      const animeType = content.animeType;
+      if (animeType === 'Movie' || animeType === 'OVA' || animeType === 'Special') {
+        return { season: undefined, episode: undefined };
+      }
       
-      // Fallback to episodeData length if totalEpisodes is missing
+      // For TV anime: use seasonNumber field (not hardcoded 1)
+      const season = content.seasonNumber || 1;
+      
+      // Use content.episodes (MAL episode count) as primary source
+      let episode = content.episodes;
+      
+      // Fallback to episodeData length if episodes field is missing
       if (!episode && content.episodeData) {
         const episodeData = typeof content.episodeData === 'string' 
           ? JSON.parse(content.episodeData) 
           : content.episodeData;
         
-        const episodeArray = Array.isArray(episodeData) ? episodeData : [];
+        // Normalize episode data structure - handle both episodeData.episodes and episodeData as array
+        const episodeArray = Array.isArray(episodeData?.episodes) 
+          ? episodeData.episodes 
+          : Array.isArray(episodeData) 
+            ? episodeData 
+            : [];
+        
         episode = episodeArray.length || undefined;
       }
       
       return {
-        season: 1,
+        season,
         episode
       };
     }
