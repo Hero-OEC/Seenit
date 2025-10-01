@@ -1,6 +1,7 @@
 import { db } from "../db";
 import { content, importStatus, type Content, type InsertContent, type ImportStatus } from "@shared/schema";
 import { eq, and, or, sql } from "drizzle-orm";
+import { omdbService } from "./omdb";
 
 interface TVMazeShow {
   id: number;
@@ -27,6 +28,11 @@ interface TVMazeShow {
   image?: {
     medium?: string;
     original?: string;
+  };
+  externals?: {
+    tvrage?: number;
+    thetvdb?: number;
+    imdb?: string;
   };
   _embedded?: {
     episodes?: Array<{
@@ -142,7 +148,7 @@ export class TVMazeService {
     return await this.makeRequest<{[key: string]: number}>(`/updates/shows?since=${since}`);
   }
 
-  private mapTVMazeToContent(show: TVMazeShow): InsertContent {
+  private async mapTVMazeToContent(show: TVMazeShow): Promise<InsertContent> {
     const network = show.network?.name || show.webChannel?.name;
     const episodes = show._embedded?.episodes || [];
     const totalEpisodes = episodes.length;
@@ -174,6 +180,29 @@ export class TVMazeService {
     else if (show.status === 'In Development') status = 'upcoming';
     else if (show.status === 'Ended') status = 'completed';
 
+    // Fetch IMDb rating via OMDb using external IDs
+    let imdbRating = null;
+    let imdbId = null;
+    let imdbVotes = null;
+
+    if (show.externals?.imdb) {
+      imdbId = show.externals.imdb;
+      try {
+        const omdbData = await omdbService.getImdbRating(imdbId);
+        if (omdbData.rating !== null) {
+          imdbRating = omdbData.rating;
+          imdbVotes = omdbData.votes;
+          console.log(`[TVMaze] Got IMDb rating for "${show.name}": ${imdbRating} (${imdbVotes} votes)`);
+        } else {
+          console.warn(`[TVMaze] No IMDb rating available for "${show.name}" (${imdbId})`);
+        }
+      } catch (error) {
+        console.error(`[TVMaze] Error fetching IMDb rating for "${show.name}":`, error);
+      }
+    } else {
+      console.warn(`[TVMaze] No IMDb ID found for "${show.name}"`);
+    }
+
     return {
       title: show.name,
       type: 'tv',
@@ -183,7 +212,7 @@ export class TVMazeService {
       genres: show.genres || [],
       year: show.premiered ? new Date(show.premiered).getFullYear() : null,
       endYear: show.ended ? new Date(show.ended).getFullYear() : null,
-      rating: show.rating?.average || null,
+      rating: imdbRating, // Use IMDb rating from OMDb instead of TVMaze rating
       poster: show.image?.medium || null,
       backdrop: show.image?.original || null,
       status,
@@ -207,10 +236,11 @@ export class TVMazeService {
       // Metadata
       tags: [show.status?.toLowerCase().replace(/\s+/g, '-')].filter(Boolean),
       popularity: show.rating?.average || null,
-      voteCount: null,
+      voteCount: imdbVotes || null,
       
-      // Not applicable
-      imdbRating: null,
+      // Store IMDb data
+      imdbId: imdbId || undefined,
+      imdbRating: imdbRating,
       rottenTomatoesRating: null,
       malRating: null,
       streamingPlatforms: null,
@@ -330,7 +360,7 @@ export class TVMazeService {
 
             // Fetch detailed show data with episodes
             const detailedShow = await this.getShowWithEpisodes(show.id);
-            const mappedContent = this.mapTVMazeToContent(detailedShow);
+            const mappedContent = await this.mapTVMazeToContent(detailedShow);
 
             if (existingContent) {
               // Update existing content
@@ -468,7 +498,7 @@ export class TVMazeService {
         // Fetch latest data for this show
         const tvmazeId = parseInt(show.sourceId);
         const detailedShow = await this.getShowWithEpisodes(tvmazeId);
-        const mappedContent = this.mapTVMazeToContent(detailedShow);
+        const mappedContent = await this.mapTVMazeToContent(detailedShow);
 
         // Update existing show with latest data
         await db
