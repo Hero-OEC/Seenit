@@ -24,9 +24,9 @@ export default function Home() {
     enabled: !!user?.id && isSignedIn,
   });
 
-  // Fetch featured content for hero section
-  const { data: featuredContent } = useQuery<any>({
-    queryKey: ["/api/content/featured"],
+  // Fetch trending movies with trailers for hero section
+  const { data: trendingMoviesWithTrailers } = useQuery<any[]>({
+    queryKey: ["/api/content/trending-movies-with-trailers?limit=5"],
     enabled: !isSignedIn,
   });
 
@@ -113,22 +113,23 @@ export default function Home() {
     <div className="min-h-screen bg-retro-50 relative">
       <main>
         {/* Show hero section only when not signed in */}
-        {!isSignedIn && featuredContent && (
+        {!isSignedIn && trendingMoviesWithTrailers && trendingMoviesWithTrailers.length > 0 && (
           <HeroSection
-            content={{
-              id: featuredContent.id,
-              title: featuredContent.title,
-              description: featuredContent.overview || "An exciting entertainment experience waiting for you.",
-              year: featuredContent.year,
-              rating: featuredContent.imdbRating ? `${featuredContent.imdbRating}/10` : "Not Rated",
-              duration: featuredContent.runtime ? `${featuredContent.runtime}m` : "N/A",
-              genres: featuredContent.genres || [],
-              platforms: featuredContent.streamingPlatforms || [],
-              trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-              posterUrl: featuredContent.poster || "/api/placeholder/500/750"
-            }}
+            movies={trendingMoviesWithTrailers.map(movie => ({
+              id: movie.id,
+              title: movie.title,
+              description: movie.overview || "An exciting entertainment experience waiting for you.",
+              year: movie.year,
+              rating: movie.rating ? `${movie.rating.toFixed(1)}/10` : "Not Rated",
+              duration: movie.runtime ? `${movie.runtime}m` : "N/A",
+              genres: movie.genres || [],
+              platforms: movie.streamingPlatforms || [],
+              trailerKey: movie.trailerKey,
+              posterUrl: movie.poster || movie.backdrop || "/api/placeholder/500/750",
+              backdropUrl: movie.backdrop || movie.poster || "/api/placeholder/1920/1080"
+            }))}
             onAddToList={() => navigate("/signin")}
-            onViewDetails={() => navigate(`/content/${featuredContent.id}`)}
+            onViewDetails={(movieId) => navigate(`/content/${movieId}`)}
           />
         )}
         
