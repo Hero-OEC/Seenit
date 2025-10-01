@@ -238,13 +238,15 @@ export default function ContentDisplay({
           {getTypeLabel(type)}
         </span>
 
-        {/* Status Badge - always at bottom right */}
-        <span 
-          className={`absolute bottom-1.5 right-1.5 inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90`}
-          data-testid="content-status-badge"
-        >
-          {getStatusLabel(status)}
-        </span>
+        {/* Status Badge - only show for movies if upcoming, always show for TV/anime */}
+        {(type !== 'movie' || status === 'coming-soon') && (
+          <span 
+            className={`absolute bottom-1.5 right-1.5 inline-flex items-center ${isSmall ? 'px-1.5 py-0.5' : 'px-2 py-1'} rounded-full ${isSmall ? 'text-[10px]' : 'text-xs'} font-medium border ${getStatusBadgeColor(status)} backdrop-blur-sm bg-opacity-90`}
+            data-testid="content-status-badge"
+          >
+            {getStatusLabel(status)}
+          </span>
+        )}
       </div>
 
       {/* Content Info */}
