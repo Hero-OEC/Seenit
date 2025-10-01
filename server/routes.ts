@@ -83,7 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/content", async (_req, res) => {
     try {
       const content = await storage.getAllContent();
-      res.json(content);
+      const enriched = enrichContentWithSeasonInfo(content);
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch content" });
     }
@@ -106,9 +107,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const total = await storage.getContentCountByType(type, { genre: genre as string });
+      const enriched = enrichContentWithSeasonInfo(result);
       
       res.json({
-        content: result,
+        content: enriched,
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -128,7 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Query parameter 'q' is required" });
       }
       const content = await storage.searchContent(q);
-      res.json(content);
+      const enriched = enrichContentWithSeasonInfo(content);
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ message: "Failed to search content" });
     }
@@ -165,7 +168,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allContent = await storage.getAllContent();
       const shuffled = allContent.sort(() => 0.5 - Math.random());
       const recommended = shuffled.slice(0, 8); // Return 8 recommended items
-      res.json(recommended);
+      const enriched = enrichContentWithSeasonInfo(recommended);
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch recommended content" });
     }
@@ -379,7 +383,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No featured content available" });
       }
       
-      res.json(featured);
+      const enriched = enrichContentWithSeasonInfo([featured])[0];
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch featured content" });
     }
@@ -392,7 +397,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!content) {
         return res.status(404).json({ message: "Content not found" });
       }
-      res.json(content);
+      const enriched = enrichContentWithSeasonInfo([content])[0];
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch content" });
     }
