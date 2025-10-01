@@ -48,22 +48,27 @@ export class DatabaseStorage implements IStorage {
       conditions.push(sql`${content.genres}::text ILIKE ${`%${options.genre}%`}`);
     }
 
-    // Determine sort column - use any to allow different column types
-    let sortColumn: any = content.createdAt;
+    // Determine sort column and build order clause
+    let orderClause: any;
     if (options?.sort) {
       switch (options.sort) {
         case 'new':
         case 'release_date':
-          sortColumn = content.year;
+          orderClause = desc(content.year);
           break;
         case 'reviews':
         case 'popular':
-          sortColumn = content.rating;
+          // For rating-based sorting, put NULL values last to prioritize rated content
+          orderClause = sql`${content.rating} DESC NULLS LAST`;
           break;
         case 'air_date':
-          sortColumn = content.releaseDate;
+          orderClause = desc(content.releaseDate);
           break;
+        default:
+          orderClause = desc(content.createdAt);
       }
+    } else {
+      orderClause = desc(content.createdAt);
     }
 
     // Build complete query with all clauses
@@ -71,7 +76,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(content)
       .where(and(...conditions))
-      .orderBy(desc(sortColumn))
+      .orderBy(orderClause)
       .offset(options?.offset ?? 0)
       .limit(options?.limit ?? 1000);
 
