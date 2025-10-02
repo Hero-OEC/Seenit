@@ -61,7 +61,7 @@ export default function Home() {
 
   // Fetch new movie releases (sorted by release date)
   const { data: newMovieData } = useQuery<any>({
-    queryKey: ["/api/content/type/movie?limit=6&sort=new"],
+    queryKey: ["/api/content/type/movie?limit=8&sort=new"],
     enabled: true,
   });
   const newMovies = newMovieData?.content || [];
@@ -198,7 +198,7 @@ export default function Home() {
                   contentType="movie"
                   onViewAll={() => handleBrowse("Movies")}
                   onItemClick={(movie) => navigate(`/content/${movie.id}`)}
-                  maxItems={6}
+                  maxItems={8}
                   variant="compact"
                 />
 
