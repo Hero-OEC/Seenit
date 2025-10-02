@@ -302,6 +302,17 @@ export class TMDBService {
       console.error(`[TMDB] Error fetching IMDb rating for "${movie.title}":`, error);
     }
 
+    // Determine status intelligently based on release date
+    let status = movie.status;
+    if (!status && movie.release_date) {
+      const releaseDate = new Date(movie.release_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+      status = releaseDate > today ? 'upcoming' : 'released';
+    } else if (!status) {
+      status = 'released'; // fallback for movies without release date
+    }
+
     return {
       title: movie.title,
       type: 'movie',
@@ -313,11 +324,12 @@ export class TMDBService {
       rating: imdbRating, // Use IMDb rating from OMDb instead of TMDB rating
       poster: movie.poster_path ? `${this.imageBaseUrl}${movie.poster_path}` : undefined,
       backdrop: movie.backdrop_path ? `${this.largeImageBaseUrl}${movie.backdrop_path}` : undefined,
-      status: movie.status || 'Released',
+      status: status,
       runtime: movie.runtime,
       trailerKey: trailerKey || undefined,
       imdbId: imdbId || undefined,
-      voteCount: imdbVotes || undefined
+      voteCount: imdbVotes || undefined,
+      releaseDate: movie.release_date || undefined
     };
   }
 
