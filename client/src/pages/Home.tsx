@@ -59,6 +59,13 @@ export default function Home() {
   });
   const popularMovies = movieData?.content || [];
 
+  // Fetch new movie releases (sorted by release date)
+  const { data: newMovieData } = useQuery<any>({
+    queryKey: ["/api/content/type/movie?limit=6&sort=new"],
+    enabled: true,
+  });
+  const newMovies = newMovieData?.content || [];
+
   // Fetch popular TV shows from database (sorted by rating)
   const { data: tvData } = useQuery<any>({
     queryKey: ["/api/content/type/tv?limit=6&sort=popular"],
@@ -180,7 +187,7 @@ export default function Home() {
                 {/* New Movies Section */}
                 <HomeContent
                   title="New Movies"
-                  items={popularMovies.map(movie => ({
+                  items={newMovies.map(movie => ({
                     id: movie.id,
                     posterUrl: movie.poster,
                     title: movie.title,
