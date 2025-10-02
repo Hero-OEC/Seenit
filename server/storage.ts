@@ -120,7 +120,7 @@ export class MemStorage implements IStorage {
     return this.content.delete(id);
   }
 
-  async getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number}): Promise<Content[]> {
+  async getContentByType(type: string, options?: {genre?: string, limit?: number, offset?: number, sort?: string}): Promise<Content[]> {
     let filtered = Array.from(this.content.values()).filter(
       (content) => content.type === type
     );
@@ -129,6 +129,43 @@ export class MemStorage implements IStorage {
       filtered = filtered.filter(content => 
         content.genres?.some(g => g.toLowerCase().includes(options.genre!.toLowerCase()))
       );
+    }
+
+    // Apply sorting
+    if (options?.sort) {
+      switch (options.sort) {
+        case 'popular':
+          // Sort by rating (IMDb for movies/TV, MAL for anime) - highest first
+          filtered.sort((a, b) => {
+            const ratingA = a.imdbRating ?? a.malRating ?? a.rating ?? 0;
+            const ratingB = b.imdbRating ?? b.malRating ?? b.rating ?? 0;
+            return ratingB - ratingA;
+          });
+          break;
+        case 'new':
+          // Sort by release date - most recent first
+          filtered.sort((a, b) => {
+            const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+            const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+            return dateB - dateA;
+          });
+          break;
+        case 'recent':
+          // Sort by when added to database - most recently added first
+          filtered.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+          break;
+        default:
+          // Default: sort by created date (recently added)
+          filtered.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+      }
     }
 
     const offset = options?.offset || 0;
