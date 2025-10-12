@@ -1653,7 +1653,7 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
               height: '100vh'
             }}>
               <HeroSection
-                content={{
+                movies={[{
                   id: "demo-movie",
                   title: "Dune: Part Two",
                   description: "Paul Atreides unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
@@ -1662,9 +1662,10 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
                   duration: "2h 46m",
                   genres: ["Sci-Fi", "Adventure", "Drama"],
                   platforms: ["HBO Max", "Prime Video", "Apple TV+", "Vudu"],
-                  trailerUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                  posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"
-                }}
+                  trailerKey: "Way9Dexny3w",
+                  posterUrl: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+                  backdropUrl: "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg"
+                }]}
                 onAddToList={() => alert("Add to Watchlist clicked!")}
                 onViewDetails={() => alert("View Details clicked!")}
               />
@@ -1693,9 +1694,9 @@ import Tags, { Tag, MOVIE_GENRES } from "@/components/Tags";
 {`// Import the HeroSection component
 import { HeroSection } from "@/components/HeroSection";
 
-// Use with content data
+// Use with movies array
 <HeroSection
-  content={{
+  movies={[{
     id: "movie-id",
     title: "Movie Title",
     description: "Movie description...",
@@ -1704,12 +1705,13 @@ import { HeroSection } from "@/components/HeroSection";
     duration: "2h 30m",
     genres: ["Action", "Sci-Fi"],
     platforms: ["Netflix", "Prime Video"],
-    trailerUrl: "/path/to/trailer.mp4",
+    trailerKey: "youtube-video-key",
     posterUrl: "/path/to/poster.jpg",
+    backdropUrl: "/path/to/backdrop.jpg",
     logoUrl: "/path/to/logo.png" // optional
-  }}
+  }]}
   onAddToList={() => addToWatchlist()}
-  onViewDetails={() => showDetails()}
+  onViewDetails={(movieId) => showDetails(movieId)}
 />`}
                   </pre>
                 </div>
