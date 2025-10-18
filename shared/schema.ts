@@ -1,14 +1,16 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, real, date, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, real, date, jsonb, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+// Profiles table - links to Supabase auth.users
+// In Supabase, auth.users is managed by Supabase Auth
+// This table stores additional user profile data
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey(), // References auth.users(id) from Supabase Auth
   username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const content = pgTable("content", {
@@ -76,8 +78,8 @@ export const content = pgTable("content", {
 
 export const userContent = pgTable("user_content", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  contentId: varchar("content_id").notNull(),
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  contentId: varchar("content_id").notNull().references(() => content.id, { onDelete: 'cascade' }),
   status: text("status").notNull(), // 'watching', 'watched', 'want_to_watch'
   progress: integer("progress").default(0), // episodes watched
   userRating: integer("user_rating"), // 1-5 stars
@@ -102,10 +104,10 @@ export const importStatus = pgTable("import_status", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  email: true,
-  password: true,
+// Zod schemas for validation
+export const insertProfileSchema = createInsertSchema(profiles).omit({
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertContentSchema = createInsertSchema(content).omit({
@@ -124,8 +126,9 @@ export const insertImportStatusSchema = createInsertSchema(importStatus).omit({
   updatedAt: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// TypeScript types
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+export type Profile = typeof profiles.$inferSelect;
 
 export type InsertContent = z.infer<typeof insertContentSchema>;
 export type Content = typeof content.$inferSelect;
